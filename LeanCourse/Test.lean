@@ -4,4 +4,4 @@ import Mathlib.Tactic
   mousing over or clicking on the next line, and you see no other errors in this file. -/
 #eval 2 ^ 5
 
-example (x : ℝ) : x - x = 0 := by simp
+example (x y : ℝ) : x - y = -y + x := by ring
