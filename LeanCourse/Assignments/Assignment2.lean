@@ -20,22 +20,38 @@ open Real
 /-! # Exercises to practice. -/
 
 example {a b : ℝ} (h1 : a + 2 * b = 4) (h2 : a - b = 1) : a = 2 := by {
-  sorry
+  have ha: b = a-1:=
+   calc b = b + 0 :=  by ring
+   _ = b + a - a:= by ring
+   _ = -(a - b) + a := by ring
+   _= -(1) + a := by rw[h2]
+   _= -1 + a := by ring
+   _= a -1 := by ring
+  rw [ha] at h1
+  ring at h1
+  linarith -- I know I could've done it before but I wanted to try using have
   }
 
 example {u v : ℝ} (h1 : u + 1 = v) : u ^ 2 + 3 * u + 1 = v ^ 2 + v - 1 := by {
-  sorry
+  rw[←h1]
+  linarith
   }
 
 example (a b c x y : ℝ) (h : a ≤ b) (h2 : b < c) (h3 : x ≤ y) :
     a + exp x ≤ c + exp (y + 2) := by {
-  sorry
+
+    refine add_le_add ?h₁ ?h₂
+    linarith
+    have ha : x ≤ y+2 := by linarith
+    exact exp_le_exp.mpr ha
   }
 
 /-- Prove the following using `linarith`.
 Note that `linarith` cannot deal with implication or if and only if statements. -/
 example (a b c : ℝ) : a + b ≤ c ↔ a ≤ c - b := by {
-  sorry
+  constructor
+  · exact fun a_1 ↦ le_tsub_of_add_le_right a_1
+  . exact fun a_1 ↦  le_sub_iff_add_le.mp a_1
   }
 
 /- Note: for purely numerical problems, you can use `norm_num`
@@ -76,25 +92,34 @@ example (x : ℝ) (hx : x = 3) : x ^ 2 + 3 * x - 5 = 13 := by
   norm_num
 
 example {m n : ℤ} : n - m ^ 2 ≤ n + 3 := by {
-  sorry
+  calc n - m^2  ≤  n - 0 := by{
+    gcongr
+    exact sq_nonneg m
+  }
+  _ ≤ n+3 := by linarith
   }
 
 example {a : ℝ} (h : ∀ b : ℝ, a ≥ -3 + 4 * b - b ^ 2) : a ≥ 1 := by {
-  sorry
+  specialize h 2
+  ring at h
+  gcongr
   }
 
 example {a₁ a₂ a₃ b₁ b₂ b₃ : ℝ} (h₁₂ : a₁ + a₂ + 1 ≤ b₁ + b₂) (h₃ : a₃ + 2 ≤ b₃) :
   exp (a₁ + a₂) + a₃ + 1 ≤ exp (b₁ + b₂) + b₃ + 1 := by {
-  sorry
+  have ha : a₃< b₃:= by {linarith }
+  have hb : a₁ + a₂ < b₁ + b₂:= by {linarith }
+  gcongr
   }
-
 
 /- Divisibility also gives an order. Warning: divisibility uses a unicode character,
 which can be written using `\|`. -/
 
 /-- Prove this using calc. -/
 lemma exercise_division (n m k l : ℕ) (h₁ : n ∣ m) (h₂ : m = k) (h₃ : k ∣ l) : n ∣ l := by {
-  sorry
+  calc n ∣ m := by exact h₁
+  _ = k := by rw[h₂]
+  _ ∣  l := by  exact h₃
   }
 
 
@@ -121,7 +146,11 @@ example : x > y ↔ y < x := by rfl
 
 
 example (hxy : x ≤ y) (hyz : y ≤ z) (hzx : z ≤ x) : x = y ∧ y = z ∧ x = z := by {
-  sorry
+  apply le_trans hxy
+
+
+
+
   }
 
 

@@ -41,6 +41,7 @@ the argument must lie in the domain of the function.  -/
 /- Statements have type `Prop` and predicates on `A` have type `A → Prop`. -/
 #check 3 < π
 #check (Nat.Prime)
+#check ℕ
 
 
 /- To prove a statement, you use *tactics* to construct a proof of that statement.
@@ -70,12 +71,19 @@ We can do this with the `have` tactic.
 -/
 
 example (p q r : Prop) (hq : p → q) (hr : p → q → r) : p → r := by {
-  sorry
+   intro hp
+   have h : q := hq hp
+   have h2 := hr hp
+   have h3 := h2 h
+   exact h3
   }
 
 /- We can also use `specialize` to apply a hypothesis to arguments. -/
 example (p q r : Prop) (hq : p → q) (hr : p → q → r) : p → r := by {
-  sorry
+  intro hp
+  specialize hq hp
+  specialize hr hp hq
+  assumption
   }
 
 /-
@@ -86,12 +94,22 @@ We do this with the `apply` tactic.
 -/
 
 example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by {
-  sorry
+  --exact fun hs hp ↦ hr (hq hp hs)
+  intro hs hp
+  --specialize hq hp hs
+  apply hr
+  apply hq
+  · assumption
+  . assumption
   }
 
 /- We can also use `exact` or `refine` with more complicated proof terms. -/
 example (p q r : Prop) (hq : p → p → q) (hr : q → r) : p → r := by {
-  sorry
+  intro hp
+  apply hr
+  apply hq
+  . assumption
+  . assumption
   }
 
 
@@ -108,8 +126,12 @@ example (p q r : Prop) (hq : p → p → q) (hr : q → r) : p → r := by {
 variable (f g : ℝ → ℝ)
 #check (Continuous.add : Continuous f → Continuous g → Continuous (fun x ↦ f x + g x))
 
-example : Continuous (fun x ↦ 2 + x * Real.sin x) := by {
-  sorry
+example : Continuous (fun x ↦ 2 + x * sin x) := by {
+  apply Continuous.add
+  · exact continuous_const
+  apply Continuous.mul
+  · exact continuous_id
+  · exact continuous_sin
   }
 
 
@@ -152,7 +174,8 @@ You can often find similar theorems nearby the theorem you searched for.
 -/
 
 example (a b x y : ℝ) (h : a < b) (h3 : x ≤ y) : a + exp x < b + exp y := by {
-  sorry
+  refine add_lt_add_of_lt_of_le h ?h₂
+  exact exp_le_exp.mpr h3
   }
 
 
@@ -199,12 +222,13 @@ example (h₀ : a = b) (h₁ : b < c) (h₂ : c ≤ d) (h₃ : d < e) : a < e :=
   that follow from linear combinations of assumptions. -/
 
 example (h₀ : a = b) (h₁ : b < c) (h₂ : c ≤ d) (h₃ : d < e) : a < e := by {
-  sorry
+  linarith
+
   }
 
 example (x y z : ℝ) (hx : x ≤ 3 * y) (h2 : ¬ y > 2 * z)
     (h3 : x ≥ 6 * z) : x = 3 * y := by {
-  sorry
+  linarith
   }
 
 
@@ -215,17 +239,19 @@ example (x y z : ℝ) (hx : x ≤ 3 * y) (h2 : ¬ y > 2 * z)
 #check (mul_le_mul_of_nonneg_right : b ≤ c → 0 ≤ a → b * a ≤ c * a)
 
 example (ha : 0 ≤ a) (hb : 0 ≤ b) (h : 0 ≤ c) : a * (b + 2) ≤ (a + c) * (b + 2) := by {
-  sorry
+  gcongr
+  linarith
   }
 
 /- `gcongr` is very convenient for monotonicity of functions. -/
 
 example (h : a ≤ b) (h2 : b ≤ c) : exp a ≤ exp c := by {
-  sorry
+  gcongr
+  linarith
   }
 
 example (h : a ≤ b) : c - exp b ≤ c - exp a := by {
-  sorry
+  gcongr
   }
 
 example (ha : 0 ≤ a) (hb : 0 ≤ b) (h : 0 ≤ c) : a * (b + 2) ≤ (a + c) * (b + 2) := by {
@@ -235,7 +261,8 @@ example (ha : 0 ≤ a) (hb : 0 ≤ b) (h : 0 ≤ c) : a * (b + 2) ≤ (a + c) * 
 /- Remark: for equalities, you should use `congr` instead of `gcongr` -/
 
 example (h : a = b) : c - exp b = c - exp a := by {
-  sorry
+  congr
+  rw[h]
   }
 
 
@@ -286,7 +313,13 @@ def Injective (f : ℝ → ℝ) : Prop := ∀ x y : ℝ, f x = f y → x = y
 
 example (f g : ℝ → ℝ) (hg : Injective g) (hf : Injective f) :
     Injective (g ∘ f) := by {
-  sorry
+  unfold Injective
+  simp
+  intro x y h
+  unfold Injective at hf hg
+  specialize hg (f x) (f y) h
+  specialize hf x y hg
+
   }
 
 
@@ -307,7 +340,8 @@ Furthermore, we can decompose conjunction and equivalences.
 -/
 
 example (p q r s : Prop) (h : p → r) (h' : q → s) : p ∧ q → r ∧ s := by {
-  sorry
+  intro (hp1: p ∧ q)
+  obtain ⟨hp, hq⟩ := hpq
   }
 
 end Real
