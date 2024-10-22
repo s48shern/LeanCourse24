@@ -319,6 +319,8 @@ lemma exercise_nondecreasing_add (f g : ℝ → ℝ) (hf : Nondecreasing f) (hg 
   linarith
   }
 
+
+
 /-- Prove the following property of even. -/
 def EvenFunction (f : ℝ → ℝ) : Prop :=
   ∀ x, f x = f (-x)
