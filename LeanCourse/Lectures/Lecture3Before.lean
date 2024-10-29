@@ -50,7 +50,10 @@ example {α : Type*} [PartialOrder α]
     (isDense : ∀ x y : α, x < y → ∃ z : α, x < z ∧ z < y)
     (x y : α) (hxy : x < y) :
     ∃ z₁ z₂ : α, x < z₁ ∧ z₁ < z₂ ∧ z₂ < y := by {
-  sorry
+  obtain ⟨z₁, hx₀⟩ := isDense x y hxy
+  obtain ⟨hxz, hzy⟩ := hx₀
+  obtain ⟨z₂, hx₁⟩ := isDense z₁ y hzy
+  use z₁, z₂
   }
 
 
@@ -86,12 +89,27 @@ variable (a b : ℝ)
 #check (mul_eq_zero : a * b = 0 ↔ a = 0 ∨ b = 0)
 
 example : a = a * b → a = 0 ∨ b = 1 := by {
-  sorry
-  }
+  intro h
+  have h2 : a*(b-1)= 0 := by {linarith}
+  have h3: a = 0 ∨ b-1= 0 := mul_eq_zero.1 h2
+  obtain ha|hb := h3
+  · left
+    exact ha
+  · right
+    linarith
+}
 
 
 example (f : ℝ → ℝ) (hf : StrictMono f) : Injective f := by {
-  sorry
+  unfold Injective
+  intro x y hxy
+  have:= lt_trichotomy x y
+  obtain h|h|h := this
+  · specialize hf h
+    linarith
+  · exact h
+  · specialize hf h
+    linarith
   }
 
 
@@ -110,7 +128,13 @@ example {p : Prop} (h : p) : ¬ ¬ p := by
 
 
 example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by {
-  sorry
+  constructor
+  · intro h x hx
+    apply h
+    use x
+  · intro h h2
+    obtain ⟨ x, hx ⟩ := h2
+    exact h x hx
   }
 
 
@@ -118,7 +142,10 @@ example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by
 /- We can use `exfalso` to use the fact that
 everything follows from `False`: ex falso quod libet -/
 example {p : Prop} (h : ¬ p) : p → 0 = 1 := by {
-  sorry
+  intro h2
+  exfalso
+  exact h h2
+
   }
 
 
@@ -168,12 +195,32 @@ def SequentialLimit (u : ℕ → ℝ) (l : ℝ) : Prop :=
 
 example (u : ℕ → ℝ) (l : ℝ) : ¬ SequentialLimit u l ↔
     ∃ ε > 0, ∀ N, ∃ n ≥ N, |u n - l| ≥ ε := by {
-  sorry
+      unfold SequentialLimit
+      push_neg
+      rfl
   }
 
 lemma sequentialLimit_unique (u : ℕ → ℝ) (l l' : ℝ) :
     SequentialLimit u l → SequentialLimit u l' → l = l' := by {
-  sorry
+      unfold SequentialLimit
+      intro hl
+      intro hl'
+      by_contra h
+      let d := |l -l'|
+      have hd: d >0 := by exact abs_sub_pos.mpr h
+      specialize hl (d/2) (half_pos hd)
+      obtain ⟨N, hN⟩ := hl
+      obtain ⟨N', hN'⟩ := hl' (d/2) (half_pos hd)
+      let N₀ := max N N'
+      specialize hN N₀ (Nat.le_max_left N N')
+      specialize hN' N₀ (Nat.le_max_right N N')
+      have := calc
+        d = |l -l'| := by rfl
+        _ = |(u N₀ - l') - (u N₀ - l)|:= by ring
+        _ ≤ |u N₀ - l'| + |u N₀ - l|:= by exact abs_sub (u N₀ - l') (u N₀ - l)
+        _ < d/2 + d/2 := by gcongr
+        _ = d := by ring
+      exact lt_irrefl d this
   }
 
 
@@ -236,8 +283,8 @@ corresponds by definition to conjunction, disjunction or negation. -/
 -/
 example (hxs : x ∈ s) (hxt : x ∈ t) : x ∈ s ∩ t := by
   constructor
-  · assumption
-  · assumption
+  · exact hxs
+  · exact hxt
 
 example (hxs : x ∈ s) : x ∈ s ∪ t := by
   left
@@ -257,16 +304,18 @@ example (hxs : x ∈ s) : x ∈ s ∪ t := by
 #check subset_def
 
 example : s ∩ t ⊆ s ∩ (t ∪ u) := by {
-  sorry
+  intro x hx
+  constructor
+  · exact hx.left
+  · left
+    exact hx.right
   }
 
 /- you can also prove it at thge level of sets, without talking about elements. -/
 example : s ∩ t ⊆ s ∩ (t ∪ u) := by {
-  sorry
+  gcongr
+  exact subset_union_left
   }
-
-
-
 
 
 /- ## Proving two Sets are equal
@@ -289,9 +338,9 @@ example : s ∩ t = t ∩ s := by
 /- We can also use existing lemmas and `calc`. -/
 example : (s ∪ tᶜ) ∩ t = s ∩ t := by
   calc (s ∪ tᶜ) ∩ t
-      = (s ∩ t) ∪ (tᶜ ∩ t)  := by rw?
-    _ = s ∩ t ∪ ∅           := by rw?
-    _ = s ∩ t               := by rw?
+      = (s ∩ t) ∪ (tᶜ ∩ t)  := by rw [@Set.union_inter_distrib_right]
+    _ = s ∩ t ∪ ∅           := by rw [@compl_inter_self]
+    _ = s ∩ t               := by rw [@union_empty]
 
 
 
@@ -305,7 +354,12 @@ def Evens : Set ℕ := {n : ℕ | Even n}
 def Odds : Set ℕ := {n | Odd n}
 
 example : Evensᶜ = Odds := by {
-  sorry
+  unfold Evens
+  unfold Odds
+  unfold Even
+  unfold Odd
+
+
   }
 
 
