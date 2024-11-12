@@ -55,7 +55,9 @@ example (n m : ℕ) (h : (n : ℚ) + 3 ≤ 2 * m) : (n : ℝ) + 1 < 2 * m := by 
   }
 
 example (n m : ℕ) (h : (n : ℚ) = m ^ 2 - 2 * m) : (n : ℝ) + 1 = (m - 1) ^ 2 := by {
-  sorry
+  rw [@sub_pow_two]
+  simp [h]
+  norm_cast at *
   }
 
 example (n m : ℕ) : (n : ℝ) < (m : ℝ) ↔ n < m := by {
@@ -225,12 +227,36 @@ def PythagoreanTriple.mul (n: ℝ) (a: PythagoreanTriple) : PythagoreanTriple wh
 
 /- Prove that triples of equivalent types are equivalent. -/
 
+
 @[ext] structure Triple (α : Type*) where
   x : α
   y : α
   z : α
+variable (α β γ : Type*)
 
-example (α β : Type*) (e : α ≃ β) : Triple α ≃ Triple β := sorry
+example (α β : Type*) (e : α ≃ β) : Triple α ≃ Triple β := by {
+  let f (k : (Triple α) ) : (Triple β) := ⟨e k.x, e k.y, e k.z⟩
+  let f_neg (k : (Triple β) ) : (Triple α) := { x := e.symm k.x, y := e.symm k.y, z := e.symm k.z }
+  constructor
+  · intro k
+    have h_toFun : ?toFun = f := rfl
+    have h_invFun : ?invFun = f_neg := rfl
+    calc f_neg (f k) = ⟨e.symm (f k).x, e.symm (f k).y, e.symm (f k).z⟩:= by{
+      exact rfl
+    }
+    _ = ⟨e.symm (e k.x), e.symm (e k.y), e.symm (e k.z)⟩ := by {
+      rfl
+    }
+    _= ⟨k.x, k.y, k.z⟩ := by simp
+
+  · intro k
+    have h_toFun : ?toFun = f := rfl
+    have h_invFun : ?invFun = f_neg := rfl
+    rw [h_toFun, h_invFun]
+    calc f (f_neg k) = f ⟨e.symm k.x, e.symm k.y, e.symm k.z⟩ := by rfl
+    _ = ⟨e (e.symm k.x), e (e.symm k.y), e (e.symm k.z)⟩ := by rfl
+    _= ⟨k.x, k.y, k.z⟩ := by simp
+}
 
 
 
@@ -285,13 +311,27 @@ lemma strictBipointed (a: StrictBipointedType): ∀ z: a.type, z ≠ a.x₀ ∨ 
 }
 
 /- Prove by induction that `∑_{i = 0}^{n} i^3 = (∑_{i=0}^{n} i) ^ 2`. -/
+
+
 open Finset in
+lemma series (n : ℕ): ∑ i in range (n + 1), (i : ℚ) = (n*(n+1)/2):= by{
+    induction n with
+    | zero => simp
+    | succ n ih =>
+      rw [Finset.sum_range_succ, ih]
+      field_simp
+      ring
+  }
 lemma sum_cube_eq_sq_sum (n : ℕ) :
     (∑ i in range (n + 1), (i : ℚ) ^ 3) = (∑ i in range (n + 1), (i : ℚ)) ^ 2 := by {
   induction n with
   | zero => simp
   | succ n hi =>
-    sorry
+    rw[series]
+    rw[series] at hi
+    rw [Finset.sum_range_succ, hi]
+    field_simp
+    ring
   }
 
 /-
@@ -377,48 +417,202 @@ second exercise. Note how we do some computations in the integers, since the sub
 is less well-behaved.
 (The converse is not true, because `89 ∣ 2 ^ 11 - 1`) -/
 
+
 lemma not_prime_iff (n : ℕ) :
     ¬ Nat.Prime n ↔ n = 0 ∨ n = 1 ∨ ∃ a b : ℕ, 2 ≤ a ∧ 2 ≤ b ∧ n = a * b := by {
-  sorry
+  constructor
+  · intro h
+    cases n with
+    | zero => left; rfl
+    | succ n =>
+    cases n with
+      | zero => right; left; rfl
+      | succ n =>
+        right; right
+        rw [Nat.prime_def_lt''] at h
+        push_neg at h
+        ring at *
+        have hn : 2 ≤ 2 + n := by linarith
+        have h:= h hn
+        obtain ⟨m, hm⟩ := h
+        have hm0 : m ≠ 1 := by simp_all only [ne_eq, true_implies, le_add_iff_nonneg_right, _root_.zero_le,
+          not_false_eq_true]
+        have hm1 : m ≠ 0 := by {
+          simp
+          by_contra ha
+          rw [ha] at hm
+          have hm := hm.1
+          omega
+        }
+        have hm2 : 2 ≤ m := by {
+          cases m with
+          | zero => contradiction
+          |  succ m =>
+            cases m with
+            | zero => contradiction
+            | succ n => linarith
+        }
+        use m
+        simp [hm]
+        constructor
+        · use hm2
+        · obtain ⟨b, hb⟩ := hm.1
+          use b
+          constructor
+          · have hm := (hm.2).2
+            by_contra h
+            cases b with
+            | zero => linarith
+            |  succ b =>
+              cases b with
+              | zero =>
+                ring at hb
+                exact hm (id (Eq.symm hb))
+              | succ n => linarith
+          · exact hb
+
+  · intro h
+    rcases h with h | h | h
+    · rw [h]
+      norm_num
+    · rw [h]
+      norm_num
+    · rcases h with ⟨a, b, ha, hb, hc⟩
+      subst hc
+      refine not_prime_mul ?mpr.inr.inr.intro.intro.intro.intro.a1
+          ?mpr.inr.inr.intro.intro.intro.intro.b1
+      linarith
+      linarith
   }
+
 
 lemma prime_of_prime_two_pow_sub_one (n : ℕ) (hn : Nat.Prime (2 ^ n - 1)) : Nat.Prime n := by {
   by_contra h2n
   rw [not_prime_iff] at h2n
   obtain rfl|rfl|⟨a, b, ha, hb, rfl⟩ := h2n
-  · sorry
-  · sorry
+  · norm_cast at *
+  · norm_cast at *
   have h : (2 : ℤ) ^ a - 1 ∣ (2 : ℤ) ^ (a * b) - 1
   · rw [← Int.modEq_zero_iff_dvd]
     calc (2 : ℤ) ^ (a * b) - 1
-        ≡ ((2 : ℤ) ^ a) ^ b - 1 [ZMOD (2 : ℤ) ^ a - 1] := by sorry
-      _ ≡ (1 : ℤ) ^ b - 1 [ZMOD (2 : ℤ) ^ a - 1] := by sorry
-      _ ≡ 0 [ZMOD (2 : ℤ) ^ a - 1] := by sorry
-  have h2 : 2 ^ 2 ≤ 2 ^ a := by sorry
-  have h3 : 1 ≤ 2 ^ a := by sorry
+        ≡ ((2 : ℤ) ^ a) ^ b - 1 [ZMOD (2 : ℤ) ^ a - 1] := by ring; rfl
+      _ ≡ (1 : ℤ) ^ b - 1 [ZMOD (2 : ℤ) ^ a - 1] := by {
+        refine Int.ModEq.sub ?h₁ rfl
+        have h : (2 ^ a) ≡ 1 [ZMOD 2 ^ a - 1] := by {exact Int.modEq_sub (2 ^ a) 1}
+        exact Int.ModEq.pow b h
+      }
+      _ ≡ 0 [ZMOD (2 : ℤ) ^ a - 1] := by simp only [one_pow, sub_self, Int.ModEq.refl]
+  have h2 : 2 ^ 2 ≤ 2 ^ a := by {
+    refine pow_le_pow_of_le_right ?hx ha
+    linarith
+  }
+  have h3 : 1 ≤ 2 ^ a := by exact Nat.one_le_two_pow
   have h4 : 2 ^ a - 1 ≠ 1 := by zify; simp [h3]; linarith
-  have h5 : 2 ^ a - 1 < 2 ^ (a * b) - 1 := by
+  have h5 : 2 ^ a - 1 < 2 ^ (a * b) - 1 := by{
     apply tsub_lt_tsub_right_of_le h3
-    sorry
-  have h6' : 2 ^ 0 ≤ 2 ^ (a * b) := by sorry
+    gcongr
+    linarith
+    calc a < a * 2 := by {
+      refine (Nat.lt_mul_iff_one_lt_right ?ha).mpr ?_
+      linarith
+      norm_num
+    }
+    _ ≤ a * b := by exact Nat.mul_le_mul_left a hb
+  }
+  have h6' : 2 ^ 0 ≤ 2 ^ (a * b) := by gcongr; linarith; exact Nat.zero_le (a * b)
   have h6 : 1 ≤ 2 ^ (a * b) := h6'
-  have h' : 2 ^ a - 1 ∣ 2 ^ (a * b) - 1 := by norm_cast at h
+  have h : 2 ^ a - 1 ∣ 2 ^ (a * b) - 1 := by norm_cast at h
   rw [Nat.prime_def_lt] at hn
-  sorry
+  have hn := hn.2
+  specialize hn (2 ^ a - 1)
+  have hn := hn h5
+  have hn := hn h
+  contradiction
   }
 
-#eval (a ^ 2 + b)*(b ^ 2 + a)
+
 
 /- Prove that for positive `a` and `b`, `a^2 + b` and `b^2 + a` cannot both be squares.
 Prove it on paper first! -/
+-- I'm sure our solution could've been better but I didn't know how to use WLOG
 lemma not_isSquare_sq_add_or (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
     ¬ IsSquare (a ^ 2 + b) ∨ ¬ IsSquare (b ^ 2 + a) := by {
   unfold IsSquare
   by_contra hc
   simp at hc
-  obtain ⟨xa, ha⟩:= hc.1
-  obtain ⟨xb, hb⟩:= hc.2
-  sorry
+  obtain ⟨xa, ha1⟩:= hc.1
+  obtain ⟨xb, hb1⟩:= hc.2
+  by_cases h : a < b
+  · have hlb : b^2 < b^2 + a:= by simp [ha]
+    have hub : b^2 +a< (b+1)^2 := by {
+      calc b^2 + a < b+b^2 := by linarith
+      _ < 2*b+ b^2 := by simp  [hb]
+      _ < 1 + 2*b + b^2 := by norm_num
+      _ = (b+1)^2 := by linarith
+    }
+    have hl : b < xb := by{
+      rw [hb1] at hlb
+      ring at hlb
+      exact lt_of_pow_lt_pow_left' 2 hlb
+    }
+    have hub : xb < b+1 := by{
+      rw [hb1] at hub
+      have hub : xb^2 < (b+1)^2 := by linarith
+      exact lt_of_pow_lt_pow_left' 2 hub
+    }
+    have := lt_trichotomy xb b
+    obtain hcon|hcon|hcon := this
+    · linarith
+    · linarith
+    · linarith
+  · push_neg at h
+    have hcases : b < a ∨ a = b := by exact Or.symm (LE.le.eq_or_gt h)
+    rcases hcases with h | h
+    · have hlb : a^2 < a^2 + b:= by simp [hb]
+      have hub : a^2 +b< (a+1)^2 := by {
+        calc a^2 + b < a+a^2 := by linarith
+        _ < 2*a+ a^2 := by simp  [ha]
+        _ < 1 + 2*a + a^2 := by norm_num
+        _ = (a+1)^2 := by linarith
+      }
+      have hl : a < xa := by{
+        rw [ha1] at hlb
+        ring at hlb
+        exact lt_of_pow_lt_pow_left' 2 hlb
+      }
+      have hub : xa < a+1 := by{
+        rw [ha1] at hub
+        have hub : xa^2 < (a+1)^2 := by linarith
+        exact lt_of_pow_lt_pow_left' 2 hub
+      }
+      have := lt_trichotomy xb b
+      obtain hcon|hcon|hcon := this
+      · linarith
+      · linarith
+      · linarith
+    · rw [← h] at ha1
+      have ha1 : a ^ 2 + a = xa^2 := by simp [ha1]; ring
+      have hl : a < xa := by {
+        have haux : a^2 < xa^2 := by {
+          calc a^2 < a^2 + a := by simp [ha]
+          _ = xa^2 := by rw [ha1]
+        }
+        exact lt_of_pow_lt_pow_left' 2 haux
+      }
+      have hub : xa < a+1 := by{
+        have haux : xa^2 < (a +1)^2:= by {
+          calc xa^2 = a^2 + a := by rw[←ha1]
+          _ < a^2 +2*a := by simp [ha]
+          _ < a^2 +2*a +1 := by norm_num
+          _ = (a+1)^2 := by linarith}
+        exact lt_of_pow_lt_pow_left' 2 haux
+      }
+      have := lt_trichotomy xb b
+      obtain hcon|hcon|hcon := this
+      · linarith
+      · linarith
+      · linarith
+
   }
 
 
@@ -429,8 +623,35 @@ behind notation. But you can use apply to use the lemmas about real numbers. -/
 abbrev PosReal : Type := {x : ℝ // 0 < x}
 
 def groupPosReal : Group PosReal where
-inv (x: PosReal):= sorry --((1:PosReal)/x: PosReal)
-inv_mul_cancel:=sorry
+  mul x y := ⟨x.1 * y.1, mul_pos x.2 y.2⟩
+
+  one := ⟨1, zero_lt_one⟩
+
+  inv x := ⟨1/x.1, ⟩
+
+  mul_assoc := by
+    intros x y z
+    apply Subtype.ext 
+    exact mul_assoc x.1 y.1 z.1
+
+  -- Proof that 1 is the left identity for multiplication
+  one_mul := by
+    intro x
+    apply Subtype.ext
+    exact one_mul x.1
+
+  -- Proof that 1 is the right identity for multiplication
+  mul_one := by
+    intro x
+    apply Subtype.ext
+    exact mul_one x.1
+  
+  inv_mul_cancel := by 
+    intro x
+    apply Subtype.ext
+    norm_cast at *
+    
+
 
 
 

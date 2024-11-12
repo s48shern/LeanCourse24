@@ -8,7 +8,7 @@ noncomputable section
 
 /-
 # Practical remarks
-* Assignment 5 due on 5.12. Upload it to eCampus.
+* Assignment 5 due on 12.11. Upload it to eCampus.
 -/
 
 /- # Last Week -/
@@ -39,9 +39,10 @@ Some useful tactics when dealing with numbers:
 -/
 
 example : 2 ^ 3 + 17 = 300 / 12 := by norm_num
+example : Nat.Prime 13 := by norm_num
+example : ¬ Nat.Prime 1000 := by norm_num
 example (x : ℝ) : x + 5 + 3 = x + 8 := by
-  rw [add_assoc]
-  norm_num
+  norm_num [add_assoc]
 
 example (n m : ℤ) : 2 * n + 1 ≠ 2 * m := by omega
 
@@ -77,6 +78,7 @@ In the infoview (right half of your screen), these coercions are denoted with `�
 section
 #eval (12 : ℚ) / 15
 #eval (7 : ℤ) - 8
+#check (7 : ℤ) - 8
 variable (n : ℕ)
 #check (n : ℚ)
 #check (n + 1 : ℚ)
@@ -96,16 +98,18 @@ Note: when coercing from `ℕ` to e.g. `ℚ` these tactics will not push/pull ca
 since `↑n - ↑m = ↑(n - m)` and `↑n / ↑m = ↑(n / m)` are not always true.
 -/
 
-example (n : ℕ) : ((n + 1 : ℤ) : ℚ) = n + 1 := by norm_cast
+example (n : ℕ) :
+    ((n + 1 : ℤ) : ℚ) = (n + 1 : ℚ) := by norm_cast
 
 example (n m : ℕ) (h : (n : ℚ) + 1 ≤ m) : (n : ℝ) + 1 ≤ m := by {
-  -- exact fails
+  -- exact h -- fails
   norm_cast
   norm_cast at h
   }
 
-example (n m : ℕ) (h : n = m * m + 2) : (n : ℝ) - 3 = (m + 1) * (m - 1) := by {
-  rw[h]
+example (n m : ℕ) (h : (n : ℚ) = m * m + 2) : (n : ℝ) - 3 = (m + 1) * (m - 1) := by {
+  norm_cast at h
+  rw [h]
   push_cast
   ring
   }
@@ -123,12 +127,11 @@ def fac : ℕ → ℕ
 -- illegal:
 -- def wrong : ℕ → ℕ
 --   | 0 => 1
---   | (n + 1) => wrong (n + 2)
+--   | (n + 1) =>
+--     -- have : n + 2 < n + 1 := by sorry
+--     wrong (n + 2)
 
-
-
-
-
+-- #eval! wrong 2
 
 lemma fac_zero : fac 0 = 1 := rfl
 
@@ -140,26 +143,27 @@ example : fac 4 = 24 := rfl
 
 theorem fac_pos (n : ℕ) : 0 < fac n := by {
   induction n with
-  | zero => trivial
-  | succ n ih => {
-    rw[fac]
+  | zero =>
+    unfold fac
+    norm_num
+  | succ n ih =>
+    rw [fac]
     positivity
-  }
-
   }
 
 open BigOperators Finset
 
 /- We can use `∑ i in range (n + 1), f i` to take the sum `f 0 + f 1 + ⋯ + f n`. -/
+-- #check Finset.range
 
 example (f : ℕ → ℝ) : ∑ i in range 0, f i = 0 :=
-  by simp
+  sum_range_zero f
 
 example (f : ℕ → ℝ) (n : ℕ) : ∑ i in range (n + 1), f i = (∑ i in range n, f i) + f n :=
   sum_range_succ f n
 
 /- Here `range n` or `Finset.range n` is the set `{0, ..., n - 1}`.
-It's type is `Finset ℕ`, which is a set
+It's type is `Finset ℕ`, which is a set together with the property that it's finite.
 -/
 #check Finset.range
 
@@ -173,7 +177,7 @@ example (n : ℕ) : ∑ i in range (n + 1), (i : ℚ) = n * (n + 1) / 2 := by {
   induction n with
   | zero => simp
   | succ n ih =>
-    rw[Finset.sum_range_succ,ih]
+    rw [Finset.sum_range_succ, ih]
     field_simp
     ring
   }
@@ -185,13 +189,13 @@ example (n : ℕ) : ∑ i in range (n + 1), (i : ℚ) = n * (n + 1) / 2 := by {
 
 /- We can use other induction principles with `induction ... using ... with` -/
 
-theorem fac_dvd_fac (n m : ℕ) (h : n ≤ m) : fac n ∣ fac m := by {
+theorem fac_dvd_fac (n m : ℕ)
+    (h : n ≤ m) : fac n ∣ fac m := by {
   induction m, h using Nat.le_induction with
-  | base => simp
+  | base => rfl
   | succ k hk ih =>
-    rw[fac]
+    rw [fac]
     exact Dvd.dvd.mul_left ih (k + 1)
-
   }
 
 
@@ -223,7 +227,7 @@ variable (a : Point)
 #check a.z
 #check Point.x a
 
-example : a.x = Point.x a := rfl
+example : a.x = Point.x a := by rfl
 
 end
 
@@ -233,7 +237,10 @@ end
 
 /- We can prove that two points are equal using the `ext` tactic. -/
 
-example (a b : Point) (hx : a.x = b.x) (hy : a.y = b.y) (hz : a.z = b.z) :
+example (a b : Point)
+    (hx : a.x = b.x)
+    (hy : a.y = b.y)
+    (hz : a.z = b.z) :
     a = b := by
   ext
   all_goals assumption
@@ -338,10 +345,14 @@ instance : Add Point := ⟨add⟩
 @[simp] lemma add_y (a b : Point) : (a + b).y = a.y + b.y := by rfl
 @[simp] lemma add_z (a b : Point) : (a + b).z = a.z + b.z := by rfl
 
+-- @[simp] lemma add_def (a b : Point) :
+--     a + b = add a b := by rfl
+
+-- example (x y : ℝ) : x + y = y + x := by sorry
+
 example (a b : Point) : a + b = b + a := by {
   ext
-  all_goals simp
-  all_goals ring
+  all_goals simp [add_comm]
   }
 
 end Point
@@ -380,12 +391,17 @@ structure PosPoint' extends Point where
 
 def PointPoint'.add (a b : PosPoint') : PosPoint' :=
 { a.toPoint + b.toPoint with
-  x_pos := by dsimp; linarith [a.x_pos, b.x_pos]
-  y_pos := by dsimp; linarith [a.y_pos, b.y_pos]
-  z_pos := by dsimp; linarith [a.z_pos, b.z_pos] }
+  x_pos := by simp; linarith [a.x_pos, b.x_pos]
+  y_pos := by simp; linarith [a.y_pos, b.y_pos]
+  z_pos := by simp; linarith [a.z_pos, b.z_pos] }
 
 /- We could also define a type like this using a subtype. It's notation is very similar to sets,
 but written as `{x : α // p x}` instead of `{x : α | p x}`. -/
+
+structure PosReal' where
+  toReal : ℝ
+  toReal_pos : toReal > 0
+
 
 def PosReal : Type :=
   { x : ℝ // x > 0 }
@@ -397,6 +413,7 @@ def set_of_positive_reals : Set ℝ :=
 And it gets ugly when you have more than 2 projections. -/
 
 example (x : PosReal) : x.1 > 0 := x.2
+example (x : PosReal') : x.1 > 0 := x.2
 
 def PosPoint'' : Type :=
   { x : ℝ × (ℝ × ℝ) // x.1 > 0 ∧ x.2.1 > 0 ∧ x.2.2 > 0 }
@@ -491,22 +508,24 @@ class AbelianGroup' (G : Type*) where
   neg : G → G
   add_neg : ∀ x : G, add x (neg x) = zero
 
-instance : AbelianGroup' ℤ where
+instance some_name : AbelianGroup' ℤ where
   add := fun a b ↦ a + b
   comm := add_comm
   assoc := add_assoc
   zero := 0
   add_zero := by simp
   neg := fun a ↦ -a
-  add_neg := by exact?
+  add_neg := by exact fun x ↦ Int.add_right_neg x
 
-#eval AbelianGroup'.add (2 : ℤ) 5
+#eval AbelianGroup'.add (2 : ℤ) (5 : ℤ)
 
-infixl:70 " +' " => AbelianGroup'.add
+infixl:65 " +' " => AbelianGroup'.add
 
+#check 2 + 3 * 5
 #eval (-2) +' 5
 
 notation " 𝟘 " => AbelianGroup'.zero
+
 
 prefix:max "-'" => AbelianGroup'.neg
 
@@ -531,3 +550,8 @@ instance AbelianGroup'.prod (G G' : Type*) [AbelianGroup' G] [AbelianGroup' G'] 
 /- Now Lean will figure out itself that `AbelianGroup' (ℤ × ℤ)`. -/
 set_option trace.Meta.synthInstance true in
 #check ((2, 3) : ℤ × ℤ) +' (4, 5)
+
+set_option trace.Meta.synthInstance true in
+#synth AbelianGroup' (ℤ × ℤ)
+
+#check mul_comm
