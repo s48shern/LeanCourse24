@@ -147,7 +147,25 @@ Use `Quotient.ind` to prove something for all elements of a quotient.
 You can use this using the induction tactic: `induction x using Quotient.ind; rename_i x`.
 -/
 def quotient_equiv_subtype (X : Type*) :
-    Quotient (myEquivalenceRelation X) ≃ X := sorry
+    Quotient (myEquivalenceRelation X) ≃ X where
+      toFun := Quotient.lift id (by
+        intro a b hab
+        exact hab
+      )
+      invFun := by{
+        let f (k : X ) : (Quotient (myEquivalenceRelation X)) := ⟦k⟧
+        use f
+      }
+      left_inv := by{
+        apply Quotient.ind
+        intro x
+        rfl
+      }
+      right_inv := by {
+        rintro x
+        rfl
+      }
+
 
 
 
@@ -159,9 +177,50 @@ variable (G : Type*) {X : Type*} [Group G] [MulAction G X]
 Prove that the orbits of two elements are equal
 precisely when one element is in the orbit of the other. -/
 def orbitOf (x : X) : Set X := range (fun g : G ↦ g • x)
+#check MulAction.mem_orbit_iff
 
 lemma orbitOf_eq_iff (x y : X) : orbitOf G x = orbitOf G y ↔ y ∈ orbitOf G x := by {
-  sorry
+  constructor
+  · intro hx
+    rw[hx]
+    unfold orbitOf
+    rw [@Set.mem_range]
+    use 1
+    simp
+  · intro hx
+    unfold orbitOf at hx
+    rw [@Set.mem_range] at hx
+    obtain ⟨z, hz⟩ := hx
+    have h1 : orbitOf G (z • x) = orbitOf G x := by{
+      refine Eq.symm (Set.ext ?_)
+      intro x_1
+      constructor
+      · intro h1
+        obtain ⟨z1, hz1⟩ := h1
+        simp at hz1
+        use z1 • (z⁻¹)
+        simp only [smul_eq_mul]
+        calc (z1 * z⁻¹) • z • x = z1 • z⁻¹ • z • x := MulAction.mul_smul z1 (z⁻¹) (z • x)
+        _ = z1 • x := by simp
+        _ = x_1 := by rw [← hz1]
+      · intro h
+        obtain ⟨z1, hz1⟩ := h
+        simp at hz1
+        use (z1 • z)
+        subst hz1 hz
+        simp_all only [smul_eq_mul]
+        exact mul_smul z1 z x
+    }
+    ext k
+    constructor
+    · intro horb
+      rw[← hz]
+      rw[h1]
+      exact horb
+    · intro horb
+      rw[←hz] at horb
+      rw[← h1]
+      exact horb
   }
 
 /- Define the stabilizer of an element `x` as the subgroup of elements
