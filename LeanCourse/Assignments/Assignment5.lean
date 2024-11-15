@@ -627,11 +627,11 @@ def groupPosReal : Group PosReal where
 
   one := ⟨1, zero_lt_one⟩
 
-  inv x := ⟨1/x.1, ⟩
+  inv x := ⟨1/x.1, sorry ⟩
 
   mul_assoc := by
     intros x y z
-    apply Subtype.ext 
+    apply Subtype.ext
     exact mul_assoc x.1 y.1 z.1
 
   -- Proof that 1 is the left identity for multiplication
@@ -645,12 +645,12 @@ def groupPosReal : Group PosReal where
     intro x
     apply Subtype.ext
     exact mul_one x.1
-  
-  inv_mul_cancel := by 
+
+  inv_mul_cancel := by
     intro x
     apply Subtype.ext
     norm_cast at *
-    
+
 
 
 

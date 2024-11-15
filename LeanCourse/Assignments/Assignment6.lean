@@ -28,30 +28,44 @@ open Classical
 subtypes. -/
 
 abbrev PosReal : Type := {x : ℝ // x > 0}
-
+variable (a : Real) (p : Real → PosReal) (s : {a : Real // a > 0 })
 /- Codomain is a subtype (usually not recommended). -/
 example (f : ℝ → PosReal) (hf : Monotone f) :
     Monotone (fun x ↦ log (f x)) := by {
-  sorry
+    intro x y hx
+    simp
+    have h2: ↑(f x) ≤ ↑(f y) := by exact hf hx
   }
 
 /- Specify that the range is a subset of a given set (recommended). -/
 example (f : ℝ → ℝ) (hf : range f ⊆ {x | x > 0}) (h2f : Monotone f) :
   Monotone (log ∘ f) := by {
-  sorry
+  intro x y hx
+  simp only [comp_apply]
+  have h2: f x ≤ f y := by exact h2f hx
+
   }
 
 /- Domain is a subtype (not recommended). -/
 example (f : PosReal → ℝ) (hf : Monotone f) :
     Monotone (fun x ↦ f ⟨exp x, exp_pos x⟩) := by {
-  sorry
-  }
+    intro x y hx
+    simp
+    apply hf
+    simp_all only [Subtype.mk_le_mk, exp_le_exp]
+    }
 
 /- Only specify that a function is well-behaved on a subset of its domain (recommended). -/
 example (f : ℝ → ℝ) (hf : MonotoneOn f {x | x > 0}) :
     Monotone (fun x ↦ f (exp x)) := by {
-  sorry
-  }
+    intro x y hx
+    simp
+    apply hf
+    all_goals simp
+    exact exp_pos x
+    exact exp_pos y
+    exact hx
+    }
 
 
 
@@ -105,7 +119,17 @@ instance : MulAction G (Subgroup G) := sorry
 Let's define the smallest equivalence relation on a type `X`. -/
 def myEquivalenceRelation (X : Type*) : Setoid X where
   r x y := x = y
-  iseqv := sorry -- Here you have to show that this is an equivalence.
+  iseqv := {
+    refl := by{
+      exact fun x ↦ rfl
+    }
+    symm := by{
+      exact fun {x y} a ↦ id (Eq.symm a)
+    }
+    trans := by{
+      simp
+    }
+  } -- Here you have to show that this is an equivalence.
                  -- If you click on the `sorry`, a lightbulb will appear to give the fields
 
 /- This simp-lemma will simplify `x ≈ y` to `x = y` in the lemma below. -/
