@@ -237,9 +237,7 @@ def stabilizerOf (x : X) : Subgroup G := sorry
 Hint: Only define the forward map (as a separate definition),
 and use `Equiv.ofBijective` to get an equivalence.
 (Note that we are coercing `orbitOf G x` to a (sub)type in the right-hand side) -/
-def orbit_stabilizer_theorem (x : X) : G ⧸ stabilizerOf G x ≃ orbitOf G x := by {
-  sorry
-  }
+def orbit_stabilizer_theorem (x : X) : G ⧸ stabilizerOf G x ≃ orbitOf G x := by
 
 
 end GroupActions
