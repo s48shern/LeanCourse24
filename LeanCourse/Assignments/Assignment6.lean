@@ -225,20 +225,78 @@ lemma orbitOf_eq_iff (x y : X) : orbitOf G x = orbitOf G y ↔ y ∈ orbitOf G x
 
 /- Define the stabilizer of an element `x` as the subgroup of elements
 `g ∈ G` that satisfy `g • x = x`. -/
-def stabilizerOf (x : X) : Subgroup G := sorry
+def stabilizerOf (x : X) : Subgroup G where
+  carrier := {g | g • x = x}
+  mul_mem' := by {
+    intro a b ha hb
+    have h: (a*b) • x = a • b • x := by exact mul_smul a b x
+    have h: (a*b) • x = x := by {
+      rw [h, hb, ha]
+    }
+    exact h
+  }
+  one_mem' := by {
+    simp
+  }
+  inv_mem' := by {
+    simp
+    intro x1 hx1
+    have h: (x1⁻¹ * x1) • x = x := by {
+      simp
+    }
+    have h: x1⁻¹ •  x1 • x = x := by exact inv_smul_smul x1 x
+    rw [hx1] at h
+    exact h
+  }
 
 -- This is a lemma that allows `simp` to simplify `x ≈ y` in the proof below.
 @[simp] theorem leftRel_iff {x y : G} {s : Subgroup G} :
     letI := QuotientGroup.leftRel s; x ≈ y ↔ x⁻¹ * y ∈ s :=
   QuotientGroup.leftRel_apply
 
+#check Equiv.ofBijective
 /- Let's probe the orbit-stabilizer theorem.
 
 Hint: Only define the forward map (as a separate definition),
 and use `Equiv.ofBijective` to get an equivalence.
 (Note that we are coercing `orbitOf G x` to a (sub)type in the right-hand side) -/
 def orbit_stabilizer_theorem (x : X) : G ⧸ stabilizerOf G x ≃ orbitOf G x := by {
-  sorry
+  let φ: G ⧸ stabilizerOf G x → (orbitOf G x: Set X) :=
+    fun g ↦ Quotient.lift
+    (fun g ↦ ⟨g • x, by simp [orbitOf]⟩)
+    (by
+        intro a b hab
+        simp at *
+        refine eq_inv_smul_iff.mp ?_
+        have h': (a⁻¹ * b) • x = a⁻¹ • b • x:= by exact mul_smul a⁻¹ b x
+        rw [←h']
+        simp [stabilizerOf] at hab
+        exact id (Eq.symm hab)
+      ) g
+  have hg: Bijective φ := by {
+    constructor
+    . unfold Injective
+      apply Quotient.ind
+      intro g1
+      apply Quotient.ind
+      intro g2 hg
+      simp [φ] at hg
+      have h': x = g1⁻¹ • g2 •  x := eq_inv_smul_iff.mpr hg
+      have h'': (g1⁻¹ * g2) •  x = g1⁻¹ • g2 •  x := mul_smul g1⁻¹ g2 x
+      rw [←h'] at h''
+      have h': g1⁻¹ * g2 ∈ stabilizerOf G x := by{
+        simp [stabilizerOf]
+        exact h''
+      }
+      rw [← leftRel_iff] at h'
+      rw [Quotient.sound h']
+    . unfold Surjective
+      rintro ⟨b, hb⟩
+      obtain ⟨y, hy⟩:= hb
+      use y
+      exact SetCoe.ext hy
+  }
+  exact Equiv.ofBijective φ hg
   }
 
 
