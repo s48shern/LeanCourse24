@@ -77,7 +77,7 @@ Examples of filters:
 #check (atTop : Filter ℕ)
 
 example {s : Set ℝ} : s ∈ atTop ↔
-  ∃ N, ∀ n ≥ N, n ∈ s := by exact?
+  ∃ N, ∀ n ≥ N, n ∈ s := by exact mem_atTop_sets
 
 /- `𝓝 x`, made of neighborhoods of `x` in a topological space -/
 #check (𝓝 3 : Filter ℝ)
@@ -97,7 +97,7 @@ as a generalized element of `Set X`.
 
 
 example {s t : Set ℝ} : t ∈ 𝓟 s ↔ s ⊆ t :=
-  by exact?
+  by exact mem_principal
 
 
 
@@ -213,7 +213,7 @@ example {ι : Type*} (s : ι → Set X) :
   simp
   intro i
   apply interior_mono ?_ hx
-  exact iInter_subset (fun i ↦ s i) i
+  exact iInter_subset_of_subset i fun ⦃a⦄ a ↦ a
   }
 
 
@@ -227,7 +227,7 @@ example {f : X → Y} :
 value `f x` tends to `f x₀` whenever `x` tends to `x₀`. -/
 example {f : X → Y} :
     Continuous f ↔ ∀ x₀, Tendsto f (𝓝 x₀) (𝓝 (f x₀)) := by
-  exact?
+  exact continuous_iff_continuousAt
 
 /- By definition, the right-hand side states that `f` is
 continuous at `x₀`. -/
@@ -261,10 +261,10 @@ example {x : X} {s : Set X} (h : s ∈ 𝓝 x) : x ∈ s := by
 separatedness axioms. -/
 
 example : T0Space X ↔ Injective (𝓝 : X → Filter X) := by
-  exact?
+  exact t0Space_iff_nhds_injective X
 
 example : T1Space X ↔ ∀ x, IsClosed ({ x } : Set X) :=
-  ⟨by exact?, by exact?⟩
+  ⟨by exact fun a x ↦ isClosed_singleton, by exact fun a ↦ { t1 := a }⟩
 
 example : T2Space X ↔
     ∀ x y : X, x ≠ y → Disjoint (𝓝 x) (𝓝 y) :=
@@ -272,7 +272,7 @@ example : T2Space X ↔
 
 example : RegularSpace X ↔ ∀ {s : Set X} {a},
     IsClosed s → a ∉ s → Disjoint (𝓝ˢ s) (𝓝 a) := by
-  exact?
+  exact regularSpace_iff X
 
 
 
@@ -288,7 +288,7 @@ example : RegularSpace X ↔ ∀ {s : Set X} {a},
 example {K : Set X} : IsCompact K ↔ ∀ {ι : Type u}
     (U : ι → Set X), (∀ i, IsOpen (U i)) → (K ⊆ ⋃ i, U i) →
     ∃ t : Finset ι, K ⊆ ⋃ i ∈ t, U i := by
-  exact?
+  exact isCompact_iff_finite_subcover
 
 #check CompactSpace
 
@@ -302,7 +302,7 @@ This can also be reformulated using filters.
 -/
 
 example (F : Filter X) : NeBot F ↔ F ≠ ⊥ := by
-  exact?
+  exact neBot_iff
 
 example {x : X} (F : Filter X) :
     ClusterPt x F ↔ NeBot (𝓝 x ⊓ F) := by

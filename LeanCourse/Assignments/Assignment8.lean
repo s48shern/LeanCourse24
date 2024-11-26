@@ -33,7 +33,28 @@ example {ι : Type*} {L : Filter ι} {f g : ι → ℝ} (h1 : ∀ᶠ i in L, f i
 
 example {ι : Type*} {L : Filter ι} {a b : ι → ℤ} (h1 : ∀ᶠ i in L, a i ≤ b i + 1)
     (h2 : ∀ᶠ i in L, b i ≤ a i + 1) (h3 : ∀ᶠ i in L, b i ≠ a i) : ∀ᶠ i in L, |a i - b i| = 1 := by {
-  sorry
+    filter_upwards [h1, h2, h3] with i h1 h2 h3
+    have h2 : b i - a i ≤ 1 := by linarith
+    have h1 : a i - b i ≤ 1 := by linarith
+    have h1 : |a i - b i| ≤ 1 := by {
+      refine abs_sub_le_iff.mpr ?_
+      constructor
+      · exact h1
+      · exact h2
+    }
+    rw [@Int.abs_le_one_iff] at h1
+    simp_all only [ne_eq, tsub_le_iff_right, Int.reduceNeg]
+    cases h1 with
+    | inl h =>
+      simp_all only [abs_zero, zero_ne_one]
+      push_neg at h3
+      have h : b i = a i := by linarith
+      exact h3 h
+    | inr h_1 =>
+      cases h_1 with
+      | inl h => simp_all only [abs_one]
+      | inr h_2 => simp_all only [Int.reduceNeg, abs_neg, abs_one]
+
   }
 
 /- The goal of the following exercise is to prove that
@@ -186,10 +207,32 @@ lemma technical_filter_exercise {ι α : Type*} {p : ι → Prop} {q : Prop} {a 
     (hbF : ∀ᶠ x in F, x ≠ b) (haG : ∀ᶠ x in G, x ≠ a) (haF : pure a ≤ F) (hbG : pure b ≤ G) :
     (∀ᶠ i in L, p i ↔ q) ↔
     Tendsto (fun i ↦ if p i then a else b) L (if q then F else G) := by {
-  have hab : a ≠ b
-  · sorry
+  have hab : a ≠ b := by{
+    exact haF hbF
+  }
   rw [tendsto_iff_eventually]
-  sorry
+  constructor
+  · intro h
+    intro p1 hp
+    filter_upwards [h] with i h
+    simp at *
+    replace h : p i = q := propext h
+    subst h
+    split
+    next h =>
+      simp_all only [iff_true, ↓reduceIte]
+      apply haF
+      exact hp
+    next h =>
+      simp_all only [iff_false, ↓reduceIte]
+      apply hbG
+      exact hp
+  · intro h
+
+    sorry
+
+
+
   }
 
 /- To be more concrete, we can use the previous lemma to prove the following.

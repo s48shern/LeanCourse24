@@ -344,7 +344,7 @@ E.g. we want to say that `X ^ 2 - 2 : ℤ[X]` has a root in `ℝ` -/
 
 example : ∃ (x : ℝ), aeval x (X ^ 2 - 2 : ℤ[X]) = 0 := by {
   use (2^(1/2))
-  rw?
+  rw [@Mathlib.Tactic.Ring.pow_atom][@Mathlib.Tactic.Ring.pow_atom][@Mathlib.Tactic.Ring.pow_atom][@Mathlib.Tactic.Ring.pow_atom][@Mathlib.Tactic.Ring.pow_atom]
 
   }
 
