@@ -6,7 +6,7 @@ open Function Ideal Polynomial Classical
 open scoped Matrix
 -- This is removed intentionally and should not be used manually in the exercises
 attribute [-ext] LinearMap.prod_ext
-
+-- Pablo cageao and Sergio Hernando
 
 /-
 
@@ -55,7 +55,7 @@ example (n m : ℤ) : span {n} ⊓ span {m} = span {lcm n m} := by {
     calc m ∣ lcm n m := by exact dvd_lcm_right n m
     _ ∣ x := by exact h1
   }
-
+#leansearch "span gcd."
 /- Show that transposing a matrix gives rise to a linear equivalence. -/
 example {R M m n : Type*} [Ring R] [AddCommGroup M] [Module R M] :
   Matrix m n M ≃ₗ[R] Matrix n m M where
