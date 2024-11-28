@@ -200,8 +200,10 @@ instance : CompleteBooleanAlgebra (RegularOpens X) :=
 /- Here is a technical property using filters, characterizing when a 2-valued function converges to
 a filter of the form `if q then F else G`. The next exercise is a more concrete application.
 Useful lemmas here are
-* `Filter.Eventually.filter_mono`
-* `Filter.Eventually.mono` -/
+-/
+#check Filter.Eventually.filter_mono
+#check Filter.Eventually.mono
+#check pure
 lemma technical_filter_exercise {ι α : Type*} {p : ι → Prop} {q : Prop} {a b : α}
     {L : Filter ι} {F G : Filter α}
     (hbF : ∀ᶠ x in F, x ≠ b) (haG : ∀ᶠ x in G, x ≠ a) (haF : pure a ≤ F) (hbG : pure b ≤ G) :
@@ -228,10 +230,8 @@ lemma technical_filter_exercise {ι α : Type*} {p : ι → Prop} {q : Prop} {a 
       apply hbG
       exact hp
   · intro h
-
-    sorry
-
-
+    rw [@eventually_iff] at *
+    rw [@pure_le_iff] at haF hbG
 
   }
 
@@ -245,5 +245,27 @@ lemma tendsto_indicator_iff {ι : Type*} {L : Filter ι} {s : ι → Set ℝ} {t
     (ha : ∀ x, f x ≠ 0) :
     (∀ x, ∀ᶠ i in L, x ∈ s i ↔ x ∈ t) ↔
     Tendsto (fun i ↦ indicator (s i) f) L (𝓝 (indicator t f)) := by {
-  sorry
+    #check (𝓝 (t.indicator f))
+    constructor
+    . intro hx
+      unfold indicator
+      have h: Tendsto (fun i x ↦ if x ∈ s i then f x else 0) L (𝓝 fun x ↦ if x ∈ t then f x else 0) ↔ ∀ x, Tendsto (fun i ↦ if x ∈ s i then f x else 0) L (if x ∈ t then 𝓝 (f x) else 𝓝 0) := by {
+        unfold Tendsto
+        constructor
+        . intro h x
+          sorry
+        . intro h
+          sorry
+      }
+      rw [h]
+      intro x
+      rw [← technical_filter_exercise]
+      . exact hx x
+      . exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) (ha x)
+      . exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) fun a ↦ ha x (id (Eq.symm a))
+      . exact intervalIntegral.FTCFilter.pure_le
+      . exact intervalIntegral.FTCFilter.pure_le
+    . intro h x
+      sorry
+
   }
