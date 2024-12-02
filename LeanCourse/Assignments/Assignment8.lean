@@ -241,31 +241,43 @@ then  `f * 1_{s i}` tends to `f * 1_t` iff `x ∈ s i` is eventually equivalent 
 `x ∈ t` for all `x`. (note that this does *not* necessarily mean that `s i = t` eventually).
 `f * 1_t` is written `indicator t f` in Lean.
 Useful lemmas for this exercise are `indicator_apply`, `apply_ite` and `tendsto_pi_nhds`. -/
+#check indicator_apply
+#check apply_ite
+#check tendsto_pi_nhds
 lemma tendsto_indicator_iff {ι : Type*} {L : Filter ι} {s : ι → Set ℝ} {t : Set ℝ} {f : ℝ → ℝ}
     (ha : ∀ x, f x ≠ 0) :
     (∀ x, ∀ᶠ i in L, x ∈ s i ↔ x ∈ t) ↔
     Tendsto (fun i ↦ indicator (s i) f) L (𝓝 (indicator t f)) := by {
-    #check (𝓝 (t.indicator f))
+    let f':=(fun i x1 ↦ if x1 ∈ s i then f x1 else 0)
+    let g':=(fun x1 ↦ if x1 ∈ t then f x1 else 0)
+    have h: Tendsto f' L (𝓝 g') ↔ ∀ (x), Tendsto (fun i ↦ f' i x) L (𝓝 (g' x)) := by {
+      exact tendsto_pi_nhds
+    }
+    have h': (∀ (x), 𝓝 (g' x) = if x ∈ t then 𝓝 (f x) else 𝓝 0) := by {
+      unfold g'
+      exact fun x ↦ apply_ite 𝓝 (x ∈ t) (f x) 0
+    }
+    unfold indicator
     constructor
     . intro hx
-      unfold indicator
-      have h: Tendsto (fun i x ↦ if x ∈ s i then f x else 0) L (𝓝 fun x ↦ if x ∈ t then f x else 0) ↔ ∀ x, Tendsto (fun i ↦ if x ∈ s i then f x else 0) L (if x ∈ t then 𝓝 (f x) else 𝓝 0) := by {
-        unfold Tendsto
-        constructor
-        . intro h x
-          sorry
-        . intro h
-          sorry
-      }
       rw [h]
       intro x
+      specialize h' x
+      rw [h']
       rw [← technical_filter_exercise]
       . exact hx x
       . exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) (ha x)
       . exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) fun a ↦ ha x (id (Eq.symm a))
       . exact intervalIntegral.FTCFilter.pure_le
       . exact intervalIntegral.FTCFilter.pure_le
-    . intro h x
-      sorry
-
+    . intro hx x
+      rw [h] at hx
+      specialize hx x
+      rw [h'] at hx
+      rw [← technical_filter_exercise] at hx
+      . exact hx
+      . exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) (ha x)
+      . exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) fun a ↦ ha x (id (Eq.symm a))
+      . exact intervalIntegral.FTCFilter.pure_le
+      . exact intervalIntegral.FTCFilter.pure_le
   }
