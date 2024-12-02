@@ -213,7 +213,7 @@ example {ι : Type*} (s : ι → Set X) :
   simp
   intro i
   apply interior_mono ?_ hx
-  exact iInter_subset_of_subset i fun ⦃a⦄ a ↦ a
+  exact iInter_subset_of_subset i fun ⦃b⦄ a ↦ a
   }
 
 
@@ -223,11 +223,18 @@ example {f : X → Y} :
     Continuous f ↔ ∀ s, IsOpen s → IsOpen (f ⁻¹' s) :=
   continuous_def
 
+#check continuous_def
+#check continuousAt_def
 /- It is equivalent to saying that for any `x₀` the function
 value `f x` tends to `f x₀` whenever `x` tends to `x₀`. -/
 example {f : X → Y} :
-    Continuous f ↔ ∀ x₀, Tendsto f (𝓝 x₀) (𝓝 (f x₀)) := by
-  exact continuous_iff_continuousAt
+    Continuous f ↔ ∀ x₀, Tendsto f (𝓝 x₀) (𝓝 (f x₀)) := by {
+      simp [Tendsto] at *
+      rw [continuous_iff_continuousAt]
+      unfold ContinuousAt
+      unfold Tendsto
+      trivial
+    }
 
 /- By definition, the right-hand side states that `f` is
 continuous at `x₀`. -/

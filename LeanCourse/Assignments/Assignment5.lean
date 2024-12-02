@@ -650,6 +650,7 @@ def groupPosReal : Group PosReal where
     intro x
     apply Subtype.ext
     norm_cast at *
+    sorry
 
 
 
