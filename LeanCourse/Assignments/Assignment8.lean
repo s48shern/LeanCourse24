@@ -245,5 +245,16 @@ lemma tendsto_indicator_iff {ι : Type*} {L : Filter ι} {s : ι → Set ℝ} {t
     (ha : ∀ x, f x ≠ 0) :
     (∀ x, ∀ᶠ i in L, x ∈ s i ↔ x ∈ t) ↔
     Tendsto (fun i ↦ indicator (s i) f) L (𝓝 (indicator t f)) := by {
-  sorry
+  constructor
+  · intro h
+    apply?
+  · intro h x
+    filter_upwards [] with i
+    simp at *
+    constructor
+    · intro h2
+      sorry
+    · intro h2
+      sorry
+
   }
