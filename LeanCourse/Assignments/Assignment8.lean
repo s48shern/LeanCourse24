@@ -248,16 +248,6 @@ lemma tendsto_indicator_iff {ι : Type*} {L : Filter ι} {s : ι → Set ℝ} {t
     (ha : ∀ x, f x ≠ 0) :
     (∀ x, ∀ᶠ i in L, x ∈ s i ↔ x ∈ t) ↔
     Tendsto (fun i ↦ indicator (s i) f) L (𝓝 (indicator t f)) := by {
-    let f':=(fun i x1 ↦ if x1 ∈ s i then f x1 else 0)
-    let g':=(fun x1 ↦ if x1 ∈ t then f x1 else 0)
-    have h: Tendsto f' L (𝓝 g') ↔ ∀ (x), Tendsto (fun i ↦ f' i x) L (𝓝 (g' x)) := by {
-      exact tendsto_pi_nhds
-    }
-    have h': (∀ (x), 𝓝 (g' x) = if x ∈ t then 𝓝 (f x) else 𝓝 0) := by {
-      unfold g'
-      exact fun x ↦ apply_ite 𝓝 (x ∈ t) (f x) 0
-    }
-    unfold indicator
     constructor
     . intro hx
       rw [h]
