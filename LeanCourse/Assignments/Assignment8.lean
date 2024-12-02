@@ -232,6 +232,31 @@ lemma technical_filter_exercise {ι α : Type*} {p : ι → Prop} {q : Prop} {a 
   · intro h
     rw [@eventually_iff] at *
     rw [@pure_le_iff] at haF hbG
+    simp_all only [ne_eq, eq_iff_iff, iff_true, iff_false, ↓reduceIte]
+    refine eventually_iff.mp ?_
+    let p1 (y : (α) ) : (Prop):= y = b
+    rw [@Subtype.forall'] at h
+    simp_all only [Subtype.forall, p1]
+    specialize h p1
+    rw [Filter.Eventually] at h
+    simp_all only [setOf_eq_eq_singleton, ite_eq_right_iff, imp_false, p1]
+
+    by_cases hq : q = true
+    · subst hq
+      simp_all only [↓reduceIte, iff_true, p1]
+      sorry
+    · have h₁ : ∀ᶠ y in G, p1 y := by{
+      filter_upwards [ haG] with y hy
+      simp [p1]
+      sorry
+      }
+      simp_all only [eq_iff_iff, iff_true, iff_false, ↓reduceIte, p1]
+      apply h
+      exact h₁
+
+
+
+
 
   }
 
@@ -248,6 +273,16 @@ lemma tendsto_indicator_iff {ι : Type*} {L : Filter ι} {s : ι → Set ℝ} {t
     (ha : ∀ x, f x ≠ 0) :
     (∀ x, ∀ᶠ i in L, x ∈ s i ↔ x ∈ t) ↔
     Tendsto (fun i ↦ indicator (s i) f) L (𝓝 (indicator t f)) := by {
+    let f':=(fun i x1 ↦ if x1 ∈ s i then f x1 else 0)
+    let g':=(fun x1 ↦ if x1 ∈ t then f x1 else 0)
+    have h: Tendsto f' L (𝓝 g') ↔ ∀ (x), Tendsto (fun i ↦ f' i x) L (𝓝 (g' x)) := by {
+      exact tendsto_pi_nhds
+    }
+    have h': (∀ (x), 𝓝 (g' x) = if x ∈ t then 𝓝 (f x) else 𝓝 0) := by {
+      unfold g'
+      exact fun x ↦ apply_ite 𝓝 (x ∈ t) (f x) 0
+    }
+    unfold indicator
     constructor
     . intro hx
       rw [h]
