@@ -5,7 +5,7 @@ import Mathlib.Analysis.Calculus.Deriv.Pow
 
 noncomputable section
 open BigOperators Function Set Real Filter Classical Topology TopologicalSpace
-
+-- Pablo Cageao and Sergio Hernando
 
 /-
 
@@ -230,34 +230,22 @@ lemma technical_filter_exercise {ι α : Type*} {p : ι → Prop} {q : Prop} {a 
       apply hbG
       exact hp
   · intro h
-    rw [@eventually_iff] at *
-    rw [@pure_le_iff] at haF hbG
-    simp_all only [ne_eq, eq_iff_iff, iff_true, iff_false, ↓reduceIte]
-    refine eventually_iff.mp ?_
-    let p1 (y : (α) ) : (Prop):= y = b
-    rw [@Subtype.forall'] at h
-    simp_all only [Subtype.forall, p1]
-    specialize h p1
-    rw [Filter.Eventually] at h
-    simp_all only [setOf_eq_eq_singleton, ite_eq_right_iff, imp_false, p1]
-
-    by_cases hq : q = true
-    · subst hq
-      simp_all only [↓reduceIte, iff_true, p1]
-      sorry
-    · have h₁ : ∀ᶠ y in G, p1 y := by{
-      filter_upwards [ haG] with y hy
-      simp [p1]
-      sorry
-      }
-      simp_all only [eq_iff_iff, iff_true, iff_false, ↓reduceIte, p1]
+    simp_all only [ne_eq]
+    split at h
+    next h =>
+      simp_all only [iff_true]
+      apply Filter.Eventually.mono
       apply h
-      exact h₁
-
-
-
-
-
+      exact hbF
+      intro x a_1
+      simp_all only [ite_eq_right_iff, imp_false, Decidable.not_not]
+    next h =>
+      simp_all only [iff_false]
+      apply Filter.Eventually.mono
+      apply h
+      exact haG
+      intro x a_1
+      simp_all only [ite_eq_left_iff, Classical.not_imp, not_false_eq_true]
   }
 
 /- To be more concrete, we can use the previous lemma to prove the following.
