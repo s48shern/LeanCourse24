@@ -83,7 +83,10 @@ example (x : ℝ) : DifferentiableAt ℝ sin x :=
 example (x : ℝ) :
     HasDerivAt (fun x ↦ Real.cos x + Real.sin x)
     (Real.cos x - Real.sin x) x := by {
-  sorry
+  rw [@sub_eq_neg_add]
+  refine HasDerivAt.add ?hf ?hg
+  · exact hasDerivAt_cos x
+  · exact hasDerivAt_sin x
   }
 
 
@@ -198,7 +201,22 @@ normed vector space. -/
 
 example (x : ℝ) : deriv (fun x ↦ ((Real.cos x) ^ 2, (Real.sin x) ^ 2)) x =
     (- 2 * Real.cos x * Real.sin x, 2 * Real.sin x * Real.cos x) := by {
-  sorry
+  apply HasDerivAt.deriv
+  refine HasDerivAt.prod ?h.hf₁ ?h.hf₂
+  · convert HasDerivAt.pow _ _ using 1
+    rotate_right
+    exact hasDerivAt_cos x
+    ring
+    /-   suffices : HasDerivAt (fun x ↦ cos x ^ 2)
+        (2* (cos x) ^ 1 *-sin x ) x
+      · simp at this
+        simp
+        exact this
+      apply HasDerivAt.pow
+      exact hasDerivAt_cos x -/
+  · convert HasDerivAt.pow _ _
+    simp
+    exact hasDerivAt_sin x
   }
 
 
@@ -247,8 +265,11 @@ example (f : E → F) (f' : E →L[𝕜] F) (x₀ : E) (hff' : HasFDerivAt f f' 
 by applying the Fréchet derivative to an argument -/
 example (x y : ℝ) :
     let f := fun ((x,y) : ℝ × ℝ) ↦ x^2 + x * y
-    fderiv ℝ f (x, y) (1, 0) = 2 * x + y := by
-  sorry -- exercise
+    fderiv ℝ f (x, y) (1, 0) = 2 * x + y := by{
+    sorry
+
+
+  }
 
 
 /- We write `ContDiff 𝕜 n f` to say that `f` is `C^n`,
@@ -318,7 +339,12 @@ if we know the antiderivative. -/
 
 example (a b : ℝ) : ∫ x in a..b, exp (x + 3) =
     exp (b + 3) - exp (a + 3) := by {
-  sorry
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt]
+  · intro x hx
+    refine HasDerivAt.comp_add_const x 3 ?hderiv.hf
+    exact Real.hasDerivAt_exp (x + 3)
+  · apply Continuous.intervalIntegrable
+    fun_prop
   }
 
 
@@ -416,7 +442,7 @@ example : BorelSpace ℝ := by infer_instance
 that are Borel measurable up to a null set. -/
 #check NullMeasurableSet
 example {s : Set ℝ} (hs : volume s = 0) : NullMeasurableSet s := by
-  exact?
+  exact NullMeasurableSet.of_null hs
 
 /- The collection of measurable sets on `ℝ`
 is the smallest σ-algebra containing the open sets.
@@ -425,7 +451,9 @@ Remark: `rw` will not rewrite inside a binder
 (like `fun x`, `∃ x`, `∫ x` or `∀ᶠ x`).
 Use `simp_rw`, `simp only` or `unfold` instead. -/
 example : ∀ᵐ x : ℝ, Irrational x := by {
-  sorry
+  unfold Irrational
+  refine Countable.ae_not_mem ?h volume
+  exact countable_range Rat.cast
   }
 
 
@@ -439,7 +467,14 @@ under that map are measurable. -/
 #check Integrable
 
 example : ¬ Integrable (fun x ↦ 1 : ℝ → ℝ) := by {
-  sorry
+  unfold Integrable
+  push_neg
+  intro h1
+  rw [@hasFiniteIntegral_const_iff]
+  push_neg
+  constructor
+  · simp
+  · simp_all only [measure_univ_of_isAddLeftInvariant, le_refl]
   }
 
 

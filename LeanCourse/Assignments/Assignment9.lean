@@ -377,5 +377,24 @@ lemma mono_exercise_part1_copy {f : α → α} (hf : Continuous f) (h2f : Inject
 /- Prove the following using the change of variables theorem. -/
 lemma change_of_variables_exercise (f : ℝ → ℝ) :
     ∫ x in (0)..π, sin x * f (cos x) = ∫ y in (-1)..1, f y := by {
-  sorry
+    let g : ℝ → ℝ := cos
+    let f1 : ℝ → ℝ := -sin
+    have g_deriv : ∀ x ∈ Icc 0 π, HasDerivAt g (-sin x) x := by{
+      intros x hx
+      exact (hasDerivAt_cos x)
+    }
+
+    have g_inj : InjOn g (Icc 0 π) := by exact injOn_cos
+    have g_cont : ContinuousOn g (Icc 0 π) := continuousOn_cos
+    have g_deriv_cont : ContinuousOn f1 (Icc 0 π) := by {
+      simp_all only [mem_Icc, and_imp, continuousOn_neg_iff, g, f1]
+      exact continuousOn_sin
+    }
+    simp_all only [mem_Icc, and_imp, continuousOn_neg_iff, g, f1]
+    calc ∫ x in (0)..π, sin x * f (cos x) = ∫ x in (0)..π, (-(-sin x))*(f (cos x))  := by {simp_all only [neg_neg]}
+    _ = ∫ y in (cos π)..cos 0, f y := by {
+        sorry
+      }
+    _ = ∫ y in (-1)..1, f y := by simp only [neg_neg, cos_pi, cos_zero]
+
   }
