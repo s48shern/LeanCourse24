@@ -373,7 +373,6 @@ lemma mono_exercise_part1_copy {f : α → α} (hf : Continuous f) (h2f : Inject
     exact hc hc'
   }
 
-
 /- Prove the following using the change of variables theorem. -/
 lemma change_of_variables_exercise (f : ℝ → ℝ) :
     ∫ x in (0)..π, sin x * f (cos x) = ∫ y in (-1)..1, f y := by {
@@ -383,7 +382,11 @@ lemma change_of_variables_exercise (f : ℝ → ℝ) :
       intros x hx
       exact (hasDerivAt_cos x)
     }
-
+    have g_deriv': ∀ x ∈ [[0,π]], HasDerivWithinAt g (-sin x) [[0,π]] x := by {
+      intro x hx
+      refine HasDerivAt.hasDerivWithinAt (hasDerivAt_cos x)
+    }
+    have s_measurable: MeasurableSet [[0,π]] := by exact measurableSet_uIcc
     have g_inj : InjOn g (Icc 0 π) := by exact injOn_cos
     have g_cont : ContinuousOn g (Icc 0 π) := continuousOn_cos
     have g_deriv_cont : ContinuousOn f1 (Icc 0 π) := by {
@@ -391,10 +394,22 @@ lemma change_of_variables_exercise (f : ℝ → ℝ) :
       exact continuousOn_sin
     }
     simp_all only [mem_Icc, and_imp, continuousOn_neg_iff, g, f1]
-    calc ∫ x in (0)..π, sin x * f (cos x) = ∫ x in (0)..π, (-(-sin x))*(f (cos x))  := by {simp_all only [neg_neg]}
-    _ = ∫ y in (cos π)..cos 0, f y := by {
-        sorry
+    calc ∫ x in (0)..π, sin x * f (cos x) = ∫ x in [[0, π]], sin x * f (cos x) := by {
+      sorry
+    }
+    _= ∫ x in [[0, π]], (abs (sin x)) * f (cos x) := by{
+      sorry
+    }
+    _ = ∫ y in (cos '' [[0,π]]), f y := by {
+        rw [← uIcc_of_le] at g_inj
+        rw [integral_image_eq_integral_abs_deriv_smul s_measurable g_deriv' g_inj]
+        . simp
+        . exact pi_nonneg
       }
-    _ = ∫ y in (-1)..1, f y := by simp only [neg_neg, cos_pi, cos_zero]
-
+    _ = ∫ y in [[-1,1]], f y := by {
+      sorry
+    }
+    _ = ∫ y in (-1)..1, f y := by {
+      sorry
+    }
   }
