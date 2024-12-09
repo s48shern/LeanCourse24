@@ -331,7 +331,7 @@ lemma mono_exercise_part1_copy {f : α → α} (hf : Continuous f) (h2f : Inject
     have hc: c ∈ f '' [[a, b]] ∩ f '' [[x, b]] := by exact mem_inter hfIab hfIxb
     rw [hint] at hc
     have hc:= h2f (h2f (congrArg f (congrArg f hc)))
-    have hc: ¬ c < f b := by exact not_lt.mpr (le_of_eq (h2f (h2f (congrArg f (congrArg f (id (Eq.symm hc)))))))
+    have hc: ¬ c < f b := by exact Eq.not_lt hc
     exact hc hcb
   . simp at h'
     have hc: ∃c, f x < c ∧ c < f a := by exact exists_between h
@@ -368,11 +368,8 @@ lemma mono_exercise_part1_copy {f : α → α} (hf : Continuous f) (h2f : Inject
     }
     rw [hint] at hc
     have hc:= h2f (h2f (congrArg f (congrArg f hc)))
-    have hc: ¬ c < f b := by {
-    subst hc
-    simp_all only [uIcc_of_le, lt_self_iff_false]}
-    have hc': c < f b:= by exact gt_trans h2ab hca
-    exact hc hc'
+    have hc': ¬ f x < c := by exact Eq.not_gt hc
+    exact hc' hcx
   }
 
 /- Prove the following using the change of variables theorem. -/
