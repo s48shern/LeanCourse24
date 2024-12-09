@@ -13,6 +13,7 @@ noncomputable section
 noncomputable section
 open BigOperators Function Set Real Filter Classical Topology TopologicalSpace
 
+--Pablo Cageao & Sergio Javier Hernando
 
 /-
 * From Mathematics in Lean https://leanprover-community.github.io/mathematics_in_lean
