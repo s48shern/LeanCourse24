@@ -368,7 +368,9 @@ lemma mono_exercise_part1_copy {f : α → α} (hf : Continuous f) (h2f : Inject
     }
     rw [hint] at hc
     have hc:= h2f (h2f (congrArg f (congrArg f hc)))
-    have hc: ¬ c < f b := by exact not_lt.mpr (le_of_eq (h2f (h2f (congrArg f (congrArg f (id (Eq.symm hc)))))))
+    have hc: ¬ c < f b := by {
+    subst hc
+    simp_all only [uIcc_of_le, lt_self_iff_false]}
     have hc': c < f b:= by exact gt_trans h2ab hca
     exact hc hc'
   }
@@ -395,10 +397,40 @@ lemma change_of_variables_exercise (f : ℝ → ℝ) :
     }
     simp_all only [mem_Icc, and_imp, continuousOn_neg_iff, g, f1]
     calc ∫ x in (0)..π, sin x * f (cos x) = ∫ x in [[0, π]], sin x * f (cos x) := by {
-      sorry
+      rw [intervalIntegral.integral_of_le]
+      have hint: [[0, π]] = Icc 0 π := by {
+        refine uIcc_of_le ?h
+        exact pi_nonneg
+      }
+      simp_all only [mem_Icc, and_imp, measurableSet_Icc]
+      exact Eq.symm integral_Icc_eq_integral_Ioc
+      exact pi_nonneg
     }
     _= ∫ x in [[0, π]], (abs (sin x)) * f (cos x) := by{
-      sorry
+      have hpos :  ∀ x : ℝ,  (x ∈ [[0, π]]) → sin x ≥ 0 := by{
+        intro x hx
+        rw [@mem_uIcc] at hx
+        have hx : ( 0 ≤ x ∧ x ≤ π ) := by{ cases hx with
+        | inl h => simp_all only [and_self]
+        | inr h_1 =>{
+          obtain ⟨left, right⟩ := h_1
+          apply And.intro
+          · calc 0 ≤ π := by exact pi_nonneg
+            _ ≤ x := by exact left
+          · calc x ≤ 0 := by exact right
+            _ ≤ π := by exact pi_nonneg}
+        }
+        apply sin_nonneg_of_nonneg_of_le_pi
+        exact hx.1
+        exact hx.2
+      }
+      have habs : ∀ x : ℝ, (x ∈ [[0, π]]) → sin x = abs (sin x)  := by{
+        exact fun x a ↦ Eq.symm (abs_of_nonneg (hpos x a))
+      }
+      apply setIntegral_congr measurableSet_Icc
+      intros x hx
+      rw [@mul_eq_mul_right_iff]
+      exact mul_eq_mul_left_iff.mp (congrArg (HMul.hMul (f (cos x))) (habs x hx))
     }
     _ = ∫ y in (cos '' [[0,π]]), f y := by {
         rw [← uIcc_of_le] at g_inj
@@ -407,9 +439,38 @@ lemma change_of_variables_exercise (f : ℝ → ℝ) :
         . exact pi_nonneg
       }
     _ = ∫ y in [[-1,1]], f y := by {
-      sorry
+      have hint : (cos '' [[0,π]]) = [[-1,1]] := by{
+        ext x
+        constructor
+        · intro h
+          rw [@mem_image] at h
+          obtain ⟨y, hy⟩ := h
+          simp_all only [neg_le_self_iff, zero_le_one, uIcc_of_le, mem_Icc]
+          obtain ⟨left, right⟩ := hy
+          subst right
+          apply And.intro
+          · exact neg_one_le_cos y
+          · exact cos_le_one y
+        · intro h
+          simp_all only [neg_le_self_iff, zero_le_one, uIcc_of_le, mem_Icc, mem_image]
+          obtain ⟨left, right⟩ := h
+          use (arccos x)
+          apply And.intro
+          · rw [@mem_uIcc]
+            have h1 : 0 ≤ arccos x := by exact arccos_nonneg x
+            have h2 : arccos x ≤ π := by exact arccos_le_pi x
+            simp_all only [and_self, true_or]
+          · exact cos_arccos left right
+      }
+      simp_all only [neg_le_self_iff, zero_le_one, uIcc_of_le]
     }
     _ = ∫ y in (-1)..1, f y := by {
-      sorry
+      rw [intervalIntegral.integral_of_le]
+      have hint: [[-1, 1]] = Icc (-1) 1 := by {
+        simp_all only [Int.reduceNeg, neg_le_self_iff, zero_le_one, uIcc_of_le]
+      }
+      simp_all
+      exact integral_Icc_eq_integral_Ioc
+      linarith
     }
   }
