@@ -393,7 +393,8 @@ lemma change_of_variables_exercise (f : ℝ → ℝ) :
       have hpos :  ∀ x : ℝ,  (x ∈ [[0, π]]) → sin x ≥ 0 := by{
         intro x hx
         rw [@mem_uIcc] at hx
-        have hx : ( 0 ≤ x ∧ x ≤ π ) := by{ cases hx with
+        have hx : ( 0 ≤ x ∧ x ≤ π ) := by{
+        cases hx with
         | inl h => simp_all only [and_self]
         | inr h_1 =>{
           obtain ⟨left, right⟩ := h_1

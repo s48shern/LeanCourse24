@@ -69,6 +69,9 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (s
         simp at hnot
         obtain ⟨p, hp, hd⟩:=hnot
         have hd: ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ xgcd p n' = 1 := by {
+          rename_i h_1
+          simp_all only [not_false_eq_true, gt_iff_lt, and_self, implies_true, true_and, ge_iff_le, exists_and_left]
+          obtain ⟨left, right⟩ := h_1
           sorry
         }
         obtain ⟨k, n', hk, hpk, hpn⟩:=hd
