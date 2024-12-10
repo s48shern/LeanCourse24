@@ -5,8 +5,9 @@ open Classical
 --open Nat.Squarefree
 
 --We can take a in ℕ for the condition fermat as n is always odd
-lemma carmichael_prop_is_odd (n : ℕ): n > 2 → (∀ (a : ℤ), (Int.gcd a n = 1 → (n:ℤ) ∣ a ^ (n - 1) - 1 )) → ¬ 2 ∣ n := by {
-  intro h2 ha
+lemma carmichael_prop_is_odd (n : ℕ): n > 2 ∧ (∀ (a : ℤ), (Int.gcd a n = 1 → (n:ℤ) ∣ a ^ (n - 1) - 1 )) → ¬ 2 ∣ n := by {
+  intro h2
+  obtain ⟨h2, ha⟩:= h2
   specialize ha (n-1)
   have h: (n-1: ℤ).gcd (n) = 1 := by {
     have hh: (n-1:ℤ) = (n-1:ℕ) := by{
@@ -47,6 +48,7 @@ lemma carmichael_prop_is_odd (n : ℕ): n > 2 → (∀ (a : ℤ), (Int.gcd a n =
   have hend: ¬ n>2 := by exact Eq.not_gt hend
   exact hend h2
 }
+
 
 structure Carmichael where
   n: ℕ
