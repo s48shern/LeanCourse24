@@ -29,19 +29,43 @@ def myFirstLocalHomeo : PartialHomeomorph ℝ ℝ where
   toFun := fun x ↦ -x
   invFun := fun x ↦ -x
   source := Ioo (-1) 1
-  target := sorry
-  map_source' := by
-    sorry
+  target := Ioo (-1) 1
+  map_source' := by{
+    intro x a
+    simp_all only [mem_Ioo, neg_lt_neg_iff, true_and]
+    obtain ⟨left, right⟩ := a
+    rw [@neg_lt] at left
+    exact left}
   map_target' := by
-    sorry
+    {
+      intro x a
+      simp_all only [mem_Ioo, neg_lt_neg_iff, true_and]
+      obtain ⟨left, right⟩ := a
+      rw [@neg_lt] at left
+      exact left
+    }
   left_inv' := by
-    sorry
+    {
+      intro x a
+      simp_all only [mem_Ioo, neg_neg]
+    }
   right_inv' := by
-    sorry
-  open_source := sorry
-  open_target := sorry
-  continuousOn_toFun := sorry
-  continuousOn_invFun := sorry
+    {
+      intro x a
+      simp_all only [mem_Ioo, neg_neg]}
+  open_source :=by {
+  simp_all only
+  exact isOpen_Ioo
+  }
+  open_target := by {
+  simp_all only
+  exact isOpen_Ioo
+  }
+  continuousOn_toFun := by{
+    simp_all only
+    exact continuousOn_neg
+  }
+  continuousOn_invFun := by simp_all only; exact continuousOn_neg
 
 /-!
 ### Smooth functions on `[0, 1]`
@@ -63,17 +87,50 @@ def g : I → ℝ := Subtype.val
 
 -- this is the charted space structure on `I`
 #check IccManifold
+#check contMDiff_iff
 
 /- You might want to use `contMDiff_iff` and unfold the definition of
 `modelWithCornersEuclideanHalfSpace` (and some other functions) in the proof. -/
 
 example : ContMDiff (𝓡∂ 1) 𝓘(ℝ) ∞ g := by {
-  sorry
+    refine contMDiff_iff.mpr ?_
+    simp_all
+    apply And.intro
+    · exact continuous_iff_le_induced.mpr fun U a ↦ a
+    · intro a b
+      obtain ⟨left, right⟩ := b
+      split
+      next h => sorry
+      next h =>
+        simp_all only [not_lt]
+        sorry
+
   }
 
 lemma msmooth_of_smooth {f : ℝ → I} {s : Set ℝ} (h : ContDiffOn ℝ ∞ (fun x ↦ (f x : ℝ)) s) :
   ContMDiffOn 𝓘(ℝ) (𝓡∂ 1) ∞ f s := by {
-  sorry
+  refine contMDiffOn_iff_target.mpr ?_
+  constructor
+  · refine ContinuousAt.continuousOn ?left.hcont
+    intro x a
+    refine Continuous.continuousAt ?left.hcont.h
+    unfold ContDiffOn at h
+    have h := h x a
+    unfold ContDiffWithinAt at h
+    sorry
+
+  · intro y
+    simp_all only [extChartAt, PartialHomeomorph.extend, chartAt_unitInterval, coe_lt_one, PartialEquiv.coe_trans,
+    ModelWithCorners.toPartialEquiv_coe, PartialHomeomorph.toFun_eq_coe, PartialEquiv.trans_source,
+    ModelWithCorners.source_eq, preimage_univ, inter_univ]
+    obtain ⟨val, property⟩ := y
+    split
+    next h_1 =>
+      rw [@contMDiffOn_iff_contDiffOn]
+      sorry
+    next h_1 =>
+      simp_all only [not_lt]
+      sorry
   }
 
 /-! # No exercises to hand-in. -/
