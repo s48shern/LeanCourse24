@@ -5,7 +5,7 @@ open Classical
 --open Nat.Squarefree
 
 --We can take a in ℕ for the condition fermat as n is always odd
-lemma carmichael_prop_is_odd (n : ℕ): n > 2 ∧ (∀ (a : ℤ), (Int.gcd a n = 1 → (n:ℤ) ∣ a ^ (n - 1) - 1 )) → ¬ 2 ∣ n := by {
+lemma weak_carmichael_is_odd (n : ℕ): n > 2 ∧ (∀ (a : ℤ), (Int.gcd a n = 1 → (n:ℤ) ∣ a ^ (n - 1) - 1 )) → ¬ 2 ∣ n := by {
   intro h2
   obtain ⟨h2, ha⟩:= h2
   specialize ha (n-1)
@@ -57,16 +57,15 @@ structure Carmichael where
   fermat: ∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1
 
 def isCarmichael (n : ℕ):= ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
-def squarefree (n : ℕ) := ∀ (x : ℕ), Nat.Prime x → ¬x * x ∣ n
 
-theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1) ∣ (n-1))) :=
+theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1) ∣ (n-1))) :=
   by {
     constructor
     . intro h
       rw [isCarmichael] at h
       have h:= h.2.1
-      have hsq: squarefree n := by{
-        rw [squarefree]
+      have hsq: Squarefree n := by{
+        rw [Squarefree]
         by_contra hnot
         simp at hnot
         obtain ⟨p, hp, hd⟩:=hnot
@@ -94,10 +93,47 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (s
         . exact hp.2
   }
 
-lemma Korselts_criterion' (k: ℕ) : k>0 ∧ Nat.Prime (6*k + 1) ∧ Nat.Prime (12*k+1) ∧  Nat.Prime (18*k+1) →
-  ∀ (a : ℕ), xgcd a ((6*k + 1)*(12*k+1)*(18*k+1)) = 1 → ((6*k + 1)*(12*k+1)*(18*k+1)) ∣ a^(((6*k + 1)*(12*k+1)*(18*k+1))-1)-1 := by sorry
+lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧ (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1) → isCarmichael (p0 * p1 * p2) := by {
+  rintro ⟨hp0, hp1, hp2, k, hk, hkp0, hkp1, hkp2⟩
+  have hp0g: p0>1 := by exact Prime.one_lt hp0
+  have hp1g: p1>1 := by exact Prime.one_lt hp1
+  have hp2g: p2>1 := by exact Prime.one_lt hp2
+  have hp01g: p0*p1 > 1:= by exact Right.one_lt_mul' hp0g hp1g
+  rw [Korselt]
+  constructor
+  . refine Nat.squarefree_mul_iff.mpr ?intro.intro.intro.intro.intro.intro.intro.left.a
+    constructor
+    refine coprime_mul_iff_left.mpr ?intro.intro.intro.intro.intro.intro.intro.left.a.left.a
+    constructor
+    have hint: ¬ p0 ∣ p2 := by {
+      sorry
+    }
+    exact (Nat.Prime.coprime_iff_not_dvd hp0).mpr hint
+    have hint: ¬ p1 ∣ p2 := by {
+      sorry
+    }
+    exact (Nat.Prime.coprime_iff_not_dvd hp1).mpr hint
+    constructor
+    refine Nat.squarefree_mul_iff.mpr ?intro.intro.intro.intro.intro.intro.intro.left.a.right.left.a
+    constructor
+    have hint: ¬ p0 ∣ p1 := by {
+      sorry
+    }
+    exact (Nat.Prime.coprime_iff_not_dvd hp0).mpr hint
+    constructor
+    exact Irreducible.squarefree hp0
+    exact Irreducible.squarefree hp1
+    exact Irreducible.squarefree hp2
+  intro p hp hpp
+  sorry
+  constructor
+  refine not_prime_mul ?intro.intro.intro.intro.intro.intro.intro.hp.left.a1 ?intro.intro.intro.intro.intro.intro.intro.hp.left.b1
+  sorry
+  sorry
+  exact Right.one_lt_mul' hp01g hp2g
+}
 
-@[simp] lemma isCarmichael' (n: ℕ): isCarmichael (n : ℕ) ↔ ¬ Nat.Prime n ∧ ∀ (a : ℕ), n ∣ a^(n-1)-1 := by sorry
+@[simp] lemma isCarmichael' (n: ℕ): isCarmichael n ↔ ¬ Nat.Prime n ∧ ∀ (a : ℕ), n ∣ a^(n-1)-1 := by sorry
 
 theorem carmichael_properties (k: ℕ) : isCarmichael k → ¬ 2 ∣ k ∧
   (∃ p1, ∃ p2, ∃ p3, Nat.Prime p1 ∧ p1 ∣ k ∧ Nat.Prime p2 ∧ p2 ∣ k ∧ Nat.Prime p3 ∧ p3 ∣ k ∧ ¬ p1=p2 ∧ ¬ p1=p3 ∧ ¬ p2=p3) ∧
