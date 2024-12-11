@@ -106,18 +106,24 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     refine coprime_mul_iff_left.mpr ?intro.intro.intro.intro.intro.intro.intro.left.a.left.a
     constructor
     have hint: ¬ p0 ∣ p2 := by {
-      sorry
+      rw [@prime_def_lt'] at hp2
+      have hint: p0 < p2 := by linarith
+      exact hp2.2 p0 hp0g hint
     }
     exact (Nat.Prime.coprime_iff_not_dvd hp0).mpr hint
     have hint: ¬ p1 ∣ p2 := by {
-      sorry
+      rw [@prime_def_lt'] at hp2
+      have hint: p1 < p2 := by linarith
+      exact hp2.2 p1 hp1g hint
     }
     exact (Nat.Prime.coprime_iff_not_dvd hp1).mpr hint
     constructor
     refine Nat.squarefree_mul_iff.mpr ?intro.intro.intro.intro.intro.intro.intro.left.a.right.left.a
     constructor
     have hint: ¬ p0 ∣ p1 := by {
-      sorry
+      rw [@prime_def_lt'] at hp1
+      have hint: p0 < p1 := by linarith
+      exact hp1.2 p0 hp0g hint
     }
     exact (Nat.Prime.coprime_iff_not_dvd hp0).mpr hint
     constructor
@@ -125,11 +131,56 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     exact Irreducible.squarefree hp1
     exact Irreducible.squarefree hp2
   intro p hp hpp
-  sorry
+  have hp2: p=p0 ∨ p=p1 ∨ p=p2:= by{
+    by_contra hcont
+    simp at hcont
+    rw [propext (Prime.dvd_iff_not_coprime hp)] at hpp
+    rw [@coprime_mul_iff_right] at hpp
+    rw [@coprime_mul_iff_right] at hpp
+    simp at hpp
+    have hpp0: p.Coprime p0:= by {
+      have hint: ¬ p ∣ p0 := by {
+        rw [@prime_def_lt'] at hp0
+        by_cases hc: p < p0
+        exact hp0.2 p (Prime.two_le hp) hc
+        simp at hc
+        exact not_dvd_of_pos_of_lt (zero_lt_of_lt hp0g) (Nat.lt_of_le_of_ne hc (Ne.symm hcont.1))
+      }
+      exact (Nat.Prime.coprime_iff_not_dvd hp).mpr hint
+    }
+    have hpp1: p.Coprime p1:= by {
+      have hint: ¬ p ∣ p1 := by {
+        rw [@prime_def_lt'] at hp1
+        by_cases hc: p < p1
+        exact hp1.2 p (Prime.two_le hp) hc
+        simp at hc
+        exact not_dvd_of_pos_of_lt (zero_lt_of_lt hp1g) (Nat.lt_of_le_of_ne hc (Ne.symm hcont.2.1))
+      }
+      exact (Nat.Prime.coprime_iff_not_dvd hp).mpr hint
+    }
+    have hpp2: p.Coprime p2:= by {
+      have hint: ¬ p ∣ p2 := by {
+        rw [@prime_def_lt'] at hp2
+        by_cases hc: p < p2
+        exact hp2.2 p (Prime.two_le hp) hc
+        simp at hc
+        exact not_dvd_of_pos_of_lt (zero_lt_of_lt hp2g) (Nat.lt_of_le_of_ne hc (Ne.symm hcont.2.2))
+      }
+      exact (Nat.Prime.coprime_iff_not_dvd hp).mpr hint
+    }
+    exact ((hpp hpp0 hpp1) hpp2)
+  }
+  obtain hp|hp|hp:= hp2
+  . rw [hp]
+    sorry
+  . rw [hp]
+    sorry
+  . rw [hp]
+    sorry
   constructor
   refine not_prime_mul ?intro.intro.intro.intro.intro.intro.intro.hp.left.a1 ?intro.intro.intro.intro.intro.intro.intro.hp.left.b1
-  sorry
-  sorry
+  exact Ne.symm (Nat.ne_of_lt hp01g)
+  exact Ne.symm (Nat.ne_of_lt hp2g)
   exact Right.one_lt_mul' hp01g hp2g
 }
 
