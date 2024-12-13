@@ -187,21 +187,60 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
       }
       refine Int.ModEq.add ?_ ?_
       . simp
-        calc k * 30 ≡ k*(6*5) [ZMOD 6*k] := by rfl
-        _ ≡ 6*k*5 [ZMOD 6*k] := by ring_nf; trivial
+        calc k * 30 ≡ 6*k*5 [ZMOD 6*k] := by ring_nf; trivial
         _ ≡ 0*5 [ZMOD 6*k] := Int.ModEq.mul_right 5 hi
         _ ≡ 0 [ZMOD 6*k] := by rfl
       . simp
-        calc k^2 * 216 ≡ k^2*(6*36) [ZMOD 6*k] := by rfl
-        _ ≡ k*k*(6*36) [ZMOD 6*k] := by ring_nf; trivial
-        _ ≡ 6*k*(36*k) [ZMOD 6*k] := by ring_nf; trivial
+        calc k^2 * 216 ≡ 6*k*(36*k) [ZMOD 6*k] := by ring_nf; trivial
         _ ≡ 0*(36*k) [ZMOD 6*k] := Int.ModEq.mul_right (36*k) hi
         _ ≡ 0 [ZMOD 6*k] := by ring_nf; trivial
     }
   . rw [hp]
-    sorry
+    rw [← Int.modEq_zero_iff_dvd]
+    calc p0 * p1 * p2 - 1 ≡ p0 * 1 * p2 - 1 [ZMOD p1 - 1] := by {
+      refine Int.ModEq.sub_right 1 ?_
+      refine Int.ModEq.mul_right p2 ?_
+      exact Int.ModEq.mul_left p0 (Int.modEq_sub p1 1)
+    }
+    _ ≡ k * 24 + k ^ 2 * 108 [ZMOD p1 - 1] := by rw [hkp0, hkp2]; push_cast; ring_nf; trivial
+    _ ≡ 0 + 0 [ZMOD p1 - 1] := by {
+      rw [hkp1]
+      have hi: 12 * k ≡ 0 [ZMOD 12 * k] := by{
+        refine Dvd.dvd.modEq_zero_int ?_
+        trivial
+      }
+      refine Int.ModEq.add ?_ ?_
+      . simp
+        calc k * 24 ≡ 6*k*4 [ZMOD 12*k] := by ring_nf; trivial
+        _ ≡ 0*4 [ZMOD 12*k] := Int.ModEq.mul_right 4 hi
+        _ ≡ 0 [ZMOD 12*k] := by rfl
+      . simp
+        calc k^2 * 108 ≡ 12*k*(9*k) [ZMOD 12*k] := by ring_nf; trivial
+        _ ≡ 0*(9*k) [ZMOD 12*k] := Int.ModEq.mul_right (9*k) hi
+        _ ≡ 0 [ZMOD 12*k] := by ring_nf; trivial
+    }
   . rw [hp]
-    sorry
+    rw [← Int.modEq_zero_iff_dvd]
+    calc p0 * p1 * p2 - 1 ≡ p0 * p1 * 1 - 1 [ZMOD p2 - 1] := by {
+      refine Int.ModEq.sub_right 1 ?_
+      refine Int.ModEq.mul_left (p0*p1) (Int.modEq_sub p2 1)
+    }
+    _ ≡ k * 18 + k ^ 2 * 72 [ZMOD p2 - 1] := by rw [hkp0, hkp1]; push_cast; ring_nf; trivial
+    _ ≡ 0 + 0 [ZMOD p2 - 1] := by {
+      rw [hkp2]
+      have hi: k*18 ≡ 0 [ZMOD k*18] := by{
+        refine Dvd.dvd.modEq_zero_int ?_
+        trivial
+      }
+      refine Int.ModEq.add ?_ ?_
+      . simp
+        ring_nf; exact hi
+      . ring_nf
+        simp
+        calc k^2 * 72 ≡ k*18*(4*k) [ZMOD k*18] := by ring_nf; trivial
+        _ ≡ 0*(4*k) [ZMOD k*18] := Int.ModEq.mul_right (4*k) hi
+        _ ≡ 0 [ZMOD k*18] := by ring_nf; trivial
+    }
   constructor
   refine not_prime_mul ?intro.intro.intro.intro.intro.intro.intro.hp.left.a1 ?intro.intro.intro.intro.intro.intro.intro.hp.left.b1
   exact Ne.symm (Nat.ne_of_lt hp01g)
