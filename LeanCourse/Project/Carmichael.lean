@@ -259,8 +259,8 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
       }
       refine Int.ModEq.add ?_ ?_
       . simp
-        calc k * 24 ≡ 6*k*4 [ZMOD 12*k] := by ring_nf; trivial
-        _ ≡ 0*4 [ZMOD 12*k] := Int.ModEq.mul_right 4 hi
+        calc k * 24 ≡ 12*k*2 [ZMOD 12*k] := by ring_nf; trivial
+        _ ≡ 0*2 [ZMOD 12*k] := Int.ModEq.mul_right 2 hi
         _ ≡ 0 [ZMOD 12*k] := by rfl
       . simp
         calc k^2 * 108 ≡ 12*k*(9*k) [ZMOD 12*k] := by ring_nf; trivial
@@ -303,14 +303,15 @@ theorem carmichael_properties (k: ℕ) : isCarmichael k → ¬ 2 ∣ k ∧
   ∀ p, Nat.Prime p ∧ p ∣ k → p < Nat.sqrt k := by {
     intro h
     constructor
-    . apply carmichael_prop_is_odd
+    . apply weak_carmichael_is_odd
       . by_cases h': k=2
         . absurd h.1
           rw [h']
           trivial
-        . have h:=h.2.2
-          exact Nat.lt_of_le_of_ne h fun a ↦ h' (_root_.id (Eq.symm a))
-      . exact h.2.1
+        . have h'':=h.2.2
+          constructor
+          . exact Nat.lt_of_le_of_ne h'' fun a ↦ h' (_root_.id (Eq.symm a))
+          . exact h.2.1
     . constructor
       . sorry
       . intro p hp
