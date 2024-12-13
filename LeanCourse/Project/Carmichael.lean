@@ -57,7 +57,7 @@ structure Carmichael where
   fermat: ∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1
 
 def isCarmichael (n : ℕ):= ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
-
+#leansearch "prime maximum power divisor."
 theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
@@ -65,15 +65,63 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
       rw [isCarmichael] at h
       have h:= h.2.1
       have hsq: Squarefree n := by{
-        rw [Squarefree]
+        rw [@squarefree_iff_prime_squarefree]
         by_contra hnot
         simp at hnot
         obtain ⟨p, hp, hd⟩:=hnot
-        have hd: ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ xgcd p n' = 1 := by {
+        have hd: ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ Nat.gcd p n' = 1 := by {
           rename_i h_1
           simp_all only [not_false_eq_true, gt_iff_lt, and_self, implies_true, true_and, ge_iff_le, exists_and_left]
           obtain ⟨left, right⟩ := h_1
-          sorry
+          obtain ⟨m, hn⟩ := hd
+          use p.maxPowDiv m + 2
+          constructor
+          · linarith
+          · use m /  (p ^ (p.maxPowDiv m))
+            constructor
+            · calc p ^ (p.maxPowDiv m + 2) * (m /  (p ^ (p.maxPowDiv m))) = (p ^ (p.maxPowDiv m) * p ^ 2) * (m /  (p ^ (p.maxPowDiv m))) := by ring_nf
+              _ = p ^ 2 * p ^ p.maxPowDiv m * m /  (p ^ (p.maxPowDiv m)):= by {
+                rw [@npow_mul_comm]
+                refine Eq.symm (Nat.mul_div_assoc (p ^ 2 * p ^ p.maxPowDiv m) ?H)
+                exact maxPowDiv.pow_dvd p m
+              }
+              _ = p ^ 2 * m * p ^ p.maxPowDiv m  /  (p ^ (p.maxPowDiv m))  := by rw [Nat.mul_right_comm]
+              _ = p^2 *m* 1 := by {
+                simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
+                have h : m ≠ 0 := by {
+                  simp_all only [ne_eq]
+                  intro a
+                  subst a
+                  simp_all only [CharP.cast_eq_zero, mul_zero, Int.gcd_zero_right, _root_.zero_le, tsub_eq_zero_of_le,
+                    pow_zero, sub_self, dvd_refl, implies_true, not_lt_zero']
+                }
+                simp_all only [ne_eq, or_false]
+                ring_nf
+                have h: p > 0 := by {simp_all only [gt_iff_lt]; exact Nat.Prime.pos hp}
+                refine Nat.div_eq_of_eq_mul_left ?H1 ?H2
+                exact Nat.pos_pow_of_pos (p.maxPowDiv m) h
+                exact Nat.mul_right_comm (p ^ 2) (p ^ p.maxPowDiv m) m
+                }
+              _ = n := by{
+              subst hn
+              simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
+              have h: p ^2 = p*p := by ring_nf
+              simp_all only [true_or]
+              }
+            · refine Eq.symm (Nat.gcd_greatest ?h.right.hda ?h.right.hdb ?h.right.hd)
+              · exact Nat.one_dvd p
+              · exact Nat.one_dvd (m / p ^ p.maxPowDiv m)
+              · intro x ha1 ha2
+                rw [@dvd_one]
+                rw [propext (dvd_prime hp)] at ha1
+                by_contra h
+                have h : x = p := by simp_all only [false_or, Nat.cast_mul]
+                rw [h] at ha2
+                obtain ⟨k, hn⟩ := ha2
+
+
+
+
         }
         obtain ⟨k, n', hk, hpk, hpn⟩:=hd
         --have hcong: ∃ a, a ≅ 1+p (mod p^k)
