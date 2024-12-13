@@ -58,7 +58,7 @@ structure Carmichael where
 
 def isCarmichael (n : ℕ):= ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
 
-theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1) ∣ (n-1))) :=
+theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
     . intro h
@@ -172,7 +172,32 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
   }
   obtain hp|hp|hp:= hp2
   . rw [hp]
-    sorry
+    rw [← Int.modEq_zero_iff_dvd]
+    calc p0 * p1 * p2 - 1 ≡ 1 * p1 * p2 - 1 [ZMOD p0 - 1] := by {
+      refine Int.ModEq.sub ?h₁ rfl
+      refine Int.ModEq.mul ?_ rfl
+      exact Int.ModEq.mul_right p1 (Int.modEq_sub p0 1)
+    }
+    _ ≡ k * 30 + k ^ 2 * 216 [ZMOD p0 - 1] := by rw [hkp1, hkp2]; push_cast; ring_nf; trivial
+    _ ≡ 0 + 0 [ZMOD p0 - 1] := by {
+      rw [hkp0]
+      have hi: 6 * k ≡ 0 [ZMOD 6 * k] := by{
+        refine Dvd.dvd.modEq_zero_int ?_
+        trivial
+      }
+      refine Int.ModEq.add ?_ ?_
+      . simp
+        calc k * 30 ≡ k*(6*5) [ZMOD 6*k] := by rfl
+        _ ≡ 6*k*5 [ZMOD 6*k] := by ring_nf; trivial
+        _ ≡ 0*5 [ZMOD 6*k] := Int.ModEq.mul_right 5 hi
+        _ ≡ 0 [ZMOD 6*k] := by rfl
+      . simp
+        calc k^2 * 216 ≡ k^2*(6*36) [ZMOD 6*k] := by rfl
+        _ ≡ k*k*(6*36) [ZMOD 6*k] := by ring_nf; trivial
+        _ ≡ 6*k*(36*k) [ZMOD 6*k] := by ring_nf; trivial
+        _ ≡ 0*(36*k) [ZMOD 6*k] := Int.ModEq.mul_right (36*k) hi
+        _ ≡ 0 [ZMOD 6*k] := by ring_nf; trivial
+    }
   . rw [hp]
     sorry
   . rw [hp]
