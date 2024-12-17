@@ -57,20 +57,20 @@ structure Carmichael where
   fermat: ∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1
 
 def isCarmichael (n : ℕ):= ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
-#leansearch "prime maximum power divisor."
+#check Nat.chineseRemainder
 theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
     . intro h
       rw [isCarmichael] at h
       have h:= h.2.1
+      rename_i h_1
       have hsq: Squarefree n := by{
         rw [@squarefree_iff_prime_squarefree]
         by_contra hnot
         simp at hnot
         obtain ⟨p, hp, hd⟩:=hnot
         have hd: ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ Nat.gcd p n' = 1 := by {
-          rename_i h_1
           simp_all only [not_false_eq_true, gt_iff_lt, and_self, implies_true, true_and, ge_iff_le, exists_and_left]
           obtain ⟨left, right⟩ := h_1
           obtain ⟨m, hn⟩ := hd
@@ -117,20 +117,94 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
                 by_contra h
                 have h : x = p := by simp_all only [false_or, Nat.cast_mul]
                 rw [h] at ha2
-                obtain ⟨k, hn⟩ := ha2
+                norm_num
+                have hdiv : p ^ (p.maxPowDiv m+1) ∣ m := by {
+                  obtain ⟨n, hn ⟩ := ha2
+                  have hdiv : m = p^(p.maxPowDiv m+1)*n := by {
+                    calc m = p^(p.maxPowDiv m)* p*n := by {
+                      rw [Nat.div_eq_iff_eq_mul_left] at hn
+                      · ring_nf;
+                        linarith
+                      · refine Nat.pow_pos ?H.h
+                        exact Prime.pos hp
+                      · exact maxPowDiv.pow_dvd p m
+                    }
+                    _ = p^(p.maxPowDiv m+1) *n := by {
+                    simp_all only [or_true, Nat.cast_mul, _root_.mul_eq_mul_right_iff]
+                    apply Or.inl
+                    rfl}
+                  }
+                  exact Dvd.intro n (_root_.id (Eq.symm hdiv))
+                }
 
+                have hcontra : p.maxPowDiv m+1 ≤ p.maxPowDiv m := by {
+                  apply Nat.maxPowDiv.le_of_dvd
+                  · exact Prime.one_lt hp
+                  · by_contra hc
+                    push_neg at hc
+                    have hc : m = 0 := by exact eq_zero_of_le_zero hc
+                    rw [hc] at hn
+                    have hn : n = 0 := by exact hn
+                    linarith
+                  · exact hdiv
 
+                }
+                linarith
+        }
+        have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
 
+        obtain ⟨k, n', hk, hpk, hpn⟩:=hd
+        have hcong: ∃ (a : ℕ), a ≡ 1 + p [MOD p^k] ∧  a ≡ 1 [MOD n']:= by{
+          have hcop: (p^k).Coprime n' := by exact Coprime.pow_left k hpn
+          obtain ⟨a, ha⟩ := Nat.chineseRemainder hcop (1 + p) 1
+          use a
+        }
+        obtain ⟨a, ha⟩ := hcong
+        have hgcd : a.gcd ↑n = 1 := by {
+          sorry
+        }
+        specialize h a
+        have h := h hgcd
+        have hcarm : a ^ (n-1) ≡ 1 [MOD n] := by {
+          refine Nat.ModEq.symm (Nat.modEq_of_dvd ?_)
+          subst hpk
+          simp_all only [ge_iff_le, not_false_eq_true, gt_iff_lt, and_self, Nat.cast_mul, Nat.cast_pow, implies_true,
+            Nat.cast_one]
+        }
+        have hred : (1+ p)^(n-1) ≡ 1 [MOD p^2] := by sorry
+        have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
+
+          have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
+            rw [add_pow];
+            simp [hobvious]
+          }
+          rw [haux]
+          #check Finset.sum_range_succ
+          let m1 := n-1
+          have hprob: n = m1+1 := by linarith
+          rw [hprob]
+          rw [Finset.sum_range_succ]
+          simp
+          let m2:= m1-1
+          have hprob: m1= m2+1 := by refine Eq.symm (Nat.sub_add_cancel ?h); exact?
 
         }
-        obtain ⟨k, n', hk, hpk, hpn⟩:=hd
-        --have hcong: ∃ a, a ≅ 1+p (mod p^k)
-        sorry
       }
       constructor
       . exact hsq
       . intro p hpp hpn
+        have h2 : Nat.gcd p n = p := Nat.gcd_eq_left hpn
+
+        have h3 : ¬p ^ 2 ∣ n := by{
+          intro hcontra
+          rw [@squarefree_iff_prime_squarefree] at hsq
+          specialize hsq p
+          have hsq := hsq hpp
+          ring_nf at hsq
+          contradiction
+        }
         sorry
+
     . intro h
       rw [isCarmichael]
       constructor
@@ -140,7 +214,7 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
           sorry
         . exact hp.2
   }
-
+#leansearch "binomial expansion first coefficient."
 lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧ (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1) → isCarmichael (p0 * p1 * p2) := by {
   rintro ⟨hp0, hp1, hp2, k, hk, hkp0, hkp1, hkp2⟩
   have hp0g: p0>1 := by exact Prime.one_lt hp0
@@ -311,7 +385,7 @@ theorem carmichael_properties (k: ℕ) : isCarmichael k → ¬ 2 ∣ k ∧
         . have h'':=h.2.2
           constructor
           . exact Nat.lt_of_le_of_ne h'' fun a ↦ h' (_root_.id (Eq.symm a))
-          . exact h.2.1
+      . exact h.2.1
     . constructor
       . sorry
       . intro p hp
