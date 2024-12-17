@@ -232,13 +232,11 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
             specialize hpa p hp1
             have h:= h.2 p hp1
             have hf: (p-1:ℤ) = (p-1:ℕ) := by {
-              refine Eq.symm (Int.natCast_pred_of_pos ?_)
-              sorry
+              exact Eq.symm (Int.natCast_pred_of_pos (Prime.pos hp1.1))
             }
             rw [hf] at h
             have hf: (n-1:ℤ) = (n-1:ℕ) := by {
-              refine Eq.symm (Int.natCast_pred_of_pos ?_)
-              sorry
+              exact Eq.symm (Int.natCast_pred_of_pos (zero_lt_of_lt hp.2))
             }
             rw [hf] at h
             norm_cast at h
