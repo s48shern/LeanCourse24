@@ -57,8 +57,8 @@ structure Carmichael where
   fermat: ∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1
 
 def isCarmichael (n : ℕ):= ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
-#check Nat.chineseRemainder
-theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
+
+theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
     . intro h
@@ -179,16 +179,62 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
             simp [hobvious]
           }
           rw [haux]
-          #check Finset.sum_range_succ
           let m1 := n-1
           have hprob: n = m1+1 := by linarith
           rw [hprob]
           rw [Finset.sum_range_succ]
           simp
-          let m2:= m1-1
-          have hprob: m1= m2+1 := by refine Eq.symm (Nat.sub_add_cancel ?h); exact?
 
+          let m2:= m1-1
+          have hprob2: m1= m2+1 := by {
+            refine Eq.symm (Nat.sub_add_cancel ?h);
+            linarith
+          }
+          rw [hprob2]
+          rw [Finset.sum_range_succ]
+          simp
+          have haux : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by {
+            calc p * (m2 + 1) + 1 ≡ (m2 + 1)* p + 1 [MOD p ^ 2] := by apply Nat.ModEq.add_right 1 ; ring_nf; rfl
+            _ ≡ 1 + (m2 + 1)* p [MOD p ^ 2] := by {
+              norm_num
+              norm_cast
+              apply Nat.modEq_of_dvd
+              have h0 : ↑(1 + (m2 + 1) * p) - ↑((m2 + 1) * p + 1) = 0 := by {
+                calc 1 + (m2 + 1) * p - ((m2 + 1) * p + 1) = 1 + (m2 + 1) * p - (m2 + 1) * p - 1 := by rfl
+                _ = (m2 + 1) * p - (m2 + 1) * p:= by simp
+                _ = 0 := by norm_num
+              }
+              sorry
+
+            }
+          }
+          rw[hprob2] at hprob;
+          have hprob : m2 = n-2 := by{exact rfl}
+          have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡ 0 [MOD p^2] := by{
+            calc  ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡  ∑ x ∈ Finset.range (n-2), p ^ (n-2 + 1 - x) * (n-2 + 1).choose x [MOD p^2]:= by rw [hprob]
+
+            _ ≡ 0 [MOD p^2] := by sorry
+          }
+          calc ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x + p * (m2 + 1) + 1 ≡ p * (m2 + 1) + 1  [MOD p^2]:= by {
+            apply Nat.ModEq.add_right 1
+            sorry
+
+          }
+          _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
         }
+        have hdiv : 1 + (n-1)*p ≡ 1 - p[MOD p^2] := by{
+          calc 1 + (n-1)*p ≡ 1 + n * p - p [MOD p^2] := by sorry
+          _ ≡ 1 + 0 * p - p [MOD p^2] := by rw [← Nat.pow_two] at hd; sorry
+          _ ≡ 1 - p [MOD p^2] := by sorry
+        }
+        have hcontra : 1 ≡ 1-p [MOD p^2 ]:= by sorry
+        have hdiv : p ≡ 0 [MOD p^2 ]:=by sorry
+        rw [Nat.modEq_zero_iff_dvd] at hdiv
+        have h1 : 1 < p := by exact Prime.one_lt hp
+        have h2 : 1 < 2 := by linarith
+        apply Nat.not_pos_pow_dvd h1 h2
+        exact hdiv
+
       }
       constructor
       . exact hsq
