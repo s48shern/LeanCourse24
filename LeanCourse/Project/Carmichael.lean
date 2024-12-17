@@ -57,8 +57,8 @@ structure Carmichael where
   fermat: ∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1
 
 def isCarmichael (n : ℕ):= ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
-#leansearch "prime maximum power divisor."
-theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
+
+theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
     . intro h
@@ -129,14 +129,55 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
       }
       constructor
       . exact hsq
-      . intro p hpp hpn
+      . intro p hpp
+        have hpn:=hpp.2
+        have hpp:= hpp.1
         sorry
     . intro h
       rw [isCarmichael]
       constructor
       . exact hp.1
       . constructor
-        . intro a
+        . intro a han
+          have hpa: ∀p, Nat.Prime p ∧ p∣n → IsCoprime a p:= by{
+            intro p hpp
+            rw [@dvd_def] at hpp
+            have hpp:=hpp.2
+            obtain ⟨c, hc⟩:= hpp
+            rw[hc] at han
+            rw [@isCoprime_iff_gcd_eq_one]
+            exact gcd_eq_one_of_gcd_mul_right_eq_one_left han
+          }
+          have hpa: ∀p, Nat.Prime p ∧ p∣n → a ^ (p - 1) ≡ 1 [ZMOD (p:ℤ)] := by{
+            intro p hp1
+            specialize hpa p hp1
+            exact Int.ModEq.pow_card_sub_one_eq_one hp1.1 hpa
+          }
+          have hpa: ∀p, Nat.Prime p ∧ p∣n → a ^ (n - 1) ≡ 1 [ZMOD (p:ℤ)] := by{
+            intro p hp1
+            specialize hpa p hp1
+            have h:= h.2 p hp1
+            have hf: (p-1:ℤ) = (p-1:ℕ) := by {
+              refine Eq.symm (Int.natCast_pred_of_pos ?h)
+            }
+            rw [hf] at h
+            have hf: (n-1:ℤ) = (n-1:ℕ) := by {
+              refine Eq.symm (Int.natCast_pred_of_pos ?h)
+            }
+            rw [hf] at h
+            norm_cast at h
+            rw [@dvd_def] at h
+            have h2: ∀ c, a ^ ((p - 1)*c) ≡ 1 [ZMOD (p:ℤ)]:= by{
+              intro c
+              calc a ^ ((p - 1)*c) ≡ (a ^ (p - 1))^c [ZMOD (p:ℤ)] := by ring_nf; trivial
+              _ ≡ 1^c [ZMOD (p:ℤ)] := Int.ModEq.pow c hpa
+              _ ≡ 1 [ZMOD (p:ℤ)] := by ring_nf; trivial
+            }
+            obtain ⟨c, hc⟩:= h
+            specialize h2 c
+            rw [← hc] at h2
+            exact h2
+          }
           sorry
         . exact hp.2
   }
@@ -178,7 +219,9 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     exact Irreducible.squarefree hp0
     exact Irreducible.squarefree hp1
     exact Irreducible.squarefree hp2
-  intro p hp hpp
+  intro p hp
+  have hpp := hp.2
+  have hp := hp.1
   have hp2: p=p0 ∨ p=p1 ∨ p=p2:= by{
     by_contra hcont
     simp at hcont
