@@ -42,12 +42,12 @@ example (a b : ℕ) : (a + b) + a ≤ 2 * (a + b) := by
   sorry
 
 example (a b : ℕ) : (a + b) + a ≤ 2 * (a + b) := by
-  have hR : Mul ℝ := by infer_instance
+  let hR : Mul ℝ := by infer_instance
   -- the line above states that we have a multiplication
   -- on ℝ, but forget how it is defined.
   have h (x y : ℝ) : x * y = y * x :=
     mul_comm x y -- error
-  sorry
+  linarith
 
 
 
@@ -56,8 +56,9 @@ example (a b : ℕ) : (a + b) + a ≤ 2 * (a + b) := by
 `simp_rw` does. -/
 example {p q : ℕ → Prop} (h : ∃ x, p x)
     (h2 : ∀ x, p x ↔ q x) : ∃ x, q x := by
-  -- rw [h2] at h
-  sorry
+  simp_rw [h2] at h
+  exact h
+
 
 
 
