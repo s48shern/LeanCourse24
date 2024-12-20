@@ -56,7 +56,205 @@ structure Carmichael where
   g1: n>1
   fermat: ∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1
 
-def isCarmichael (n : ℕ):= ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
+def isCarmichael (n : ℕ) := ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
+#check gcd_mul_dvd_mul_gcd
+lemma CarmichaelSquarefreeClaim (n : ℕ)(p : ℕ)(h: ∀ (a : ℤ), a.gcd ↑n = 1 → ↑n ∣ a ^ (n - 1) - 1)(hd : p*p ∣ n)(hp: Nat.Prime p)(h_1: ¬Nat.Prime n ∧ (∀ (a : ℤ), a.gcd ↑n = 1 → ↑n ∣ a ^ (n - 1) - 1) ∧ n > 1) : ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ Nat.gcd p n' = 1 := by{
+  simp_all only [not_false_eq_true, gt_iff_lt, and_self, implies_true, true_and, ge_iff_le, exists_and_left]
+  obtain ⟨left, right⟩ := h_1
+  obtain ⟨m, hn⟩ := hd
+  use p.maxPowDiv m + 2
+  constructor
+  · linarith
+  · use m /  (p ^ (p.maxPowDiv m))
+    constructor
+    · calc p ^ (p.maxPowDiv m + 2) * (m /  (p ^ (p.maxPowDiv m))) = (p ^ (p.maxPowDiv m) * p ^ 2) * (m /  (p ^ (p.maxPowDiv m))) := by ring_nf
+      _ = p ^ 2 * p ^ p.maxPowDiv m * m /  (p ^ (p.maxPowDiv m)):= by {
+        rw [@npow_mul_comm]
+        refine Eq.symm (Nat.mul_div_assoc (p ^ 2 * p ^ p.maxPowDiv m) ?H)
+        exact maxPowDiv.pow_dvd p m
+      }
+      _ = p ^ 2 * m * p ^ p.maxPowDiv m  /  (p ^ (p.maxPowDiv m))  := by rw [Nat.mul_right_comm]
+      _ = p^2 *m* 1 := by {
+        simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
+        have h : m ≠ 0 := by {
+          simp_all only [ne_eq]
+          intro a
+          subst a
+          simp_all only [CharP.cast_eq_zero, mul_zero, Int.gcd_zero_right, _root_.zero_le, tsub_eq_zero_of_le,
+            pow_zero, sub_self, dvd_refl, implies_true, not_lt_zero']
+        }
+        simp_all only [ne_eq, or_false]
+        ring_nf
+        have h: p > 0 := by {simp_all only [gt_iff_lt]; exact Nat.Prime.pos hp}
+        refine Nat.div_eq_of_eq_mul_left ?H1 ?H2
+        exact Nat.pos_pow_of_pos (p.maxPowDiv m) h
+        exact Nat.mul_right_comm (p ^ 2) (p ^ p.maxPowDiv m) m
+        }
+      _ = n := by{
+      subst hn
+      simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
+      have h: p ^2 = p*p := by ring_nf
+      simp_all only [true_or]
+      }
+    · refine Eq.symm (Nat.gcd_greatest ?h.right.hda ?h.right.hdb ?h.right.hd)
+      · exact Nat.one_dvd p
+      · exact Nat.one_dvd (m / p ^ p.maxPowDiv m)
+      · intro x ha1 ha2
+        rw [@dvd_one]
+        rw [propext (dvd_prime hp)] at ha1
+        by_contra h
+        have h : x = p := by simp_all only [false_or, Nat.cast_mul]
+        rw [h] at ha2
+        norm_num
+        have hdiv : p ^ (p.maxPowDiv m+1) ∣ m := by {
+          obtain ⟨n, hn ⟩ := ha2
+          have hdiv : m = p^(p.maxPowDiv m+1)*n := by {
+            calc m = p^(p.maxPowDiv m)* p*n := by {
+              rw [Nat.div_eq_iff_eq_mul_left] at hn
+              · ring_nf;
+                linarith
+              · refine Nat.pow_pos ?H.h
+                exact Prime.pos hp
+              · exact maxPowDiv.pow_dvd p m
+            }
+            _ = p^(p.maxPowDiv m+1) *n := by {
+            simp_all only [or_true, Nat.cast_mul, _root_.mul_eq_mul_right_iff]
+            apply Or.inl
+            rfl}
+          }
+          exact Dvd.intro n (_root_.id (Eq.symm hdiv))
+        }
+        have hcontra : p.maxPowDiv m+1 ≤ p.maxPowDiv m := by {
+          apply Nat.maxPowDiv.le_of_dvd
+          · exact Prime.one_lt hp
+          · by_contra hc
+            push_neg at hc
+            have hc : m = 0 := by exact eq_zero_of_le_zero hc
+            rw [hc] at hn
+            have hn : n = 0 := by exact hn
+            linarith
+          · exact hdiv
+
+        }
+        linarith
+}
+#check Nat.ModEq.gcd_eq
+lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : Squarefree n := by{
+  rw [isCarmichael] at h
+  have h:= h.2.1
+  rename_i h_1
+  rw [@squarefree_iff_prime_squarefree]
+  by_contra hnot
+  simp at hnot
+  obtain ⟨p, hp, hd⟩:=hnot
+  have hd: ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ Nat.gcd p n' = 1 := by {
+    exact CarmichaelSquarefreeClaim n p h hd hp h_1
+  }
+  have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
+  obtain ⟨k, n', hk, hpk, hpn⟩:=hd
+  have hcong: ∃ (a : ℕ), a ≡ 1 + p [MOD p^k] ∧  a ≡ 1 [MOD n']:= by{
+    have hcop: (p^k).Coprime n' := by exact Coprime.pow_left k hpn
+    obtain ⟨a, ha⟩ := Nat.chineseRemainder hcop (1 + p) 1
+    use a
+  }
+  obtain ⟨a, ha⟩ := hcong
+  have hgcd : a.gcd ↑n = 1 := by {
+    obtain ⟨left, right⟩ := ha
+    have h1: a.gcd n' = 1 := by {
+      calc a.gcd n' = (1).gcd n' := by exact ModEq.gcd_eq right
+      _ = 1 := by exact Nat.gcd_one_left n'
+    }
+    have h2: a.gcd (p^k) = 1 := by {
+      have haux: a.gcd (p^k) = (1+p).gcd (p^k) := by exact ModEq.gcd_eq left
+      have haux2: (1+p).gcd (p) = 1 := by simp
+      rw[haux]
+      exact Coprime.pow_right k haux2
+    }
+    have hfin : a.gcd n ∣  1 := by {
+      rw [←hpk]
+      calc a.gcd ((p^k) * n' )∣ a.gcd (p^k) * a.gcd (n') := by simp [gcd_mul_dvd_mul_gcd]
+      _ =  a.gcd (p^k) * 1 := by rw [h1]
+      _ = 1 := by rw[h2];
+    }
+    exact Nat.eq_one_of_dvd_one hfin
+  }
+  specialize h a
+  have h := h hgcd
+  have hcarm : a ^ (n-1) ≡ 1 [MOD n] := by {
+    refine Nat.ModEq.symm (Nat.modEq_of_dvd ?_)
+    subst hpk
+    simp_all only [ge_iff_le, not_false_eq_true, gt_iff_lt, and_self, Nat.cast_mul, Nat.cast_pow, implies_true,
+      Nat.cast_one]
+  }
+  have hred : (1+ p)^(n-1) ≡ 1 [MOD p^2] := by {
+    sorry
+  }
+  have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
+
+    have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
+      rw [add_pow];
+      simp [hobvious]
+    }
+    rw [haux]
+    let m1 := n-1
+    have hprob: n = m1+1 := by linarith
+    rw [hprob]
+    rw [Finset.sum_range_succ]
+    simp
+
+    let m2:= m1-1
+    have hprob2: m1= m2+1 := by {
+      refine Eq.symm (Nat.sub_add_cancel ?h);
+      linarith
+    }
+    rw [hprob2]
+    rw [Finset.sum_range_succ]
+    simp
+    have haux : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by {
+      calc p * (m2 + 1) + 1 ≡ (m2 + 1)* p + 1 [MOD p ^ 2] := by apply Nat.ModEq.add_right 1 ; ring_nf; rfl
+      _ ≡ 1 + (m2 + 1)* p [MOD p ^ 2] := by {
+        apply Nat.modEq_of_dvd
+        have h0 : ↑(1 + (m2 + 1) * p) - ↑((m2 + 1) * p + 1) = 0 := by {
+          calc 1 + (m2 + 1) * p - ((m2 + 1) * p + 1) = 1 + (m2 + 1) * p - (m2 + 1) * p - 1 := by rfl
+          _ = (m2 + 1) * p - (m2 + 1) * p:= by simp
+          _ = 0 := by norm_num
+        }
+        sorry
+
+      }
+    }
+    rw[hprob2] at hprob;
+    have hprob : m2 = n-2 := by{exact rfl}
+    have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡ 0 [MOD p^2] := by{
+      calc  ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡  ∑ x ∈ Finset.range (n-2), p ^ (n-2 + 1 - x) * (n-2 + 1).choose x [MOD p^2]:= by rw [hprob]
+
+      _ ≡ 0 [MOD p^2] := by sorry
+    }
+    calc ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x + p * (m2 + 1) + 1 ≡ p * (m2 + 1) + 1  [MOD p^2]:= by {
+      apply Nat.ModEq.add_right 1
+      sorry
+
+    }
+    _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
+  }
+  have hdiv : 1 + (n-1)*p ≡ 1 - p[MOD p^2] := by{
+    calc 1 + (n-1)*p ≡ 1 + n * p - p [MOD p^2] := by sorry
+    _ ≡ 1 + 0 * p - p [MOD p^2] := by rw [← Nat.pow_two] at hd; sorry
+    _ ≡ 1 - p [MOD p^2] := by sorry
+  }
+  have hcontra : 1 ≡ 1-p [MOD p^2 ]:= by {
+    sorry
+  }
+  have hdiv : p ≡ 0 [MOD p^2 ]:=by {
+    sorry
+  }
+  rw [Nat.modEq_zero_iff_dvd] at hdiv
+  have h1 : 1 < p := by exact Prime.one_lt hp
+  have h2 : 1 < 2 := by linarith
+  apply Nat.not_pos_pow_dvd h1 h2
+  exact hdiv
+}
+
 
 theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
@@ -66,180 +264,15 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
       have h:= h.2.1
       rename_i h_1
       have hsq: Squarefree n := by{
-        rw [@squarefree_iff_prime_squarefree]
-        by_contra hnot
-        simp at hnot
-        obtain ⟨p, hp, hd⟩:=hnot
-        have hd: ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ Nat.gcd p n' = 1 := by {
-          simp_all only [not_false_eq_true, gt_iff_lt, and_self, implies_true, true_and, ge_iff_le, exists_and_left]
-          obtain ⟨left, right⟩ := h_1
-          obtain ⟨m, hn⟩ := hd
-          use p.maxPowDiv m + 2
-          constructor
-          · linarith
-          · use m /  (p ^ (p.maxPowDiv m))
-            constructor
-            · calc p ^ (p.maxPowDiv m + 2) * (m /  (p ^ (p.maxPowDiv m))) = (p ^ (p.maxPowDiv m) * p ^ 2) * (m /  (p ^ (p.maxPowDiv m))) := by ring_nf
-              _ = p ^ 2 * p ^ p.maxPowDiv m * m /  (p ^ (p.maxPowDiv m)):= by {
-                rw [@npow_mul_comm]
-                refine Eq.symm (Nat.mul_div_assoc (p ^ 2 * p ^ p.maxPowDiv m) ?H)
-                exact maxPowDiv.pow_dvd p m
-              }
-              _ = p ^ 2 * m * p ^ p.maxPowDiv m  /  (p ^ (p.maxPowDiv m))  := by rw [Nat.mul_right_comm]
-              _ = p^2 *m* 1 := by {
-                simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
-                have h : m ≠ 0 := by {
-                  simp_all only [ne_eq]
-                  intro a
-                  subst a
-                  simp_all only [CharP.cast_eq_zero, mul_zero, Int.gcd_zero_right, _root_.zero_le, tsub_eq_zero_of_le,
-                    pow_zero, sub_self, dvd_refl, implies_true, not_lt_zero']
-                }
-                simp_all only [ne_eq, or_false]
-                ring_nf
-                have h: p > 0 := by {simp_all only [gt_iff_lt]; exact Nat.Prime.pos hp}
-                refine Nat.div_eq_of_eq_mul_left ?H1 ?H2
-                exact Nat.pos_pow_of_pos (p.maxPowDiv m) h
-                exact Nat.mul_right_comm (p ^ 2) (p ^ p.maxPowDiv m) m
-                }
-              _ = n := by{
-              subst hn
-              simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
-              have h: p ^2 = p*p := by ring_nf
-              simp_all only [true_or]
-              }
-            · refine Eq.symm (Nat.gcd_greatest ?h.right.hda ?h.right.hdb ?h.right.hd)
-              · exact Nat.one_dvd p
-              · exact Nat.one_dvd (m / p ^ p.maxPowDiv m)
-              · intro x ha1 ha2
-                rw [@dvd_one]
-                rw [propext (dvd_prime hp)] at ha1
-                by_contra h
-                have h : x = p := by simp_all only [false_or, Nat.cast_mul]
-                rw [h] at ha2
-                norm_num
-                have hdiv : p ^ (p.maxPowDiv m+1) ∣ m := by {
-                  obtain ⟨n, hn ⟩ := ha2
-                  have hdiv : m = p^(p.maxPowDiv m+1)*n := by {
-                    calc m = p^(p.maxPowDiv m)* p*n := by {
-                      rw [Nat.div_eq_iff_eq_mul_left] at hn
-                      · ring_nf;
-                        linarith
-                      · refine Nat.pow_pos ?H.h
-                        exact Prime.pos hp
-                      · exact maxPowDiv.pow_dvd p m
-                    }
-                    _ = p^(p.maxPowDiv m+1) *n := by {
-                    simp_all only [or_true, Nat.cast_mul, _root_.mul_eq_mul_right_iff]
-                    apply Or.inl
-                    rfl}
-                  }
-                  exact Dvd.intro n (_root_.id (Eq.symm hdiv))
-                }
-                have hcontra : p.maxPowDiv m+1 ≤ p.maxPowDiv m := by {
-                  apply Nat.maxPowDiv.le_of_dvd
-                  · exact Prime.one_lt hp
-                  · by_contra hc
-                    push_neg at hc
-                    have hc : m = 0 := by exact eq_zero_of_le_zero hc
-                    rw [hc] at hn
-                    have hn : n = 0 := by exact hn
-                    linarith
-                  · exact hdiv
-
-                }
-                linarith
-        }
-        have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
-        obtain ⟨k, n', hk, hpk, hpn⟩:=hd
-        have hcong: ∃ (a : ℕ), a ≡ 1 + p [MOD p^k] ∧  a ≡ 1 [MOD n']:= by{
-          have hcop: (p^k).Coprime n' := by exact Coprime.pow_left k hpn
-          obtain ⟨a, ha⟩ := Nat.chineseRemainder hcop (1 + p) 1
-          use a
-        }
-        obtain ⟨a, ha⟩ := hcong
-        have hgcd : a.gcd ↑n = 1 := by {
-          sorry
-        }
-        specialize h a
-        have h := h hgcd
-        have hcarm : a ^ (n-1) ≡ 1 [MOD n] := by {
-          refine Nat.ModEq.symm (Nat.modEq_of_dvd ?_)
-          subst hpk
-          simp_all only [ge_iff_le, not_false_eq_true, gt_iff_lt, and_self, Nat.cast_mul, Nat.cast_pow, implies_true,
-            Nat.cast_one]
-        }
-        have hred : (1+ p)^(n-1) ≡ 1 [MOD p^2] := by sorry
-        have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
-
-          have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
-            rw [add_pow];
-            simp [hobvious]
-          }
-          rw [haux]
-          let m1 := n-1
-          have hprob: n = m1+1 := by linarith
-          rw [hprob]
-          rw [Finset.sum_range_succ]
-          simp
-
-          let m2:= m1-1
-          have hprob2: m1= m2+1 := by {
-            refine Eq.symm (Nat.sub_add_cancel ?h);
-            linarith
-          }
-          rw [hprob2]
-          rw [Finset.sum_range_succ]
-          simp
-          have haux : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by {
-            calc p * (m2 + 1) + 1 ≡ (m2 + 1)* p + 1 [MOD p ^ 2] := by apply Nat.ModEq.add_right 1 ; ring_nf; rfl
-            _ ≡ 1 + (m2 + 1)* p [MOD p ^ 2] := by {
-              norm_num
-              norm_cast
-              apply Nat.modEq_of_dvd
-              have h0 : ↑(1 + (m2 + 1) * p) - ↑((m2 + 1) * p + 1) = 0 := by {
-                calc 1 + (m2 + 1) * p - ((m2 + 1) * p + 1) = 1 + (m2 + 1) * p - (m2 + 1) * p - 1 := by rfl
-                _ = (m2 + 1) * p - (m2 + 1) * p:= by simp
-                _ = 0 := by norm_num
-              }
-              sorry
-
-            }
-          }
-          rw[hprob2] at hprob;
-          have hprob : m2 = n-2 := by{exact rfl}
-          have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡ 0 [MOD p^2] := by{
-            calc  ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡  ∑ x ∈ Finset.range (n-2), p ^ (n-2 + 1 - x) * (n-2 + 1).choose x [MOD p^2]:= by rw [hprob]
-
-            _ ≡ 0 [MOD p^2] := by sorry
-          }
-          calc ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x + p * (m2 + 1) + 1 ≡ p * (m2 + 1) + 1  [MOD p^2]:= by {
-            apply Nat.ModEq.add_right 1
-            sorry
-
-          }
-          _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
-        }
-        have hdiv : 1 + (n-1)*p ≡ 1 - p[MOD p^2] := by{
-          calc 1 + (n-1)*p ≡ 1 + n * p - p [MOD p^2] := by sorry
-          _ ≡ 1 + 0 * p - p [MOD p^2] := by rw [← Nat.pow_two] at hd; sorry
-          _ ≡ 1 - p [MOD p^2] := by sorry
-        }
-        have hcontra : 1 ≡ 1-p [MOD p^2 ]:= by sorry
-        have hdiv : p ≡ 0 [MOD p^2 ]:=by sorry
-        rw [Nat.modEq_zero_iff_dvd] at hdiv
-        have h1 : 1 < p := by exact Prime.one_lt hp
-        have h2 : 1 < 2 := by linarith
-        apply Nat.not_pos_pow_dvd h1 h2
-        exact hdiv
-
+        exact SquareFree n hp h_1
       }
       constructor
       . exact hsq
       . intro p hpp
         have hpn:=hpp.2
-        have hpp:= hpp.1
-        have h2 : Nat.gcd p n = p := Nat.gcd_eq_left hpn
+        intro hdiv
+
+        have h2 : Nat.gcd p n = p := by apply Nat.gcd_eq_left ; exact hdiv
 
         have h3 : ¬p ^ 2 ∣ n := by{
           intro hcontra
