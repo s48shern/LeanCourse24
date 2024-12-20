@@ -136,7 +136,6 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
                   }
                   exact Dvd.intro n (_root_.id (Eq.symm hdiv))
                 }
-
                 have hcontra : p.maxPowDiv m+1 ≤ p.maxPowDiv m := by {
                   apply Nat.maxPowDiv.le_of_dvd
                   · exact Prime.one_lt hp
@@ -152,7 +151,6 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
                 linarith
         }
         have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
-
         obtain ⟨k, n', hk, hpk, hpn⟩:=hd
         have hcong: ∃ (a : ℕ), a ≡ 1 + p [MOD p^k] ∧  a ≡ 1 [MOD n']:= by{
           have hcop: (p^k).Coprime n' := by exact Coprime.pow_left k hpn
