@@ -190,7 +190,6 @@ lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : 
     sorry
   }
   have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
-
     have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
       rw [add_pow];
       simp [hobvious]
@@ -233,7 +232,6 @@ lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : 
     calc ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x + p * (m2 + 1) + 1 ≡ p * (m2 + 1) + 1  [MOD p^2]:= by {
       apply Nat.ModEq.add_right 1
       sorry
-
     }
     _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
   }
