@@ -5,7 +5,7 @@ open Classical
 --open Nat.Squarefree
 
 --We can take a in ℕ for the condition fermat as n is always odd
-lemma weak_carmichael_is_odd (n : ℕ): n > 2 ∧ (∀ (a : ℤ), (Int.gcd a n = 1 → (n:ℤ) ∣ a ^ (n - 1) - 1 )) → ¬ 2 ∣ n := by {
+lemma weak_carmichael_is_odd {n : ℕ}: n > 2 ∧ (∀ (a : ℤ), (Int.gcd a n = 1 → (n:ℤ) ∣ a ^ (n - 1) - 1 )) → ¬ 2 ∣ n := by {
   intro h2
   obtain ⟨h2, ha⟩:= h2
   specialize ha (n-1)
@@ -58,25 +58,24 @@ structure Carmichael where
 
 def isCarmichael (n : ℕ) := ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
 
-lemma CarmichaelSquarefreeClaim (n : ℕ)(p : ℕ)(h: ∀ (a : ℤ), a.gcd ↑n = 1 → ↑n ∣ a ^ (n - 1) - 1)(hd : p*p ∣ n)(hp: Nat.Prime p)(h_1: ¬Nat.Prime n ∧ (∀ (a : ℤ), a.gcd ↑n = 1 → ↑n ∣ a ^ (n - 1) - 1) ∧ n > 1) : ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ Nat.gcd p n' = 1 := by{
+lemma prime_dvd_def {n m p : ℕ} (hd : p^m ∣ n) (hp: Nat.Prime p) (hn: n>0) : ∃ k,∃ c, k≥ m ∧ p^k*c=n ∧ Nat.gcd p c = 1 := by{
   simp_all only [not_false_eq_true, gt_iff_lt, and_self, implies_true, true_and, ge_iff_le, exists_and_left]
-  obtain ⟨left, right⟩ := h_1
-  obtain ⟨m, hn⟩ := hd
-  use p.maxPowDiv m + 2
+  obtain ⟨c, hn⟩ := hd
+  use p.maxPowDiv c + m
   constructor
   · linarith
-  · use m /  (p ^ (p.maxPowDiv m))
+  · use c /  (p ^ (p.maxPowDiv c))
     constructor
-    · calc p ^ (p.maxPowDiv m + 2) * (m /  (p ^ (p.maxPowDiv m))) = (p ^ (p.maxPowDiv m) * p ^ 2) * (m /  (p ^ (p.maxPowDiv m))) := by ring_nf
-      _ = p ^ 2 * p ^ p.maxPowDiv m * m /  (p ^ (p.maxPowDiv m)):= by {
+    · calc p ^ (p.maxPowDiv c + m) * (c /  (p ^ (p.maxPowDiv c))) = (p ^ (p.maxPowDiv c) * p ^ m) * (c /  (p ^ (p.maxPowDiv c))) := by ring_nf
+      _ = p ^  m * p ^ p.maxPowDiv c * c /  (p ^ (p.maxPowDiv c)):= by {
         rw [@npow_mul_comm]
-        refine Eq.symm (Nat.mul_div_assoc (p ^ 2 * p ^ p.maxPowDiv m) ?H)
-        exact maxPowDiv.pow_dvd p m
+        refine Eq.symm (Nat.mul_div_assoc (p ^  m * p ^ p.maxPowDiv c) ?H)
+        exact maxPowDiv.pow_dvd p c
       }
-      _ = p ^ 2 * m * p ^ p.maxPowDiv m  /  (p ^ (p.maxPowDiv m))  := by rw [Nat.mul_right_comm]
-      _ = p^2 *m* 1 := by {
+      _ = p ^  m * c * p ^ p.maxPowDiv c  /  (p ^ (p.maxPowDiv c))  := by rw [Nat.mul_right_comm]
+      _ = p^ m * c* 1 := by {
         simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
-        have h : m ≠ 0 := by {
+        have h : c ≠ 0 := by {
           simp_all only [ne_eq]
           intro a
           subst a
@@ -87,18 +86,16 @@ lemma CarmichaelSquarefreeClaim (n : ℕ)(p : ℕ)(h: ∀ (a : ℤ), a.gcd ↑n 
         ring_nf
         have h: p > 0 := by {simp_all only [gt_iff_lt]; exact Nat.Prime.pos hp}
         refine Nat.div_eq_of_eq_mul_left ?H1 ?H2
-        exact Nat.pos_pow_of_pos (p.maxPowDiv m) h
-        exact Nat.mul_right_comm (p ^ 2) (p ^ p.maxPowDiv m) m
+        exact Nat.pos_pow_of_pos (p.maxPowDiv c) h
+        exact Nat.mul_right_comm (p ^  m) (p ^ p.maxPowDiv c) c
         }
       _ = n := by{
       subst hn
       simp_all only [Nat.cast_mul, mul_one, _root_.mul_eq_mul_right_iff]
-      have h: p ^2 = p*p := by ring_nf
-      simp_all only [true_or]
       }
     · refine Eq.symm (Nat.gcd_greatest ?h.right.hda ?h.right.hdb ?h.right.hd)
       · exact Nat.one_dvd p
-      · exact Nat.one_dvd (m / p ^ p.maxPowDiv m)
+      · exact Nat.one_dvd (c / p ^ p.maxPowDiv c)
       · intro x ha1 ha2
         rw [@dvd_one]
         rw [propext (dvd_prime hp)] at ha1
@@ -106,39 +103,39 @@ lemma CarmichaelSquarefreeClaim (n : ℕ)(p : ℕ)(h: ∀ (a : ℤ), a.gcd ↑n 
         have h : x = p := by simp_all only [false_or, Nat.cast_mul]
         rw [h] at ha2
         norm_num
-        have hdiv : p ^ (p.maxPowDiv m+1) ∣ m := by {
+        have hdiv : p ^ (p.maxPowDiv c+1) ∣ c := by {
           obtain ⟨n, hn ⟩ := ha2
-          have hdiv : m = p^(p.maxPowDiv m+1)*n := by {
-            calc m = p^(p.maxPowDiv m)* p*n := by {
+          have hdiv : c = p^(p.maxPowDiv c+1)*n := by {
+            calc c = p^(p.maxPowDiv c)* p*n := by {
               rw [Nat.div_eq_iff_eq_mul_left] at hn
               · ring_nf;
                 linarith
               · refine Nat.pow_pos ?H.h
                 exact Prime.pos hp
-              · exact maxPowDiv.pow_dvd p m
+              · exact maxPowDiv.pow_dvd p c
             }
-            _ = p^(p.maxPowDiv m+1) *n := by {
+            _ = p^(p.maxPowDiv c+1) *n := by {
             simp_all only [or_true, Nat.cast_mul, _root_.mul_eq_mul_right_iff]
             apply Or.inl
             rfl}
           }
           exact Dvd.intro n (_root_.id (Eq.symm hdiv))
         }
-        have hcontra : p.maxPowDiv m+1 ≤ p.maxPowDiv m := by {
+        have hcontra : p.maxPowDiv c+1 ≤ p.maxPowDiv c := by {
           apply Nat.maxPowDiv.le_of_dvd
           · exact Prime.one_lt hp
           · by_contra hc
             push_neg at hc
-            have hc : m = 0 := by exact eq_zero_of_le_zero hc
+            have hc : c = 0 := by exact eq_zero_of_le_zero hc
             rw [hc] at hn
-            have hn : n = 0 := by exact hn
             linarith
           · exact hdiv
         }
         linarith
 }
 
-lemma SquareFreePart2  (n : ℕ)(p: ℕ)(n':ℕ)(k:ℕ)(hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n)(hobvious: n - 1 + 1 = n)(hn : n >1) (hred : (1+ p)^(n-1) ≡ 1 [MOD p^2]): False := by{
+lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n) (hn : n >1) (hred : (1+ p)^(n-1) ≡ 1 [MOD p^2]): False := by{
+  have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
     have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
       rw [add_pow];
@@ -209,11 +206,11 @@ lemma SquareFreePart2  (n : ℕ)(p: ℕ)(n':ℕ)(k:ℕ)(hp: Nat.Prime p) (hd : p
   have h2 : 1 < 2 := by linarith
   apply Nat.not_pos_pow_dvd h1 h2
   exact ofNat_dvd.mp hdiv
-
 }
 
-lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : Squarefree n := by{
+lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := by{
   rw [isCarmichael] at h
+  have hp: ¬ Nat.Prime n ∧ n > 1 := by constructor;exact h.1;exact h.2.2
   have hn : n >1 := hp.2
   have h:= h.2.1
   rename_i h_1
@@ -222,9 +219,9 @@ lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : 
   simp at hnot
   obtain ⟨p, hp, hd⟩:=hnot
   have hd: ∃ k,∃ n', k≥ 2 ∧ p^k*n'=n ∧ Nat.gcd p n' = 1 := by {
-    exact CarmichaelSquarefreeClaim n p h hd hp h_1
+    rw [← Nat.pow_two] at hd
+    exact prime_dvd_def hd hp (zero_lt_of_lt hn)
   }
-  have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   obtain ⟨k, n', hk, hpk, hpn⟩:=hd
   have hcong: ∃ (a : ℕ), a ≡ 1 + p [MOD p^k] ∧  a ≡ 1 [MOD n']:= by{
     have hcop: (p^k).Coprime n' := by exact Coprime.pow_left k hpn
@@ -246,7 +243,7 @@ lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : 
     }
     have hfin : a.gcd n ∣  1 := by {
       rw [←hpk]
-      calc a.gcd ((p^k) * n' )∣ a.gcd (p^k) * a.gcd (n') := by simp [gcd_mul_dvd_mul_gcd]
+      calc a.gcd ((p^k) * n' )∣ a.gcd (p^k) * a.gcd (n') := by exact Nat.gcd_mul_dvd_mul_gcd a (p ^ k) n'
       _ =  a.gcd (p^k) * 1 := by rw [h1]
       _ = 1 := by rw[h2];
     }
@@ -280,11 +277,11 @@ lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : 
     calc (1+ p)^(n-1) ≡ a ^ (n - 1) [MOD p^2] := by exact Nat.ModEq.pow (n - 1) (_root_.id (Nat.ModEq.symm hb))
     _ ≡ 1 [MOD p^2] := by exact hc
   }
-  exact SquareFreePart2 n p n' k hp hd hpk hobvious hn hred
+  exact SquareFreePart2 hp hd hpk hn hred
 }
 
 
-theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p → p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
+theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
     . intro h
@@ -292,13 +289,14 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
       have h:= h.2.1
       rename_i h_1
       have hsq: Squarefree n := by{
-        exact SquareFree n hp h_1
+        exact carmichael_is_squarefree h_1
       }
       constructor
       . exact hsq
       . intro p hpp
-        have hpn:=hpp.2
-        intro hdiv
+        have hpn:=hpp.1.2
+        have hdiv:= hpp.2
+        have hpp:= hpp.1
 
         have h2 : Nat.gcd p n = p := by apply Nat.gcd_eq_left ; exact hdiv
 
@@ -311,11 +309,10 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
           contradiction
         }
         sorry
-
     . intro h
       rw [isCarmichael]
       constructor
-      . exact hp.1
+      . exact hp1
       . constructor
         . intro a han
           have hpa: ∀p, Nat.Prime p ∧ p∣n → IsCoprime a p:= by{
@@ -335,13 +332,13 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
           have hpa: ∀p, Nat.Prime p ∧ p∣n → a ^ (n - 1) ≡ 1 [ZMOD (p:ℤ)] := by{
             intro p hp1
             specialize hpa p hp1
-            have h:= h.2 p hp1.1
+            have h:= h.2 p hp1
             have hf: (p-1:ℤ) = (p-1:ℕ) := by {
               exact Eq.symm (Int.natCast_pred_of_pos (Prime.pos hp1.1))
             }
             rw [hf] at h
             have hf: (n-1:ℤ) = (n-1:ℕ) := by {
-              exact Eq.symm (Int.natCast_pred_of_pos (zero_lt_of_lt hp.2))
+              exact Eq.symm (Int.natCast_pred_of_pos (zero_lt_of_lt hp2))
             }
             rw [hf] at h
             norm_cast at h
@@ -358,10 +355,10 @@ theorem Korselt (n : ℕ) (hp: ¬ Nat.Prime n ∧ n > 1) : isCarmichael n ↔ (S
             exact h2
           }
           sorry
-        . exact hp.2
+        . exact hp2
   }
 
-lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧ (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1) → isCarmichael (p0 * p1 * p2) := by {
+lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧ (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1) → isCarmichael (p0 * p1 * p2) := by {
   rintro ⟨hp0, hp1, hp2, k, hk, hkp0, hkp1, hkp2⟩
   have hp0g: p0>1 := by exact Prime.one_lt hp0
   have hp1g: p1>1 := by exact Prime.one_lt hp1
@@ -443,7 +440,6 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
   obtain hp|hp|hp:= hp2
   . rw [hp]
     rw [← Int.modEq_zero_iff_dvd]
-    intro hobs
     calc p0 * p1 * p2 - 1 ≡ 1 * p1 * p2 - 1 [ZMOD p0 - 1] := by {
       refine Int.ModEq.sub ?h₁ rfl
       refine Int.ModEq.mul ?_ rfl
@@ -468,7 +464,6 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     }
   . rw [hp]
     rw [← Int.modEq_zero_iff_dvd]
-    intro hobs
     calc p0 * p1 * p2 - 1 ≡ p0 * 1 * p2 - 1 [ZMOD p1 - 1] := by {
       refine Int.ModEq.sub_right 1 ?_
       refine Int.ModEq.mul_right p2 ?_
@@ -493,7 +488,6 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     }
   . rw [hp]
     rw [← Int.modEq_zero_iff_dvd]
-    intro hobs
     calc p0 * p1 * p2 - 1 ≡ p0 * p1 * 1 - 1 [ZMOD p2 - 1] := by {
       refine Int.ModEq.sub_right 1 ?_
       refine Int.ModEq.mul_left (p0*p1) (Int.modEq_sub p2 1)
@@ -514,7 +508,6 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
         _ ≡ 0*(4*k) [ZMOD k*18] := Int.ModEq.mul_right (4*k) hi
         _ ≡ 0 [ZMOD k*18] := by ring_nf; trivial
     }
-  constructor
   refine not_prime_mul ?intro.intro.intro.intro.intro.intro.intro.hp.left.a1 ?intro.intro.intro.intro.intro.intro.intro.hp.left.b1
   exact Ne.symm (Nat.ne_of_lt hp01g)
   exact Ne.symm (Nat.ne_of_lt hp2g)
@@ -523,7 +516,7 @@ lemma Korselts_criterion' (p0 p1 p2: ℕ) : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
 
 @[simp] lemma isCarmichael' (n: ℕ): isCarmichael n ↔ ¬ Nat.Prime n ∧ ∀ (a : ℕ), n ∣ a^(n-1)-1 := by sorry
 
-theorem carmichael_properties (k: ℕ) : isCarmichael k → ¬ 2 ∣ k ∧
+theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
   (∃ p1, ∃ p2, ∃ p3, Nat.Prime p1 ∧ p1 ∣ k ∧ Nat.Prime p2 ∧ p2 ∣ k ∧ Nat.Prime p3 ∧ p3 ∣ k ∧ ¬ p1=p2 ∧ ¬ p1=p3 ∧ ¬ p2=p3) ∧
   ∀ p, Nat.Prime p ∧ p ∣ k → p < Nat.sqrt k := by {
     intro h
@@ -536,7 +529,7 @@ theorem carmichael_properties (k: ℕ) : isCarmichael k → ¬ 2 ∣ k ∧
         . have h'':=h.2.2
           constructor
           . exact Nat.lt_of_le_of_ne h'' fun a ↦ h' (_root_.id (Eq.symm a))
-      . exact h.2.1
+          . exact h.2.1
     . constructor
       . sorry
       . intro p hp
