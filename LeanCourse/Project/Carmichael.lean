@@ -255,12 +255,23 @@ lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : 
       Nat.cast_one]
   }
   have hred : (1+ p)^(n-1) ≡ 1 [MOD p^2] := by {
-    refine Nat.ModEq.symm (Nat.modEq_of_dvd ?_)
-    refine Nat.modEq_iff_dvd.mp ?_
-    rw[← hpk]
     have ha := ha.1
-    have ha :  a ≡ 1 + p [MOD p ^ 2] := by sorry
-    sorry
+    have hb :  a ≡ 1 + p [MOD p ^ 2] := by {
+      apply Nat.modEq_of_dvd
+      rw [Nat.modEq_iff_dvd] at ha
+      norm_cast at *
+      calc ↑(p^2) ∣ ↑(p^k) := by refine ofNat_dvd.mpr ?_; exact Nat.pow_dvd_pow p hk
+      _ ∣ subNatNat (1 + p) a:= by exact ha
+    }
+    have hc : a ^ (n - 1) ≡ 1 [MOD p^2] := by {
+      apply Nat.modEq_of_dvd
+      rw [Nat.modEq_iff_dvd] at hcarm
+      norm_cast at *
+      calc  ↑(p^2) ∣ ↑(n) := by  refine ofNat_dvd.mpr ?_ ; rw [← Nat.pow_two] at hd; exact hd
+      _ ∣ subNatNat 1 (a ^ (n - 1)) := by exact hcarm
+    }
+    calc (1+ p)^(n-1) ≡ a ^ (n - 1) [MOD p^2] := by exact Nat.ModEq.pow (n - 1) (_root_.id (Nat.ModEq.symm hb))
+    _ ≡ 1 [MOD p^2] := by exact hc
   }
   exact SquareFreePart2 n p n' k hp hd hpk hobvious hn hred
 }
