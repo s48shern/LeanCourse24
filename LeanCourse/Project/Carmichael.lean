@@ -137,6 +137,7 @@ lemma CarmichaelSquarefreeClaim (n : ℕ)(p : ℕ)(h: ∀ (a : ℤ), a.gcd ↑n 
         }
         linarith
 }
+
 lemma SquareFreePart2  (n : ℕ)(p: ℕ)(n':ℕ)(k:ℕ)(hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n)(hobvious: n - 1 + 1 = n)(hn : n >1) (hred : (1+ p)^(n-1) ≡ 1 [MOD p^2]): False := by{
   have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
     have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
@@ -194,14 +195,20 @@ lemma SquareFreePart2  (n : ℕ)(p: ℕ)(n':ℕ)(k:ℕ)(hp: Nat.Prime p) (hd : p
   have hcontra : 1 ≡ 1-p [MOD p^2 ]:= by {
     sorry
   }
-  have hdiv : p ≡ 0 [MOD p^2 ]:=by {
+  have hcontra : 1 ≡ 1-p [ZMOD p^2 ]:= by {
     sorry
   }
-  rw [Nat.modEq_zero_iff_dvd] at hdiv
+  have hdiv : p ≡ 0 [ZMOD p^2 ]:=by {
+    have hcontra : 1-p ≡ 1 [ZMOD p^2 ] := by exact _root_.id (Int.ModEq.symm hcontra)
+    rw [Int.modEq_iff_dvd]  at hcontra
+    simp at hcontra
+    exact Dvd.dvd.modEq_zero_int hcontra
+  }
+  rw [Int.modEq_zero_iff_dvd] at hdiv
   have h1 : 1 < p := by exact Prime.one_lt hp
   have h2 : 1 < 2 := by linarith
   apply Nat.not_pos_pow_dvd h1 h2
-  exact hdiv
+  exact ofNat_dvd.mp hdiv
 
 }
 
