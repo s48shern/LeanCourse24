@@ -134,7 +134,6 @@ lemma CarmichaelSquarefreeClaim (n : ℕ)(p : ℕ)(h: ∀ (a : ℤ), a.gcd ↑n 
             have hn : n = 0 := by exact hn
             linarith
           · exact hdiv
-
         }
         linarith
 }
@@ -259,6 +258,8 @@ lemma SquareFree  (n : ℕ)(hp: ¬ Nat.Prime n ∧ n > 1) (h: isCarmichael n) : 
     refine Nat.ModEq.symm (Nat.modEq_of_dvd ?_)
     refine Nat.modEq_iff_dvd.mp ?_
     rw[← hpk]
+    have ha := ha.1
+    have ha :  a ≡ 1 + p [MOD p ^ 2] := by sorry
     sorry
   }
   exact SquareFreePart2 n p n' k hp hd hpk hobvious hn hred
