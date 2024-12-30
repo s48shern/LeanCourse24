@@ -286,11 +286,10 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
     constructor
     . intro h
       rw [isCarmichael] at h
-      have h:= h.2.1
-      rename_i h_1
       have hsq: Squarefree n := by{
-        exact carmichael_is_squarefree h_1
+        exact carmichael_is_squarefree h
       }
+      have h:= h.2.1
       constructor
       . exact hsq
       . intro p hpp
@@ -354,7 +353,25 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             rw [← hc] at h2
             exact h2
           }
-          sorry
+          let setP1 := {p : ℕ | Nat.Prime p ∧ p ∣ n}
+          have hsetp : setP1.Finite := by sorry
+          let setP:= Set.Finite.toFinset hsetp
+          have h': a^(n-1) ≡ 1 [ZMOD (∏ p in setP, p)] := by{
+            induction setP using Finset.induction with
+            | empty => {
+              simp
+              exact Int.modEq_one
+            }
+            | @insert x s hxs ih => {
+              rw [Finset.prod_insert hxs]
+              rw [← Int.modEq_and_modEq_iff_modEq_mul]
+              constructor
+              have h': x ∈ setP1:= by sorry
+              exact hpa x h'
+              exact ih
+              sorry
+            }
+          }
         . exact hp2
   }
 
