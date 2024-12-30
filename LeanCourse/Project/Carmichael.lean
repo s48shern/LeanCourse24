@@ -374,10 +374,70 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
                   exact hintro p (Finset.mem_insert_of_mem hp)
                 }
                 exact ih hi
-              sorry
-
+              simp
+              have haux: (∀ p ∈ insert x s, Nat.Prime p ∧ p ∣ n) → x.Coprime (∏ x ∈ s, (x:ℤ)).natAbs := by{
+                induction s using Finset.induction with
+                  | empty => intro h2; exact coprime_of_dvd' fun k a a a ↦ a
+                  | @insert x2 s2 hxs2 ih2 => {
+                    intro hintro2
+                    rw [Finset.prod_insert hxs2]
+                    have hintro1: ¬ x∈ s2 := by {
+                      by_contra hnot
+                      exact hxs (Finset.mem_insert_of_mem hnot)
+                    }
+                    have hintro2: ((∀ p ∈ s2, Nat.Prime p ∧ p ∣ n) → a ^ (n - 1) ≡ 1 [ZMOD ∏ p ∈ s2, ↑p]) := sorry
+                    have hintro3: (∀ p ∈ insert x s2, Nat.Prime p ∧ p ∣ n) := by sorry
+                    specialize ih2 hintro1 hintro2 hintro3
+                    rw [Int.natAbs_mul]
+                    refine Coprime.mul_right ?insert.insert.H1 (ih2 hintro3)
+                    simp
+                    have hx:= (hintro x (mem_insert_self x (insert x2 s2))).1
+                    have hx2:= (hintro x2 (Finset.mem_insert_of_mem (mem_insert_self x2 s2) )).1
+                    refine (coprime_primes hx hx2).mpr ?insert.insert.H1.a
+                    by_contra hnot
+                    have hlast: x ∈ insert x2 s2 := by {
+                      rw [hnot]
+                      exact mem_insert_self x2 s2
+                    }
+                    exact hxs hlast
+                  }
+              }
+              exact haux hintro
             }
           }
+          have hsetP: (∀ p, p∈ setP ↔ Nat.Prime p ∧ p ∣ n) := by {
+            unfold setP
+            simp
+            intro p
+            constructor
+            . exact fun a ↦ a
+            . exact fun a ↦ a
+          }
+          have hpp: ∏ p ∈ setP, (p:ℤ) = n := by {
+            unfold setP
+            have haux: (∀ p, p∈ setP ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ setP, (p:ℤ) = n := by {
+              induction setP using Finset.induction with
+              | empty => {
+                intro hintro
+                simp
+                norm_cast
+                by_contra hcont
+                have h'': ∃ p, Nat.Prime p ∧ p ∣ n := by exact Nat.exists_prime_and_dvd fun a ↦ hcont (_root_.id (Eq.symm a))
+                obtain ⟨p, hp⟩:=h''
+                exact (List.mem_nil_iff p).mp ((hintro p).2 hp)
+              }
+              | @insert x s hxs ih => {
+                intro hintro
+                rw [Finset.prod_insert hxs]
+                sorry
+              }
+            }
+            exact haux hsetP
+          }
+          have hsetP: ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by intro p; exact (hsetP p).1
+          have h' := h' hsetP
+          rw [hpp] at h'
+          exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h'))
         . exact hp2
   }
 
