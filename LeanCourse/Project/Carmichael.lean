@@ -356,20 +356,26 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           let setP1 := {p : ℕ | Nat.Prime p ∧ p ∣ n}
           have hsetp : setP1.Finite := by sorry
           let setP:= Set.Finite.toFinset hsetp
-          have h': a^(n-1) ≡ 1 [ZMOD (∏ p in setP, p)] := by{
+          have h': (∀ p ∈ setP, Nat.Prime p ∧ p ∣ n) → (a^(n-1) ≡ 1 [ZMOD (∏ p in setP, p)]) := by{
             induction setP using Finset.induction with
             | empty => {
+              intro hintro
               simp
               exact Int.modEq_one
             }
             | @insert x s hxs ih => {
+              intro hintro
               rw [Finset.prod_insert hxs]
               rw [← Int.modEq_and_modEq_iff_modEq_mul]
               constructor
-              have h': x ∈ setP1:= by sorry
-              exact hpa x h'
-              exact ih
+              . exact hpa x (hintro x (mem_insert_self x s))
+              . have hi: ∀ p ∈ s, Nat.Prime p ∧ p ∣ n := by {
+                  intro p hp
+                  exact hintro p (Finset.mem_insert_of_mem hp)
+                }
+                exact ih hi
               sorry
+
             }
           }
         . exact hp2
