@@ -415,10 +415,10 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           }
           have hpp: ∏ p ∈ setP, (p:ℤ) = n := by {
             unfold setP
-            have haux: (∀ p, p∈ setP ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ setP, (p:ℤ) = n := by {
+            have haux: ∀ n>0, (∀ p, p∈ setP ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ setP, (p ^ p.maxPowDiv n:ℤ) = n := by {
               induction setP using Finset.induction with
               | empty => {
-                intro hintro
+                intro n hn0 hintro
                 simp
                 norm_cast
                 by_contra hcont
@@ -427,9 +427,75 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
                 exact (List.mem_nil_iff p).mp ((hintro p).2 hp)
               }
               | @insert x s hxs ih => {
-                intro hintro
+                intro n hn0 hintro
                 rw [Finset.prod_insert hxs]
-                sorry
+                specialize ih (n/x^(x.maxPowDiv n))
+                have hx:= (hintro x).1 (mem_insert_self x s)
+                have hend: (∀ (p : ℕ), p ∈ s ↔ Nat.Prime p ∧ p ∣ n / x^(x.maxPowDiv n)) := by{
+                  intro p
+                  constructor
+                  . intro hintro2
+                    have hp:= (hintro p).1 (Finset.mem_insert_of_mem hintro2)
+                    constructor
+                    . exact hp.1
+                    . refine (Nat.dvd_div_iff_mul_dvd ?mp.right.hbc).mpr ?mp.right.a
+                      exact maxPowDiv.pow_dvd x n
+                      refine Coprime.mul_dvd_of_dvd_of_dvd ?mp.right.a.hmn ?mp.right.a.hm ?mp.right.a.hn
+                      . have hx:=hx.1
+                        have hp:=hp.1
+                        have haux: x.Coprime p:= by{
+                          refine (coprime_primes hx hp).mpr ?mp.right.a.hmn.a
+                          by_contra hnot
+                          rw [hnot] at hxs
+                          exact hxs hintro2
+                        }
+                        exact Coprime.pow_left (x.maxPowDiv n) haux
+                      . exact maxPowDiv.pow_dvd x n
+                      exact hp.2
+                  . intro hintro2
+                    have hintro:= (hintro p).2
+                    have hcond: Nat.Prime p ∧ p ∣ n := by{
+                      constructor
+                      exact hintro2.1
+                      have h':= hintro2.2
+                      have h'2: n / x ^ x.maxPowDiv n ∣ n := by {
+                        have h'x:= hx.1
+                        have haux:  0<x ^ x.maxPowDiv n := by refine Nat.pow_pos ?h; exact Prime.pos h'x
+                        refine Nat.dvd_of_mul_dvd_mul_right haux ?_
+                        have h''x: x ^ x.maxPowDiv n ∣ n := by exact maxPowDiv.pow_dvd x n
+                        rw [Nat.div_mul_cancel h''x]
+                        exact Nat.dvd_mul_right n (x ^ x.maxPowDiv n)
+                      }
+                      exact Nat.dvd_trans h' h'2
+                    }
+                    have hintro:= hintro hcond
+                    rw [@Finset.mem_insert] at hintro
+                    obtain hintro|hintro:=hintro
+                    . by_contra
+                      have hintro2:= hintro2.2
+                      have hpx: x ^ x.maxPowDiv n * p ∣ n := by refine (Nat.dvd_div_iff_mul_dvd ?hbc).mp ?_;exact maxPowDiv.pow_dvd x n; exact hintro2
+                      rw [hintro] at hpx
+                      have hpx: x ^ (x.maxPowDiv n + 1) ∣ n := by exact hpx
+                      have hx:=hx.1
+                      have hx1: x>1 := by exact Prime.one_lt hx
+                      have hpx: x.maxPowDiv n + 1 ≤ x.maxPowDiv n := Nat.maxPowDiv.le_of_dvd hx1 hn0 hpx
+                      have hlast: x.maxPowDiv n + 1 > x.maxPowDiv n := Nat.lt_add_right 1 hpx
+                      have hlast: ¬ x.maxPowDiv n + 1 ≤ x.maxPowDiv n := not_succ_le_self (x.maxPowDiv n)
+                      exact hlast hpx
+                    . exact hintro
+                }
+                have hcond1: n / x ^ x.maxPowDiv n > 0 := by {
+                  refine (Nat.lt_div_iff_mul_lt ?hdn 0).mpr hn0
+                  exact maxPowDiv.pow_dvd x n
+                }
+                have ih := ih hcond1 hend
+                have hfinal: ∀ p ∈ s, p.maxPowDiv (n / x ^ x.maxPowDiv n) = p.maxPowDiv n := by sorry
+                have hfinal: ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n:= by sorry
+                rw [hfinal] at ih
+                rw [ih]
+                norm_cast
+                have h''x: x ^ x.maxPowDiv n ∣ n := by exact maxPowDiv.pow_dvd x n
+                exact Nat.mul_div_cancel_left' h''x
               }
             }
             exact haux hsetP
