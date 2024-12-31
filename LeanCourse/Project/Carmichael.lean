@@ -206,7 +206,9 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
   have h2 : 1 < 2 := by linarith
   apply Nat.not_pos_pow_dvd h1 h2
   exact ofNat_dvd.mp hdiv
+
 }
+lemma ModtoZmod (n a b: ℕ) (h: a ≡ b [MOD n]) : ((a : ℤ) ≡ (b : ℤ) [ZMOD (n: ℤ )]) := by exact Int.natCast_modEq_iff.mpr h
 
 lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := by{
   rw [isCarmichael] at h
@@ -222,6 +224,7 @@ lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := 
     rw [← Nat.pow_two] at hd
     exact prime_dvd_def hd hp (zero_lt_of_lt hn)
   }
+  have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   obtain ⟨k, n', hk, hpk, hpn⟩:=hd
   have hcong: ∃ (a : ℕ), a ≡ 1 + p [MOD p^k] ∧  a ≡ 1 [MOD n']:= by{
     have hcop: (p^k).Coprime n' := by exact Coprime.pow_left k hpn
@@ -449,7 +452,7 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             intro p hp
             unfold setP1 at hp
             have hp:= hp.2
-            refine Nat.le_of_dvd (zero_lt_of_lt hp2) hp
+            exact Nat.le_of_dvd (zero_lt_of_lt hp2) hp
           }
           let setP:= Set.Finite.toFinset hsetp
           have h': (∀ p ∈ setP, Nat.Prime p ∧ p ∣ n) → (a^(n-1) ≡ 1 [ZMOD (∏ p in setP, p^p.maxPowDiv n)]) := by{
@@ -696,7 +699,7 @@ theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
         . have h'':=h.2.2
           constructor
           . exact Nat.lt_of_le_of_ne h'' fun a ↦ h' (_root_.id (Eq.symm a))
-          . exact h.2.1
+      . exact h.2.1
     . constructor
       . sorry
       . intro p hp
