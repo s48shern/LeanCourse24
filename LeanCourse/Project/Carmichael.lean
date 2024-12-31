@@ -364,7 +364,6 @@ lemma prime_factorization {s : Finset ℕ}: ∀n>0, (∀ p, p∈ s ↔ Nat.Prime
     }
   }
 
-
 theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
