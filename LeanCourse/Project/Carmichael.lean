@@ -280,7 +280,7 @@ lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := 
   exact SquareFreePart2 hp hd hpk hn hred
 }
 
-lemma prime_factorization {s : Finset ℕ}: ∀n>0, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
+lemma prime_descomposition {s : Finset ℕ}: ∀n>0, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
     induction s using Finset.induction with
     | empty => {
       intro n hn0 hintro
@@ -354,8 +354,13 @@ lemma prime_factorization {s : Finset ℕ}: ∀n>0, (∀ p, p∈ s ↔ Nat.Prime
         exact maxPowDiv.pow_dvd x n
       }
       have ih := ih hcond1 hend
-      have hfinal: ∀ p ∈ s, p.maxPowDiv (n / x ^ x.maxPowDiv n) = p.maxPowDiv n := by sorry
-      have hfinal: ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n:= by sorry
+      have hfinal: ∀ p ∈ s, p.maxPowDiv (n / x ^ x.maxPowDiv n) = p.maxPowDiv n := by {
+        intro p hp
+        sorry
+      }
+      have hfinal: ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n:= by {
+        sorry
+      }
       rw [hfinal] at ih
       rw [ih]
       norm_cast
@@ -438,9 +443,16 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             exact h2
           }
           let setP1 := {p : ℕ | Nat.Prime p ∧ p ∣ n}
-          have hsetp : setP1.Finite := by sorry
+          have hsetp : setP1.Finite := by {
+            have hsetsp: {x: ℕ | x≤ n}.Finite := finite_le_nat n
+            refine Finite.subset hsetsp ?ht
+            intro p hp
+            unfold setP1 at hp
+            have hp:= hp.2
+            refine Nat.le_of_dvd (zero_lt_of_lt hp2) hp
+          }
           let setP:= Set.Finite.toFinset hsetp
-          have h': (∀ p ∈ setP, Nat.Prime p ∧ p ∣ n) → (a^(n-1) ≡ 1 [ZMOD (∏ p in setP, p)]) := by{
+          have h': (∀ p ∈ setP, Nat.Prime p ∧ p ∣ n) → (a^(n-1) ≡ 1 [ZMOD (∏ p in setP, p^p.maxPowDiv n)]) := by{
             induction setP using Finset.induction with
             | empty => {
               intro hintro
@@ -452,14 +464,15 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
               rw [Finset.prod_insert hxs]
               rw [← Int.modEq_and_modEq_iff_modEq_mul]
               constructor
-              . exact hpa x (hintro x (mem_insert_self x s))
+              . sorry
+              --. exact hpa x (hintro x (mem_insert_self x s))
               . have hi: ∀ p ∈ s, Nat.Prime p ∧ p ∣ n := by {
                   intro p hp
                   exact hintro p (Finset.mem_insert_of_mem hp)
                 }
                 exact ih hi
-              simp
-              have haux: (∀ p ∈ insert x s, Nat.Prime p ∧ p ∣ n) → x.Coprime (∏ x ∈ s, (x:ℤ)).natAbs := by{
+              --simp
+              have haux: (∀ p ∈ insert x s, Nat.Prime p ∧ p ∣ n) → (x^x.maxPowDiv n:ℤ).natAbs.Coprime (∏ x ∈ s, (x^x.maxPowDiv n:ℤ)).natAbs := by{
                 induction s using Finset.induction with
                   | empty => intro h2; exact coprime_of_dvd' fun k a a a ↦ a
                   | @insert x2 s2 hxs2 ih2 => {
@@ -469,14 +482,18 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
                       by_contra hnot
                       exact hxs (Finset.mem_insert_of_mem hnot)
                     }
-                    have hintro2: ((∀ p ∈ s2, Nat.Prime p ∧ p ∣ n) → a ^ (n - 1) ≡ 1 [ZMOD ∏ p ∈ s2, ↑p]) := sorry
+                    have hintro2: ((∀ p ∈ s2, Nat.Prime p ∧ p ∣ n) → a ^ (n - 1) ≡ 1 [ZMOD ∏ p ∈ s2, ↑p^p.maxPowDiv n]) := sorry
                     have hintro3: (∀ p ∈ insert x s2, Nat.Prime p ∧ p ∣ n) := by sorry
                     specialize ih2 hintro1 hintro2 hintro3
                     rw [Int.natAbs_mul]
                     refine Coprime.mul_right ?insert.insert.H1 (ih2 hintro3)
-                    simp
+                    --simp
                     have hx:= (hintro x (mem_insert_self x (insert x2 s2))).1
                     have hx2:= (hintro x2 (Finset.mem_insert_of_mem (mem_insert_self x2 s2) )).1
+                    rw [natAbs_pow]
+                    rw [natAbs_pow]
+                    refine Coprime.pow_right (x2.maxPowDiv n) ?insert.insert.H1.H1
+                    refine Coprime.pow_left (x.maxPowDiv n) ?insert.insert.H1.H1.H1
                     refine (coprime_primes hx hx2).mpr ?insert.insert.H1.a
                     by_contra hnot
                     have hlast: x ∈ insert x2 s2 := by {
@@ -497,10 +514,9 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             . exact fun a ↦ a
             . exact fun a ↦ a
           }
-          have hpp: ∏ p ∈ setP, (p:ℤ) = n := by {
+          have hpp: ∏ p ∈ setP, (p^ p.maxPowDiv n:ℤ) = n := by {
             unfold setP
-
-            exact prime_factorization hsetP
+            exact prime_descomposition n (zero_lt_of_lt hp2) hsetP
           }
           have hsetP: ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by intro p; exact (hsetP p).1
           have h' := h' hsetP
