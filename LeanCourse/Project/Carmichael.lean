@@ -283,7 +283,9 @@ lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := 
   exact SquareFreePart2 hp hd hpk hn hred
 }
 
-lemma prime_descomposition {s : Finset ℕ}: ∀n>0, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
+lemma prime_decomposition {n: ℕ} (hn0: n>0): ∃s : Finset ℕ, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) ∧ ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
+  have hind: ∀s: Finset ℕ, ∀n>0, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
+    intro s
     induction s using Finset.induction with
     | empty => {
       intro n hn0 hintro
@@ -371,6 +373,76 @@ lemma prime_descomposition {s : Finset ℕ}: ∀n>0, (∀ p, p∈ s ↔ Nat.Prim
       exact Nat.mul_div_cancel_left' h''x
     }
   }
+  let setP1 := {p : ℕ | Nat.Prime p ∧ p ∣ n}
+  have hsetp : setP1.Finite := by {
+    have hsetsp: {x: ℕ | x≤ n}.Finite := finite_le_nat n
+    refine Finite.subset hsetsp ?ht
+    intro p hp
+    unfold setP1 at hp
+    have hp:= hp.2
+    exact Nat.le_of_dvd hn0 hp
+  }
+  let setP:= Set.Finite.toFinset hsetp
+  use setP
+  have h: (∀ (p : ℕ), p ∈ setP ↔ Nat.Prime p ∧ p ∣ n) := by {
+    unfold setP
+    simp
+    intro p
+    constructor
+    . exact fun a ↦ a
+    . exact fun a ↦ a
+  }
+  constructor
+  exact h
+  exact hind setP n hn0 h
+}
+
+lemma prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squarefree n): ∃(s: Finset ℕ), (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) ∧ (∏ p ∈ s, (p:ℤ) = n) := by {
+  have h:= prime_decomposition hn0
+  obtain ⟨s, h⟩:= h
+  have hind: ∀ s, ∀ n, (∀ (p : ℕ), p ∈ s ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ s, ↑p = ↑n:= by {
+    intro s
+    induction s using Finset.induction with
+    | empty => {
+      intro n hn
+      simp
+      norm_cast
+      by_contra hcont
+      have h'': ∃ p, Nat.Prime p ∧ p ∣ n := by exact Nat.exists_prime_and_dvd fun a ↦ hcont (_root_.id (Eq.symm a))
+      obtain ⟨p, hp⟩:=h''
+      exact (List.mem_nil_iff p).mp ((hn p).2 hp)
+    }
+    | @insert x s hxs ih => {
+      intro n hn
+      specialize ih (n/x)
+      rw [Finset.prod_insert hxs]
+      rw [ih]
+      exact Nat.mul_div_cancel_left' ((hn x).1 (Finset.mem_insert_self x s)).2
+      intro p
+      constructor
+      . intro hp
+        have hn1:= (hn p).1 (Finset.mem_insert_of_mem hp)
+        have hn2:= (hn x).1 (Finset.mem_insert_self x s)
+        constructor
+        exact hn1.1
+        refine Nat.dvd_div_of_mul_dvd ?insert.mp.right.h
+        refine Coprime.mul_dvd_of_dvd_of_dvd ?insert.mp.right.h.hmn ?insert.mp.right.h.hm ?insert.mp.right.h.hn
+        have hp2:= hn1.1
+        have hx:= hn2.1
+        refine (coprime_primes hx hp2).mpr ?insert.mp.right.h.hmn.a
+        by_contra hnot
+        rw [hnot] at hxs
+        exact hxs hp
+        exact hn2.2
+        exact hn1.2
+      . intro hintro
+        sorry
+    }
+  }
+  use s
+  constructor
+  exact h.1
+}
 
 
 theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
