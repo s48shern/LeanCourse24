@@ -467,7 +467,8 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
               rw [Finset.prod_insert hxs]
               rw [← Int.modEq_and_modEq_iff_modEq_mul]
               constructor
-              . sorry
+              . have hpa:=hpa x (hintro x (mem_insert_self x s))
+                sorry
               --. exact hpa x (hintro x (mem_insert_self x s))
               . have hi: ∀ p ∈ s, Nat.Prime p ∧ p ∣ n := by {
                   intro p hp
@@ -486,7 +487,16 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
                       exact hxs (Finset.mem_insert_of_mem hnot)
                     }
                     have hintro2: ((∀ p ∈ s2, Nat.Prime p ∧ p ∣ n) → a ^ (n - 1) ≡ 1 [ZMOD ∏ p ∈ s2, ↑p^p.maxPowDiv n]) := sorry
-                    have hintro3: (∀ p ∈ insert x s2, Nat.Prime p ∧ p ∣ n) := by sorry
+                    have hintro3: (∀ p ∈ insert x s2, Nat.Prime p ∧ p ∣ n) := by {
+                      intro p hp
+                      rw [@Finset.mem_insert] at hp
+                      obtain hp|hp:=hp
+                      . rw [hp]
+                        have hend: x∈ insert x (insert x2 s2) := by exact mem_insert_self x (insert x2 s2)
+                        exact hintro x hend
+                      . have hend: p ∈ insert x (insert x2 s2) := Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hp)
+                        exact hintro p hend
+                    }
                     specialize ih2 hintro1 hintro2 hintro3
                     rw [Int.natAbs_mul]
                     refine Coprime.mul_right ?insert.insert.H1 (ih2 hintro3)
