@@ -283,7 +283,7 @@ lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := 
   exact SquareFreePart2 hp hd hpk hn hred
 }
 
-lemma prime_decomposition {n: ℕ} (hn0: n>0): ∃s : Finset ℕ, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) ∧ ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
+lemma forall_prime_decomposition {n: ℕ} {s: Finset ℕ} (hn0: n>0): (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) →  ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
   have hind: ∀s: Finset ℕ, ∀n>0, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) → ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
     intro s
     induction s using Finset.induction with
@@ -373,6 +373,10 @@ lemma prime_decomposition {n: ℕ} (hn0: n>0): ∃s : Finset ℕ, (∀ p, p∈ s
       exact Nat.mul_div_cancel_left' h''x
     }
   }
+  exact hind s n hn0
+}
+
+lemma exists_prime_decomposition {n: ℕ} (hn0: n>0): ∃s : Finset ℕ, (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) ∧ ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
   let setP1 := {p : ℕ | Nat.Prime p ∧ p ∣ n}
   have hsetp : setP1.Finite := by {
     have hsetsp: {x: ℕ | x≤ n}.Finite := finite_le_nat n
@@ -394,12 +398,10 @@ lemma prime_decomposition {n: ℕ} (hn0: n>0): ∃s : Finset ℕ, (∀ p, p∈ s
   }
   constructor
   exact h
-  exact hind setP n hn0 h
+  exact forall_prime_decomposition hn0 h
 }
 
-lemma prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squarefree n): ∃(s: Finset ℕ), (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) ∧ (∏ p ∈ s, p = n) := by {
-  have h:= prime_decomposition hn0
-  obtain ⟨s, h⟩:= h
+lemma forall_prime_descomposition_squarefree {n : ℕ} {s: Finset ℕ} (hn0: n > 0) (hsqn: Squarefree n): (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) → (∏ p ∈ s, p = n) := by {
   have hind: ∀ s, ∀ n, (Squarefree n ∧ (∀ (p : ℕ), p ∈ s ↔ Nat.Prime p ∧ p ∣ n)) → ∏ p ∈ s, ↑p = ↑n:= by {
     intro s
     induction s using Finset.induction with
@@ -474,16 +476,23 @@ lemma prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squarefree n
         . exact hintro'
     }
   }
-  use s
-  constructor
-  exact h.1
-  specialize hind s n
+  intro hintro
   have hcond: (Squarefree n ∧ ∀ (p : ℕ), p ∈ s ↔ Nat.Prime p ∧ p ∣ n) := by{
     constructor
     exact hsqn
-    exact h.1
+    exact fun p ↦ hintro p
   }
-  exact hind hcond
+  exact hind s n hcond
+}
+
+
+lemma exists_prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squarefree n): ∃(s: Finset ℕ), (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) ∧ (∏ p ∈ s, p = n) := by {
+  have h:= exists_prime_decomposition hn0
+  obtain ⟨s, h⟩:= h
+  use s
+  constructor
+  exact h.1
+  exact forall_prime_descomposition_squarefree hn0 hsqn h.1
 }
 
 
@@ -559,10 +568,11 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             rw [← hc] at h2
             exact h2
           }
-          have hsetP:=prime_descomposition_squarefree (zero_lt_of_lt hp2) h.1
+          have hsetP:=exists_prime_descomposition_squarefree (zero_lt_of_lt hp2) h.1
           obtain ⟨setP, hsetP⟩:=hsetP
-          have h': (∀ p ∈ setP, Nat.Prime p ∧ p ∣ n) → (a^(n-1) ≡ 1 [ZMOD (∏ p in setP, p)]) := by{
-            --induction setP using Finset.induction with
+          --have h': ∀s: Finset ℕ,((∀ p, p ∈ s ↔ Nat.Prime p ∧ p ∣ n) → (a^(n-1) ≡ 1 [ZMOD (∏ p in s, p)])) := by{
+            --intro s
+            --induction s using Finset.induction with
             --| empty => {
             --  intro hintro
             --  simp
@@ -573,9 +583,8 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             --  rw [Finset.prod_insert hxs]
             --  rw [← Int.modEq_and_modEq_iff_modEq_mul]
             --  constructor
-            --  . have hpa:=hpa x (hintro x (mem_insert_self x s))
-            --    sorry
-            --  --. exact hpa x (hintro x (mem_insert_self x s))
+            --  . exact hpa x ((hintro x).1 (mem_insert_self x s))
+            --  . exact ih x (hintro x (mem_insert_self x s))
             --  . have hi: ∀ p ∈ s, Nat.Prime p ∧ p ∣ n := by {
             --      intro p hp
             --      exact hintro p (Finset.mem_insert_of_mem hp)
@@ -624,15 +633,17 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             --  }
             --  exact haux hintro
             --}
-            sorry
-          }
-          have hsetP': ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by intro p hp; exact (hsetP.1 p).1 hp
-          have h' := h' hsetP'
-          rw [Mathlib.Tactic.Zify.natCast_eq] at hsetP
-          simp at hsetP
-          rw [hsetP.2] at h'
-          exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h'))
-        . exact hp2
+            --sorry
+          --}
+          sorry
+        sorry
+          --have hsetP': ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by intro p hp; exact (hsetP.1 p).1 hp
+          --have h' := h' setP hsetP'
+          --rw [Mathlib.Tactic.Zify.natCast_eq] at hsetP
+          --simp at hsetP
+          --rw [hsetP.2] at h'
+          --exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h'))
+        --. exact hp2
   }
 
 lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧ (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1) → isCarmichael (p0 * p1 * p2) := by {
