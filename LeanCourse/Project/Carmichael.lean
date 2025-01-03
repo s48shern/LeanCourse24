@@ -378,14 +378,49 @@ lemma forall_prime_decomposition {n: ℕ} {s: Finset ℕ} (hn0: n>0): (∀ p, p�
           refine Nat.dvd_trans (maxPowDiv.pow_dvd p (n / x ^ x.maxPowDiv n)) ?intro.intro.h₂.h.h₂
           refine div_dvd_of_dvd (maxPowDiv.pow_dvd x n)
       }
-      have hfinal: ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n:= by {
-        sorry
+      have hfinal: ∀(x: ℕ), ∀(s: Finset ℕ), ((x ∣ n ∧ x.Prime ∧ x ∉ s ∧ (∀ p, p ∈ s → (Nat.Prime p ∧ p ∣ n))) → ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n):= by {
+        intro x s h
+        obtain ⟨hxn, hxp, hs⟩:=h
+        induction s using Finset.induction with
+        | empty => rfl
+        | @insert x2 s2 hxs ih => {
+          rw [Finset.prod_insert hxs]
+          rw [ih]
+          rw [hfinal x x2]
+          exact Eq.symm (Finset.prod_insert hxs)
+          constructor
+          . exact hxn
+          constructor
+          . exact (hs.2 x2 (Finset.mem_insert_self x2 s2)).2
+          constructor
+          . exact (hs.2 x2 (Finset.mem_insert_self x2 s2)).1
+          constructor
+          . exact hxp
+          . rw [← @forall_mem_not_eq] at hs
+            have hs:= (hs.1 x2 (Finset.mem_insert_self x2 s2))
+            exact fun a ↦ hs (_root_.id (Eq.symm a))
+          constructor
+          . have hs:=hs.1
+            rw [@Finset.mem_insert] at hs
+            simp at hs
+            exact hs.2
+          . intro p hsp
+            exact hs.2 p (Finset.mem_insert_of_mem hsp)
+        }
       }
       rw [hfinal] at ih
       rw [ih]
       norm_cast
       have h''x: x ^ x.maxPowDiv n ∣ n := by exact maxPowDiv.pow_dvd x n
       exact Nat.mul_div_cancel_left' h''x
+      constructor
+      exact hx.2
+      constructor
+      exact hx.1
+      constructor
+      exact hxs
+      intro p hsp
+      exact (hintro p).1 (Finset.mem_insert_of_mem hsp)
     }
   }
   exact hind s n hn0
