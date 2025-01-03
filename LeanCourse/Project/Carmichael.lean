@@ -359,9 +359,24 @@ lemma forall_prime_decomposition {n: ℕ} {s: Finset ℕ} (hn0: n>0): (∀ p, p�
         exact maxPowDiv.pow_dvd x n
       }
       have ih := ih hcond1 hend
-      have hfinal: ∀ p ∈ s, p.maxPowDiv (n / x ^ x.maxPowDiv n) = p.maxPowDiv n := by {
-        intro p hp
-        sorry
+      have hfinal: ∀ (x p:ℕ),  (x ∣ n ∧ p ∣ n ∧ p.Prime ∧ x.Prime ∧ p ≠ x) → p.maxPowDiv (n / x ^ x.maxPowDiv n) = p.maxPowDiv n := by {
+        intro x p hp
+        obtain ⟨hnx, hnp, hpp, hpx, hnpx⟩:= hp
+        have hcpx: p.Coprime x := (coprime_primes hpp hpx).mpr hnpx
+        refine Eq.symm (Nat.le_antisymm ?intro.intro.h₁ ?intro.intro.h₂)
+        . refine maxPowDiv.le_of_dvd ?intro.intro.h₁.hp ?intro.intro.h₁.hn ?intro.intro.h₁.h
+          exact Prime.one_lt hpp
+          refine (Nat.div_pos_iff ?intro.intro.h₁.hn.hb).mpr ?intro.intro.h₁.hn.a
+          exact pow_ne_zero (x.maxPowDiv n) (Nat.Prime.ne_zero hpx)
+          exact Nat.le_of_dvd hn0 (Nat.maxPowDiv.pow_dvd x n)
+          refine (Nat.dvd_div_iff_mul_dvd ?intro.intro.h₁.h.hbc).mpr ?intro.intro.h₁.h.a
+          exact maxPowDiv.pow_dvd x n
+          refine Coprime.mul_dvd_of_dvd_of_dvd ?intro.intro.h₁.h.a.hmn (maxPowDiv.pow_dvd x n) (maxPowDiv.pow_dvd p n)
+          exact coprime_pow_primes (x.maxPowDiv n) (p.maxPowDiv n) hpx hpp (_root_.id (Ne.symm hnpx))
+        . refine maxPowDiv.le_of_dvd ?intro.intro.h₂.hp hn0 ?intro.intro.h₂.h
+          exact Prime.one_lt hpp
+          refine Nat.dvd_trans (maxPowDiv.pow_dvd p (n / x ^ x.maxPowDiv n)) ?intro.intro.h₂.h.h₂
+          refine div_dvd_of_dvd (maxPowDiv.pow_dvd x n)
       }
       have hfinal: ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n:= by {
         sorry
