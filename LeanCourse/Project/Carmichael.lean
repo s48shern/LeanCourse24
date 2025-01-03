@@ -867,7 +867,7 @@ theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
         . have h'':=h.2.2
           constructor
           . exact Nat.lt_of_le_of_ne h'' fun a ↦ h' (_root_.id (Eq.symm a))
-      . exact h.2.1
+          . exact h.2.1
     . constructor
       . sorry
       . intro p hp
