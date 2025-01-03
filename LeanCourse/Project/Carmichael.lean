@@ -620,21 +620,48 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           }
           have hsetP:=exists_prime_descomposition_squarefree (zero_lt_of_lt hp2) h.1
           obtain ⟨setP, hsetP⟩:=hsetP
-          --have h': ∀s: Finset ℕ,((∀ p, p ∈ s ↔ Nat.Prime p ∧ p ∣ n) → (a^(n-1) ≡ 1 [ZMOD (∏ p in s, p)])) := by{
-            --intro s
-            --induction s using Finset.induction with
-            --| empty => {
-            --  intro hintro
-            --  simp
-            --  exact Int.modEq_one
-            --}
-            --| @insert x s hxs ih => {
-            --  intro hintro
-            --  rw [Finset.prod_insert hxs]
-            --  rw [← Int.modEq_and_modEq_iff_modEq_mul]
-            --  constructor
-            --  . exact hpa x ((hintro x).1 (mem_insert_self x s))
-            --  . exact ih x (hintro x (mem_insert_self x s))
+          have h': ∀s: Finset ℕ, ∀m: ℕ,(Squarefree m ∧ m ∣ n ∧ (∀ p, p ∈ s ↔ Nat.Prime p ∧ p ∣ m ∧ a ^ (n - 1) ≡ 1 [ZMOD p]) → (a^(n-1) ≡ 1 [ZMOD (∏ p in s, p)])) := by{
+            intro s
+            induction s using Finset.induction with
+            | empty => {
+              intro n hintro
+              simp
+              exact Int.modEq_one
+            }
+            | @insert x s hxs ih => {
+              intro m hintro
+              rw [Finset.prod_insert hxs]
+              rw [← Int.modEq_and_modEq_iff_modEq_mul]
+              constructor
+              . exact ((hintro.2.2 x).1 (mem_insert_self x s)).2.2
+              apply ih (n/x) ?_
+              constructor
+              . sorry
+              constructor
+              . sorry
+              intro p
+              have hintrox := ((hintro.2.2 x).1 (mem_insert_self x s))
+              constructor
+              intro hps
+              have hintrop:= ((hintro.2.2 p).1 (mem_insert_of_mem hps))
+              constructor
+              exact hintrop.1
+              constructor
+              refine Nat.dvd_div_of_mul_dvd ?right.mp.right.left.h
+              refine
+                Prime.dvd_mul_of_dvd_ne ?right.mp.right.left.h.h_neq ?right.mp.right.left.h.pp1
+                  ?right.mp.right.left.h.pp2 ?right.mp.right.left.h.h1 ?right.mp.right.left.h.h2
+              by_contra hnot
+              rw [hnot] at hxs
+              exact hxs hps
+              exact hintrox.1
+              exact hintrop.1
+              exact Nat.dvd_trans hintrox.2.1 hintro.2.1
+              exact Nat.dvd_trans hintrop.2.1 hintro.2.1
+              exact hintrop.2.2
+              intro hintro2
+              sorry
+              sorry
             --  . have hi: ∀ p ∈ s, Nat.Prime p ∧ p ∣ n := by {
             --      intro p hp
             --      exact hintro p (Finset.mem_insert_of_mem hp)
@@ -682,9 +709,8 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
             --      }
             --  }
             --  exact haux hintro
-            --}
-            --sorry
-          --}
+            }
+          }
           sorry
         sorry
           --have hsetP': ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by intro p hp; exact (hsetP.1 p).1 hp
