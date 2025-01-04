@@ -134,7 +134,28 @@ lemma prime_dvd_def {n m p : ℕ} (hd : p^m ∣ n) (hp: Nat.Prime p) (hn: n>0) :
         linarith
 }
 
+
+lemma ModtoZmod (n a b: ℕ) : ( a ≡ b [MOD n]) ↔((a : ℤ) ≡ (b : ℤ) [ZMOD (n: ℤ )]) := by {
+  exact Iff.symm natCast_modEq_iff
+}
+lemma ZmodtoMod (n a b: ℕ) : ((a : ℤ) ≡ (b : ℤ)  [ZMOD (n: ℤ )]) ↔( a ≡ b [MOD n]) := by {
+  exact natCast_modEq_iff
+}
+lemma briefsimp (p m2 : ℕ) : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by {
+  have hzed :  p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [ZMOD p ^ 2] := by {
+    calc
+      p * (m2 + 1) + 1
+          ≡ (m2 + 1) * p + 1 [ZMOD p ^ 2] := by{
+            ring_nf; rfl}
+      _ ≡ 1 + (m2 + 1) * p [ZMOD p ^ 2] := by{
+            ring_nf; rfl
+      }
+  }
+  exact (ModtoZmod (p ^ 2) (p * (m2 + 1) + 1) (1 + (m2 + 1) * p)).mpr hzed
+}
+
 lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n) (hn : n >1) (hred : (1+ p)^(n-1) ≡ 1 [MOD p^2]): False := by{
+  have hred:(1+ p)^(n-1) ≡ 1 [ZMOD p^2] := by norm_cast; exact (ZmodtoMod (p ^ 2) ((1+ p)^(n-1)) (1)).mpr hred
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
     have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
@@ -157,17 +178,7 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
     rw [Finset.sum_range_succ]
     simp
     have haux : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by {
-      calc p * (m2 + 1) + 1 ≡ (m2 + 1)* p + 1 [MOD p ^ 2] := by apply Nat.ModEq.add_right 1 ; ring_nf; rfl
-      _ ≡ 1 + (m2 + 1)* p [MOD p ^ 2] := by {
-        apply Nat.modEq_of_dvd
-        have h0 : ↑(1 + (m2 + 1) * p) - ↑((m2 + 1) * p + 1) = 0 := by {
-          calc 1 + (m2 + 1) * p - ((m2 + 1) * p + 1) = 1 + (m2 + 1) * p - (m2 + 1) * p - 1 := by rfl
-          _ = (m2 + 1) * p - (m2 + 1) * p:= by simp
-          _ = 0 := by norm_num
-        }
-        sorry
-
-      }
+      exact briefsimp p m2
     }
     rw[hprob2] at hprob;
     have hprob : m2 = n-2 := by{exact rfl}
@@ -182,24 +193,20 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
     }
     _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
   }
-  have hdiv : 1 + (n-1)*p ≡ 1 - p[MOD p^2] := by{
-    calc 1 + (n-1)*p ≡ 1 + n * p - p [MOD p^2] := by {
+  have hdiv : 1 + (n-1)*p +p≡ 1 [ZMOD p^2] := by{
+    calc 1 + (n-1)*p +p≡ 1 + n * p  - p + p [ZMOD p^2] := by {
       sorry
     }
-    _ ≡ 1 + 0 * p - p [MOD p^2] := by rw [← Nat.pow_two] at hd; sorry
-    _ ≡ 1 - p [MOD p^2] := by sorry
+    _ ≡ 1 + 0 * p - p + p [ZMOD p^2] := by rw [← Nat.pow_two] at hd; sorry
+    _ ≡ 1 - p + p [ZMOD p^2] := by sorry
+    _ ≡ 1 [ZMOD p^2] := by sorry
   }
-  have hcontra : 1 ≡ 1-p [MOD p^2 ]:= by {
-    sorry
-  }
-  have hcontra : 1 ≡ 1-p [ZMOD p^2 ]:= by {
+
+  have hcontra : 1 +p≡ 1 [ZMOD p^2 ]:= by {
     sorry
   }
   have hdiv : p ≡ 0 [ZMOD p^2 ]:=by {
-    have hcontra : 1-p ≡ 1 [ZMOD p^2 ] := by exact _root_.id (Int.ModEq.symm hcontra)
-    rw [Int.modEq_iff_dvd]  at hcontra
-    simp at hcontra
-    exact Dvd.dvd.modEq_zero_int hcontra
+    exact Int.ModEq.add_left_cancel' 1 hcontra
   }
   rw [Int.modEq_zero_iff_dvd] at hdiv
   have h1 : 1 < p := by exact Prime.one_lt hp
@@ -208,7 +215,7 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
   exact ofNat_dvd.mp hdiv
 
 }
-lemma ModtoZmod (n a b: ℕ) (h: a ≡ b [MOD n]) : ((a : ℤ) ≡ (b : ℤ) [ZMOD (n: ℤ )]) := by exact Int.natCast_modEq_iff.mpr h
+
 
 lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := by{
   rw [isCarmichael] at h
