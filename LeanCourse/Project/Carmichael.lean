@@ -722,7 +722,9 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
         --. exact hp2
   }
 
-lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧ (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1) → isCarmichael (p0 * p1 * p2) := by {
+lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧
+  (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1)
+  → isCarmichael (p0 * p1 * p2) := by {
   rintro ⟨hp0, hp1, hp2, k, hk, hkp0, hkp1, hkp2⟩
   have hp0g: p0>1 := by exact Prime.one_lt hp0
   have hp1g: p1>1 := by exact Prime.one_lt hp1
@@ -878,7 +880,27 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
   exact Right.one_lt_mul' hp01g hp2g
 }
 
-@[simp] lemma isCarmichael' (n: ℕ): isCarmichael n ↔ ¬ Nat.Prime n ∧ ∀ (a : ℕ), n ∣ a^(n-1)-1 := by sorry
+@[simp] lemma isCarmichael' (n: ℕ): isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^(n-1)-1) := by{
+  constructor
+  . intro h
+    unfold isCarmichael at h
+    constructor
+    . exact h.2.2
+    constructor
+    . exact h.1
+    sorry
+  . intro hpn
+    have han:=hpn.2.2
+    have h1n:=hpn.1
+    have hpn:=hpn.2.1
+    unfold isCarmichael
+    constructor
+    exact hpn
+    constructor
+    . intro a ha
+      exact han a
+    exact h1n
+}
 
 theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
   (∃ p1, ∃ p2, ∃ p3, Nat.Prime p1 ∧ p1 ∣ k ∧ Nat.Prime p2 ∧ p2 ∣ k ∧ Nat.Prime p3 ∧ p3 ∣ k ∧ ¬ p1=p2 ∧ ¬ p1=p3 ∧ ¬ p2=p3) ∧
