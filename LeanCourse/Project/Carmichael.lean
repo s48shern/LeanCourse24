@@ -153,51 +153,107 @@ lemma briefsimp (p m2 : ℕ) : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2]
   }
   exact (ModtoZmod (p ^ 2) (p * (m2 + 1) + 1) (1 + (m2 + 1) * p)).mpr hzed
 }
-
-lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n) (hn : n >1) (hred : (1+ p)^(n-1) ≡ 1 [MOD p^2]): False := by{
-  have hred:(1+ p)^(n-1) ≡ 1 [ZMOD p^2] := by norm_cast; exact (ZmodtoMod (p ^ 2) ((1+ p)^(n-1)) (1)).mpr hred
+lemma BinomialCongruence {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n) (hn : n >1) (hred :(1+ p)^(n-1) ≡ 1 [ZMOD p^2] ): (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
-  have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [MOD p^2] := by {
-    have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
+  have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
       rw [add_pow];
       simp [hobvious]
     }
-    rw [haux]
-    let m1 := n-1
-    have hprob: n = m1+1 := by linarith
-    rw [hprob]
-    rw [Finset.sum_range_succ]
-    simp
+  norm_cast
+  simp_rw [haux]
+  let m1 := n-1
+  have hprob: n = m1+1 := by linarith
+  rw [hprob]
+  rw [Finset.sum_range_succ]
+  simp
 
-    let m2:= m1-1
-    have hprob2: m1= m2+1 := by {
-      refine Eq.symm (Nat.sub_add_cancel ?h);
-      linarith
-    }
-    rw [hprob2]
-    rw [Finset.sum_range_succ]
-    simp
-    have haux : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by {
-      exact briefsimp p m2
-    }
-    rw[hprob2] at hprob;
-    have hprob : m2 = n-2 := by{exact rfl}
-    have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡ 0 [MOD p^2] := by{
-      calc  ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡  ∑ x ∈ Finset.range (n-2), p ^ (n-2 + 1 - x) * (n-2 + 1).choose x [MOD p^2]:= by rw [hprob]
+  let m2:= m1-1
+  have hprob2: m1= m2+1 := by {
+    refine Eq.symm (Nat.sub_add_cancel ?h);
+    linarith
+  }
+  rw [hprob2]
+  rw [Finset.sum_range_succ]
+  simp
+  have haux : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [ZMOD p ^ 2] := by {
+    calc
+      p * (m2 + 1) + 1
+          ≡ (m2 + 1) * p + 1 [ZMOD p ^ 2] := by{
+            ring_nf; rfl}
+      _ ≡ 1 + (m2 + 1) * p [ZMOD p ^ 2] := by{
+            ring_nf; rfl
+      }
+  }
+  rw[hprob2] at hprob;
+  have hprob : m2 = n-2 := by{exact rfl}
+  have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡ 0 [ZMOD p^2] := by{
+    calc  ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡  ∑ x ∈ Finset.range (n-2), p ^ (n-2 + 1 - x) * (n-2 + 1).choose x [ZMOD p^2]:= by rw [hprob]
 
-      _ ≡ 0 [MOD p^2] := by sorry
-    }
-    calc ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x + p * (m2 + 1) + 1 ≡ p * (m2 + 1) + 1  [MOD p^2]:= by {
-      apply Nat.ModEq.add_right 1
-      sorry
-    }
-    _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
+    _ ≡ 0 [MOD p^2] := by sorry
+  }
+  norm_cast
+  calc ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x + p * (m2 + 1) + 1 ≡ p * (m2 + 1) + 1  [ZMOD p^2]:= by {
+    apply Nat.ModEq.add_right 1
+    sorry
+  }
+  _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
+}
+lemma powerPrimePositive (p k : ℕ) (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
+  refine (pow_pos_iff ?H.hn).mpr ?H.a
+  · exact not_eq_zero_of_lt hk
+  · exact Prime.pos hp
+}
+lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n) (hn : n >1) (hred : (1+ p)^(n-1) ≡ 1 [MOD p^2]) (hk: k ≥ 2): False := by{
+  have hred:(1+ p)^(n-1) ≡ 1 [ZMOD p^2] := by norm_cast; exact (ZmodtoMod (p ^ 2) ((1+ p)^(n-1)) (1)).mpr hred
+  have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
+  have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
+   exact BinomialCongruence hp hd hpk hn hred
   }
   have hdiv : 1 + (n-1)*p +p≡ 1 [ZMOD p^2] := by{
     calc 1 + (n-1)*p +p≡ 1 + n * p  - p + p [ZMOD p^2] := by {
-      sorry
+      ring_nf; rfl
     }
-    _ ≡ 1 [ZMOD p^2] := by sorry
+    _ ≡ 1 + 0 * p - p + p [ZMOD p^2] :=
+      by {
+        rw [← Nat.pow_two] at hd; simp; refine Int.ModEq.symm ((fun {a b n} ↦ modEq_iff_add_fac.mpr) ?_)
+        use n'*p^(k-1)
+        simp
+        norm_cast
+        rw [← hpk]
+        ring_nf
+        refine (Nat.mul_right_cancel_iff ?h.p).mpr ?h.b
+        · by_contra hc
+          push_neg at hc
+          have hn : n' = 0 := by exact eq_zero_of_le_zero hc
+          rw[hn] at hpk
+          linarith
+        · calc p* p^k = p ^(k+1) := by exact Eq.symm Nat.pow_succ'
+          _ = p^2 * p^(k-1) := by {
+            let k1 := k-1
+            have hk2: k = k1 +1 := by refine Nat.eq_add_of_sub_eq ?hle rfl; exact one_le_of_lt hk
+            have hk3: k -1 ≥ 1 := by exact Nat.le_sub_one_of_lt hk
+            refine (Nat.div_eq_iff_eq_mul_left ?H ?H').mp ?_
+            · exact powerPrimePositive p (k - 1) hk3 hp
+            · refine (Nat.dvd_prime_pow hp).mpr ?H'.a
+              use k-1
+              constructor
+              · linarith
+              · rfl
+            · refine Nat.div_eq_of_eq_mul_right ?H1 ?H2
+              · exact powerPrimePositive p (k - 1) hk3 hp
+              · have hpk :  p ^ (k - 1) * p ^ 2 = p ^(k -1 +2) := by exact Eq.symm (Nat.pow_add p (k - 1) 2)
+                rw[hpk]
+                exact Mathlib.Tactic.Ring.pow_congr rfl (congrFun (congrArg HAdd.hAdd hk2) 1) rfl
+          }
+      }
+    _ ≡ 1 - p + p [ZMOD p^2] := by {
+      have h0 : 0* p = 0 := by exact Nat.zero_mul p
+      simp [h0]
+    }
+    _ ≡ 1 [ZMOD p^2] := by {
+      have h0 : -p + p ≡ 0 [ZMOD p^2]:= by exact?
+      simp [h0]
+    }
   }
 
   have hcontra : 1 +p≡ 1 [ZMOD p^2 ]:= by {
@@ -285,7 +341,7 @@ lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := 
     calc (1+ p)^(n-1) ≡ a ^ (n - 1) [MOD p^2] := by exact Nat.ModEq.pow (n - 1) (_root_.id (Nat.ModEq.symm hb))
     _ ≡ 1 [MOD p^2] := by exact hc
   }
-  exact SquareFreePart2 hp hd hpk hn hred
+  exact SquareFreePart2 hp hd hpk hn hred hk
 }
 
 lemma forall_prime_decomposition {n: ℕ} {s: Finset ℕ} (hn0: n>0): (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) →  ∏ p ∈ s, (p ^ p.maxPowDiv n:ℤ) = n := by {
