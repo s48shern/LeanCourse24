@@ -197,8 +197,6 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
     calc 1 + (n-1)*p +p≡ 1 + n * p  - p + p [ZMOD p^2] := by {
       sorry
     }
-    _ ≡ 1 + 0 * p - p + p [ZMOD p^2] := by rw [← Nat.pow_two] at hd; sorry
-    _ ≡ 1 - p + p [ZMOD p^2] := by sorry
     _ ≡ 1 [ZMOD p^2] := by sorry
   }
 
