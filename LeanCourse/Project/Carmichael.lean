@@ -251,13 +251,15 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
       simp [h0]
     }
     _ ≡ 1 [ZMOD p^2] := by {
-      have h0 : -p + p ≡ 0 [ZMOD p^2]:= by exact?
+      have h0 : -p + p ≡ 0 [ZMOD p^2]:= by apply Dvd.dvd.modEq_zero_int; norm_num
       simp [h0]
     }
   }
 
   have hcontra : 1 +p≡ 1 [ZMOD p^2 ]:= by {
-    sorry
+    calc  1+p ≡ (1 + p) ^ (n - 1)+p [ZMOD p^2]:= by exact Int.ModEq.add (_root_.id (Int.ModEq.symm hred)) rfl
+    _ ≡ 1 + (↑n - 1) * ↑p + p [ZMOD p^2]:= by exact Int.ModEq.add hbin rfl
+    _≡ 1 [ZMOD p^2] := by exact hdiv
   }
   have hdiv : p ≡ 0 [ZMOD p^2 ]:=by {
     exact Int.ModEq.add_left_cancel' 1 hcontra
