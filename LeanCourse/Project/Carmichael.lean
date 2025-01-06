@@ -187,16 +187,10 @@ lemma BinomialCongruence {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (
   rw[hprob2] at hprob;
   have hprob : m2 = n-2 := by{exact rfl}
   have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡ 0 [ZMOD p^2] := by{
-    calc  ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡  ∑ x ∈ Finset.range (n-2), p ^ (n-2 + 1 - x) * (n-2 + 1).choose x [ZMOD p^2]:= by rw [hprob]
-
-    _ ≡ 0 [MOD p^2] := by sorry
-  }
-  norm_cast
-  calc ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x + p * (m2 + 1) + 1 ≡ p * (m2 + 1) + 1  [ZMOD p^2]:= by {
-    apply Nat.ModEq.add_right 1
     sorry
   }
-  _ ≡ 1 + (m2 + 1) * p [MOD p ^ 2] := by sorry
+  norm_cast
+  sorry
 }
 lemma powerPrimePositive (p k : ℕ) (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
   refine (pow_pos_iff ?H.hn).mpr ?H.a
