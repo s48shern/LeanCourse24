@@ -153,7 +153,31 @@ lemma briefsimp (p m2 : ℕ) : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2]
   }
   exact (ModtoZmod (p ^ 2) (p * (m2 + 1) + 1) (1 + (m2 + 1) * p)).mpr hzed
 }
-lemma BinomialCongruence {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n) (hn : n >1) (hred :(1+ p)^(n-1) ≡ 1 [ZMOD p^2] ): (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
+lemma quicklemma (p n: ℕ ) (hn: n ≥2): 1 + ↑p + ↑p * ↑(n-2) ≡ 1 + ↑p * subNatNat (2 + (n-2)) 1 [ZMOD ↑p ^ 2] := by{
+
+    norm_cast
+    calc 1 + p + p * ↑(n-2) ≡ 1 + p * (n-1)[ZMOD ↑p ^ 2] := by {
+      apply modEq_iff_add_fac.mpr
+      use 0
+      ring_nf
+      simp_all only [ge_iff_le, Nat.cast_sub, Nat.cast_ofNat]
+      linarith
+    }
+    _≡ 1 + ↑p * subNatNat (n) 1 [ZMOD ↑p ^ 2] := by norm_cast
+    _≡ 1 + ↑p * subNatNat (2 + (n - 2)) 1 [ZMOD ↑p ^ 2] := by {
+      have h: (2 + (n-2))=n := by apply add_sub_of_le; exact hn
+      simp_rw[h]; rfl
+    }
+  }
+lemma ending (a b c p :ℕ) (h1 : a ≡ b [ZMOD p^2]) (h2:  c ≡ 0 [ZMOD p^2]) : a + c ≡ b [ZMOD p^2]:= by {
+  calc  a + c≡ a + 0 [ZMOD p^2] := by exact Int.ModEq.add rfl h2
+  _ ≡ a [ZMOD p^2] := by norm_num
+  _ ≡ b [ZMOD p^2] := by exact h1
+}
+--zify
+--Fin_cases and discard nontrivial
+--interval_cases n <;> try decide
+lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) (hred :(1+ p)^(n-1) ≡ 1 [ZMOD p^2] ): (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
       rw [add_pow];
@@ -161,6 +185,7 @@ lemma BinomialCongruence {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (
     }
   norm_cast
   simp_rw [haux]
+  push_cast
   let m1 := n-1
   have hprob: n = m1+1 := by linarith
   rw [hprob]
@@ -184,13 +209,25 @@ lemma BinomialCongruence {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (
             ring_nf; rfl
       }
   }
+
   rw[hprob2] at hprob;
   have hprob : m2 = n-2 := by{exact rfl}
-  have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (m2 + 1).choose x ≡ 0 [ZMOD p^2] := by{
+  have hsum : ∑ x ∈ Finset.range m2, p ^ (m2 + 1 - x) * (1+m2).choose x ≡ 0 [ZMOD p^2] := by{
+    apply Dvd.dvd.modEq_zero_int
+    apply Finset.dvd_sum
+    intro i hi
+    have h : p^2 ∣0 := by sorry
     sorry
   }
-  norm_cast
-  sorry
+
+  ring_nf at hsum; ring_nf
+  have final :  1 + ↑p + ↑p * ↑m2 ≡ 1 + ↑p * subNatNat (2 + m2) 1 [ZMOD ↑p ^ 2] := by{
+    norm_cast
+    simp_rw[hprob]
+    exact quicklemma p n hn
+  }
+  exact ending (1 + ↑p + ↑p * ↑m2 ) (1 + ↑p * subNatNat (2 + m2) 1 )
+
 }
 lemma powerPrimePositive (p k : ℕ) (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
   refine (pow_pos_iff ?H.hn).mpr ?H.a
@@ -201,7 +238,7 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
   have hred:(1+ p)^(n-1) ≡ 1 [ZMOD p^2] := by norm_cast; exact (ZmodtoMod (p ^ 2) ((1+ p)^(n-1)) (1)).mpr hred
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
-   exact BinomialCongruence hp hd hpk hn hred
+   exact BinomialCongruence n p n' k hpk hn hred
   }
   have hdiv : 1 + (n-1)*p +p≡ 1 [ZMOD p^2] := by{
     calc 1 + (n-1)*p +p≡ 1 + n * p  - p + p [ZMOD p^2] := by {
