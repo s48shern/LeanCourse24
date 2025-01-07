@@ -689,7 +689,18 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           ring_nf at hsq
           contradiction
         }
+        have h4: p.Coprime (n/p):= by{
+          refine coprime_iff_gcd_eq_one.mpr ?_
+          sorry
+        }
+        have h5: ∃b, b^(p-1)≡ 1 [ZMOD p] := by sorry
+        obtain ⟨ b, hb ⟩ := h5
+        have h6:∃a, a ≡ b [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by sorry
+        obtain ⟨ a, ha ⟩ := h6
+        have h7 : a.gcd (n/p) =1:= by {
+          sorry
 
+        }
         sorry
     . intro h
       rw [isCarmichael]
