@@ -216,8 +216,24 @@ lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) 
     apply Dvd.dvd.modEq_zero_int
     apply Finset.dvd_sum
     intro i hi
-    have h : p^2 ∣0 := by sorry
-    sorry
+    have h : ↑p^2 ∣ ↑p ^ (m2 + 1 - i):= by {
+      have hcalc: m2 + 1 - i ≥ 2:= by {
+        apply Nat.add_one_le_iff.mpr
+        ring_nf;
+        have h:  m2 -i≥ 1:= by apply zero_lt_sub_of_lt; exact List.mem_range.mp hi
+        refine gt_iff_lt.mp ?_
+        calc 1 + m2 -i = 1 + (m2-1) := by sorry
+        _ ≥ 1+1 := by { apply Nat.add_le_add_left; sorry}
+        _ > 1 := by exact one_lt_succ_succ 0
+      }
+      exact Nat.pow_dvd_pow p hcalc
+    }
+    refine dvd_iff_exists_eq_mul_left.mpr ?h.h.advd_iff_exists_eq_mul_left
+    obtain ⟨c, hc⟩ :=h
+    use (1+m2).choose i*c
+    norm_cast
+    simp_rw[hc]
+    linarith
   }
 
   ring_nf at hsum; ring_nf
@@ -226,7 +242,7 @@ lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) 
     simp_rw[hprob]
     exact quicklemma p n hn
   }
-  exact ending (1 + ↑p + ↑p * ↑m2 ) (1 + ↑p * subNatNat (2 + m2) 1 )
+  sorry
 
 }
 lemma powerPrimePositive (p k : ℕ) (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
