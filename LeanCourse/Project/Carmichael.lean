@@ -169,7 +169,7 @@ lemma quicklemma (p n: ℕ ) (hn: n ≥2): 1 + ↑p + ↑p * ↑(n-2) ≡ 1 + �
       simp_rw[h]; rfl
     }
   }
-lemma ending (a b c p :ℕ) (h1 : a ≡ b [ZMOD p^2]) (h2:  c ≡ 0 [ZMOD p^2]) : a + c ≡ b [ZMOD p^2]:= by {
+lemma endingLemma (a b c p :ℤ ) (h1 : a ≡ b [ZMOD p^2]) (h2:  c ≡ 0 [ZMOD p^2]) : a + c ≡ b [ZMOD p^2]:= by {
   calc  a + c≡ a + 0 [ZMOD p^2] := by exact Int.ModEq.add rfl h2
   _ ≡ a [ZMOD p^2] := by norm_num
   _ ≡ b [ZMOD p^2] := by exact h1
@@ -177,6 +177,15 @@ lemma ending (a b c p :ℕ) (h1 : a ≡ b [ZMOD p^2]) (h2:  c ≡ 0 [ZMOD p^2]) 
 --zify
 --Fin_cases and discard nontrivial
 --interval_cases n <;> try decide
+lemma calcs (m2 i : ℕ) (h:m2-i ≥ 1): 1+ m2 -i ≥ 1 +1:= by {
+  calc 1+ m2 -i = 1 + (m2-i):= by {
+    refine AddLECancellable.add_tsub_assoc_of_le ?hc ?h 1
+    exact Contravariant.AddLECancellable
+    have h1_ : m2 -i ≥ 0 := by exact Nat.zero_le (m2 - i);
+    omega
+    }
+  _ ≥ 1+1 := by exact Nat.add_le_add_left h 1
+}
 lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) (hred :(1+ p)^(n-1) ≡ 1 [ZMOD p^2] ): (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
@@ -222,8 +231,7 @@ lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) 
         ring_nf;
         have h:  m2 -i≥ 1:= by apply zero_lt_sub_of_lt; exact List.mem_range.mp hi
         refine gt_iff_lt.mp ?_
-        calc 1 + m2 -i = 1 + (m2-1) := by sorry
-        _ ≥ 1+1 := by { apply Nat.add_le_add_left; sorry}
+        calc 1+ m2 -i ≥1+1 := by exact calcs m2 i h
         _ > 1 := by exact one_lt_succ_succ 0
       }
       exact Nat.pow_dvd_pow p hcalc
@@ -242,8 +250,7 @@ lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) 
     simp_rw[hprob]
     exact quicklemma p n hn
   }
-  sorry
-
+  apply endingLemma (1 + ↑p + ↑p * ↑m2) (1 + ↑p * subNatNat (2 + m2) 1) (∑ x ∈ Finset.range m2, ↑p ^ (1 + m2 - x) * ↑((1 + m2).choose x)) (↑p) final hsum
 }
 lemma powerPrimePositive (p k : ℕ) (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
   refine (pow_pos_iff ?H.hn).mpr ?H.a
@@ -682,6 +689,7 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           ring_nf at hsq
           contradiction
         }
+
         sorry
     . intro h
       rw [isCarmichael]
