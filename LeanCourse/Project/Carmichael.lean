@@ -1050,3 +1050,120 @@ theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
       . intro p hp
         sorry
   }
+#eval Squarefree 561
+lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
+  constructor
+  · have h1 : 561 = 3 * 11 * 17 := by norm_num
+    have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by sorry
+
+    -- Step 2: Verify primes
+    have p3 : Nat.Prime 3 := by exact Nat.prime_three
+    have p11 : Nat.Prime 11 := by exact properDivisors_eq_singleton_one_iff_prime.mp rfl
+    have p17 : Nat.Prime 17 := by exact properDivisors_eq_singleton_one_iff_prime.mp rfl
+    have sq3 : Squarefree 3 := by exact Irreducible.squarefree p3
+    have sq11 : Squarefree 11 := by exact Irreducible.squarefree p11
+    have sq17 : Squarefree 17 := by exact Irreducible.squarefree p17
+
+    -- Step 3: Check divisors
+    rw [h1]
+    rw [Korselt]
+    constructor
+    · by_contra hc
+      rw [@Nat.squarefree_mul_iff] at hc
+      rw [@coprime_mul_iff_left] at hc
+      have hd : (Coprime 3 17 ∧ Coprime 11 17) ∧ Squarefree (3 * 11) ∧ Squarefree 17 := by {
+        constructor
+        · constructor
+          · norm_num
+          · norm_num
+        · constructor
+          · refine _root_.squarefree_mul_iff.mpr ?right.left.a
+            constructor
+            · exact coprime_iff_isRelPrime.mp rfl
+            · exact ⟨sq3, sq11⟩
+          · exact sq17
+
+      }
+      contradiction
+    · intro p hp
+      norm_num
+      simp_all only [Nat.reduceMul]
+      obtain ⟨left, right⟩ := hp
+      have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by exact h2
+      have hlist : p ∈ [3, 11, 17] := by{
+        rw[←h2]
+        refine (mem_primeFactorsList ?hn).mpr ?_
+        exact Ne.symm (zero_ne_add_one 560)
+        exact And.symm ⟨right, left⟩
+      }
+      fin_cases hlist
+      · norm_num
+      · norm_num
+      · norm_num
+    · norm_num
+    · norm_num
+  · intro i hi
+    have h_2: Nat.Prime i → ¬ isCarmichael i := by sorry
+    have h_2_1 : Nat.Prime (i/3) ∧ ¬((i/3)-1) ∣ (i-1) → ¬ isCarmichael i := by sorry
+    have h_2_2 : Nat.Prime (i/5) ∧ ¬((i/5)-1) ∣ (i-1) → ¬ isCarmichael i := by sorry
+    have h_3 : 2 ∣ i → ¬ isCarmichael i := by sorry
+    have h_4 : 3∣ i ∧ ¬ 2 ∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_5 : 5∣ i ∧ ¬ 4 ∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_6 : 7∣ i ∧ ¬ 6 ∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_7 : 11∣ i ∧ ¬ 10∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_8 : 13∣ i ∧ ¬ 12∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_9: 17∣ i ∧ ¬ 16∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_10: 19∣  i ∧ ¬ 18∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_11: 23∣ i ∧ ¬ 22∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_12: 29∣ i ∧ ¬ 28∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_13: 31∣ i ∧ ¬ 30∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_14: 37∣ i ∧ ¬ 36∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_15: 41∣ i ∧ ¬ 40∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_16: 47∣ i ∧ ¬ 46∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_17: 53∣ i ∧ ¬ 52∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_18: 59∣ i ∧ ¬ 58∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_19: 61∣ i ∧ ¬ 60∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_20: 67∣ i ∧ ¬ 66∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_22: 73∣ i ∧ ¬ 72∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_23: 89∣ i ∧ ¬ 88∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_24: 79∣ i ∧ ¬ 78∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_sq : (Nat.sqrt i) * (Nat.sqrt i) = i → ¬ isCarmichael i := by sorry
+    have h_s9: 9 ∣ i →  ¬ isCarmichael i := by sorry
+    have h_s25 : 25 ∣ i →  ¬ isCarmichael i := by sorry
+    have h_sq_3 : (Nat.sqrt (i/3)) * (Nat.sqrt (i/3)) = (i/3)→ ¬ isCarmichael i := by sorry
+    have h_sq_5: (Nat.sqrt (i/5)) * (Nat.sqrt (i/5)) = (i/5)→ ¬ isCarmichael i := by sorry
+    have h_sq_7: (Nat.sqrt (i/7)) * (Nat.sqrt (i/7)) = (i/7)→ ¬ isCarmichael i := by sorry
+    interval_cases i
+
+    all_goals try {apply h_4; norm_num; done}
+    all_goals try {apply h_2; norm_num; done}
+    all_goals try {apply h_3; norm_num; done}
+    all_goals try {apply h_5; norm_num; done}
+    all_goals try {apply h_6; norm_num; done}
+    all_goals try {apply h_7; norm_num; done}
+    all_goals try {apply h_8; norm_num; done}
+    all_goals try {apply h_9; norm_num; done}
+    all_goals try {apply h_2_1; norm_num; done}
+    all_goals try {apply h_2_2; norm_num; done}
+    all_goals try {apply h_10; norm_num; done}
+    all_goals try {apply h_11; norm_num; done}
+    all_goals try {apply h_12; norm_num; done}
+    all_goals try {apply h_13; norm_num; done}
+    all_goals try {apply h_14; norm_num; done}
+    all_goals try {apply h_15; norm_num; done}
+    all_goals try {apply h_16; norm_num; done}
+    all_goals try {apply h_17; norm_num; done}
+    all_goals try {apply h_18; norm_num; done}
+    all_goals try {apply h_19; norm_num; done}
+    all_goals try {apply h_20; norm_num; done}
+    all_goals try {apply h_22; norm_num; done}
+    all_goals try {apply h_sq; norm_num; done}
+    all_goals try {apply h_sq_3; norm_num; done}
+    all_goals try {apply h_sq_5; norm_num; done}
+    all_goals try {apply h_sq_7; norm_num; done}
+    all_goals try {apply h_24; norm_num; done}
+    all_goals try {apply h_s9; norm_num; done}
+    all_goals try {apply h_s25; norm_num}
+
+
+}
