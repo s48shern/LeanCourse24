@@ -1030,22 +1030,39 @@ lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
   intro _ __1
   simp_all only
   }
-lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1 ∣ i-1)): ¬ isCarmichael i := by{
-  rw[Korselt];
-  push_neg;
-  intro h
-  use p
-  simp_all only [and_self, true_and]
-  obtain ⟨left, right⟩ := hdiv
-  · sorry
-  · exact hi2
-  · exact hi
-  }
+
+lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
+    have h1 : 561 = 3 * 11 * 17 := by norm_num
+    have p3 : Nat.Prime 3 := by exact Nat.prime_three
+    have p11 : Nat.Prime 11 := by exact properDivisors_eq_singleton_one_iff_prime.mp rfl
+    have p17 : Nat.Prime 17 := by exact properDivisors_eq_singleton_one_iff_prime.mp rfl
+    simp_rw[h1];
+    have h2:Nat.primeFactorsList 3 = [3] := by exact primeFactorsList_prime p3
+    have h3:Nat.primeFactorsList 11= [11] := by exact primeFactorsList_prime p11
+    have h4:Nat.primeFactorsList 17= [17] := by exact primeFactorsList_prime p17
+    have h2:Nat.primeFactorsList (3*11) = [3,11] := by  {
+      simp [Nat.primeFactorsList, Nat.factorization];
+      constructor
+      · norm_num
+      · norm_num; exact h3
+    }
+    have h2:Nat.primeFactorsList (187) = [11,17] := by  {
+      simp [Nat.primeFactorsList, Nat.factorization];
+      constructor
+      · norm_num
+      · norm_num; exact h4
+    }
+    simp [Nat.primeFactorsList, Nat.factorization];
+    constructor
+    · norm_num
+    · norm_num; exact h2
+
+
+}
 lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
-  have h1 : 561 = 3 * 11 * 17 := by norm_num
   constructor
   ·
-
+    have h1 : 561 = 3 * 11 * 17 := by norm_num
     -- Step 2: Verify primes
     have p3 : Nat.Prime 3 := by exact Nat.prime_three
     have p11 : Nat.Prime 11 := by exact properDivisors_eq_singleton_one_iff_prime.mp rfl
@@ -1078,7 +1095,8 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
       norm_num
       simp_all only [Nat.reduceMul]
       obtain ⟨left, right⟩ := hp
-      have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by rw[← h1]; simp
+      have h1 : 561 = 3 * 11 * 17 := by norm_num
+      have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by simp_rw[h1]; exact listPrime561
       have hlist : p ∈ [3, 11, 17] := by{
         rw[←h2]
         refine (mem_primeFactorsList ?hn).mpr ?_
@@ -1156,3 +1174,15 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
 
 
 }
+lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1 ∣ i-1)): ¬ isCarmichael i := by{
+  rw[Korselt];
+  push_neg;
+  intro h
+  use p
+  simp_all only [and_self, true_and]
+  obtain ⟨left, right⟩ := hdiv
+  · sorry
+
+  · exact hi2
+  · exact hi
+  }
