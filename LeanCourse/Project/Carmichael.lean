@@ -133,6 +133,7 @@ lemma prime_dvd_def {n m p : ℕ} (hd : p^m ∣ n) (hp: Nat.Prime p) (hn: n>0) :
         linarith
 }
 
+
 lemma ModtoZmod (n a b: ℕ) : ( a ≡ b [MOD n]) ↔((a : ℤ) ≡ (b : ℤ) [ZMOD (n: ℤ )]) := by {
   exact Iff.symm natCast_modEq_iff
 }
@@ -153,7 +154,6 @@ lemma briefsimp (p m2 : ℕ) : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2]
   }
   exact (ModtoZmod (p ^ 2) (p * (m2 + 1) + 1) (1 + (m2 + 1) * p)).mpr hzed
 }
-
 lemma quicklemma (p n: ℕ ) (hn: n ≥2): 1 + ↑p + ↑p * ↑(n-2) ≡ 1 + ↑p * subNatNat (2 + (n-2)) 1 [ZMOD ↑p ^ 2] := by{
 
     norm_cast
@@ -188,7 +188,6 @@ lemma calcs (m2 i : ℕ) (h:m2-i ≥ 1): 1+ m2 -i ≥ 1 +1:= by {
     }
   _ ≥ 1+1 := by exact Nat.add_le_add_left h 1
 }
-
 lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) (hred :(1+ p)^(n-1) ≡ 1 [ZMOD p^2] ): (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
@@ -1025,10 +1024,27 @@ theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
         sorry
   }
 #eval Squarefree 561
+lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
+  rw[isCarmichael];
+  push_neg;
+  intro _ __1
+  simp_all only
+  }
+lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1 ∣ i-1)): ¬ isCarmichael i := by{
+  rw[Korselt];
+  push_neg;
+  intro h
+  use p
+  simp_all only [and_self, true_and]
+  obtain ⟨left, right⟩ := hdiv
+  · sorry
+  · exact hi2
+  · exact hi
+  }
 lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
+  have h1 : 561 = 3 * 11 * 17 := by norm_num
   constructor
-  · have h1 : 561 = 3 * 11 * 17 := by norm_num
-    have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by sorry
+  ·
 
     -- Step 2: Verify primes
     have p3 : Nat.Prime 3 := by exact Nat.prime_three
@@ -1037,7 +1053,6 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     have sq3 : Squarefree 3 := by exact Irreducible.squarefree p3
     have sq11 : Squarefree 11 := by exact Irreducible.squarefree p11
     have sq17 : Squarefree 17 := by exact Irreducible.squarefree p17
-
     -- Step 3: Check divisors
     rw [h1]
     rw [Korselt]
@@ -1063,7 +1078,7 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
       norm_num
       simp_all only [Nat.reduceMul]
       obtain ⟨left, right⟩ := hp
-      have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by exact h2
+      have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by rw[← h1]; simp
       have hlist : p ∈ [3, 11, 17] := by{
         rw[←h2]
         refine (mem_primeFactorsList ?hn).mpr ?_
