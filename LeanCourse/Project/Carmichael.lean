@@ -1030,7 +1030,18 @@ lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
   intro _ __1
   simp_all only
   }
+lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1:ℤ) ∣ (i-1:ℤ)): ¬ isCarmichael i := by{
+  rw[Korselt];
+  push_neg;
+  intro h
+  use p
+  simp_all only [and_self, true_and]
+  obtain ⟨left, right⟩ := hdiv
+  · exact fun a ↦ a
 
+  · exact hi2
+  · exact hi
+  }
 lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     have h1 : 561 = 3 * 11 * 17 := by norm_num
     have p3 : Nat.Prime 3 := by exact Nat.prime_three
@@ -1110,29 +1121,22 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     · norm_num
     · norm_num
   · intro i hi
-    have h_2: Nat.Prime i → ¬ isCarmichael i := by sorry
-    have h_2_1 : Nat.Prime (i/3) ∧ ¬((i/3)-1) ∣ (i-1) → ¬ isCarmichael i := by sorry
-    have h_2_2 : Nat.Prime (i/5) ∧ ¬((i/5)-1) ∣ (i-1) → ¬ isCarmichael i := by sorry
-    have h_3 : 2 ∣ i → ¬ isCarmichael i := by sorry
-    have h_4 : 3∣ i ∧ ¬ 2 ∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_5 : 5∣ i ∧ ¬ 4 ∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_6 : 7∣ i ∧ ¬ 6 ∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_7 : 11∣ i ∧ ¬ 10∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_8 : 13∣ i ∧ ¬ 12∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_9: 17∣ i ∧ ¬ 16∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_10: 19∣  i ∧ ¬ 18∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_11: 23∣ i ∧ ¬ 22∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_12: 29∣ i ∧ ¬ 28∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_13: 31∣ i ∧ ¬ 30∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_14: 37∣ i ∧ ¬ 36∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_15: 41∣ i ∧ ¬ 40∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_16: 47∣ i ∧ ¬ 46∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_17: 53∣ i ∧ ¬ 52∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_18: 59∣ i ∧ ¬ 58∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_19: 61∣ i ∧ ¬ 60∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_20: 67∣ i ∧ ¬ 66∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_22: 73∣ i ∧ ¬ 72∣ (i-1) →¬ isCarmichael i := by sorry
-    have h_23: 89∣ i ∧ ¬ 88∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_2: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
+    have h_2_1 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime (i/3) ∧ ¬((i/3)-1) ∣ (i-1) → ¬ isCarmichael i := by sorry
+    have h_2_2 :  i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime (i/5) ∧ ¬((i/5)-1) ∣ (i-1) → ¬ isCarmichael i := by sorry
+    have h_3 :  i >1 ∧ ¬ Nat.Prime i ∧ 2 ∣ i → ¬ isCarmichael i := by sorry
+    have h_4 : i >1 ∧ ¬ Nat.Prime i ∧ 3∣ i ∧ ¬ 2 ∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_5 : i >1 ∧ ¬ Nat.Prime i ∧  5∣ i ∧ ¬ 4 ∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_6 : i >1 ∧ ¬ Nat.Prime i ∧ 7∣ i ∧ ¬ 6 ∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_7 : i >1 ∧ ¬ Nat.Prime i ∧ 11∣ i ∧ ¬ 10∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_8 : i >1 ∧ ¬ Nat.Prime i ∧ 13∣ i ∧ ¬ 12∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_9 : i >1 ∧ ¬ Nat.Prime i ∧ 17∣ i ∧ ¬ 16∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_10: i >1 ∧ ¬ Nat.Prime i ∧  19∣  i ∧ ¬ 18∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_13: i >1 ∧ ¬ Nat.Prime i ∧  31∣ i ∧ ¬ 30∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_14: i >1 ∧ ¬ Nat.Prime i ∧  37∣ i ∧ ¬ 36∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_19: i >1 ∧ ¬ Nat.Prime i ∧  61∣ i ∧ ¬ 60∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_20: i >1 ∧ ¬ Nat.Prime i ∧  67∣ i ∧ ¬ 66∣ (i-1) →¬ isCarmichael i := by sorry
+    have h_22: i >1 ∧ ¬ Nat.Prime i ∧  73∣ i ∧ ¬ 72∣ (i-1) →¬ isCarmichael i := by sorry
     have h_24: 79∣ i ∧ ¬ 78∣ (i-1) →¬ isCarmichael i := by sorry
     have h_sq : (Nat.sqrt i) * (Nat.sqrt i) = i → ¬ isCarmichael i := by sorry
     have h_s9: 9 ∣ i →  ¬ isCarmichael i := by sorry
@@ -1141,7 +1145,7 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     have h_sq_5: (Nat.sqrt (i/5)) * (Nat.sqrt (i/5)) = (i/5)→ ¬ isCarmichael i := by sorry
     have h_sq_7: (Nat.sqrt (i/7)) * (Nat.sqrt (i/7)) = (i/7)→ ¬ isCarmichael i := by sorry
     interval_cases i
-
+    all_goals try {apply h_sq; norm_num; done}
     all_goals try {apply h_4; norm_num; done}
     all_goals try {apply h_2; norm_num; done}
     all_goals try {apply h_3; norm_num; done}
@@ -1150,24 +1154,19 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     all_goals try {apply h_7; norm_num; done}
     all_goals try {apply h_8; norm_num; done}
     all_goals try {apply h_9; norm_num; done}
+    all_goals try {apply h_s9; norm_num; done}
+    all_goals try {apply h_s25; norm_num}
+    all_goals try {apply h_sq_3; norm_num; done}
+    all_goals try {apply h_sq_5; norm_num; done}
+    all_goals try {apply h_sq_7; norm_num; done}
     all_goals try {apply h_2_1; norm_num; done}
     all_goals try {apply h_2_2; norm_num; done}
     all_goals try {apply h_10; norm_num; done}
     all_goals try {apply h_13; norm_num; done}
     all_goals try {apply h_14; norm_num; done}
-    all_goals try {apply h_15; norm_num; done}
-    all_goals try {apply h_16; norm_num; done}
-    all_goals try {apply h_17; norm_num; done}
-    all_goals try {apply h_18; norm_num; done}
     all_goals try {apply h_19; norm_num; done}
     all_goals try {apply h_20; norm_num; done}
     all_goals try {apply h_22; norm_num; done}
-    all_goals try {apply h_sq; norm_num; done}
-    all_goals try {apply h_sq_3; norm_num; done}
-    all_goals try {apply h_sq_5; norm_num; done}
-    all_goals try {apply h_sq_7; norm_num; done}
-    all_goals try {apply h_24; norm_num; done}
 
-
+    apply h_24; norm_num
 }
-
