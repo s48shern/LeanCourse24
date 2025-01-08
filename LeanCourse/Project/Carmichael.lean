@@ -1153,8 +1153,6 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     all_goals try {apply h_2_1; norm_num; done}
     all_goals try {apply h_2_2; norm_num; done}
     all_goals try {apply h_10; norm_num; done}
-    all_goals try {apply h_11; norm_num; done}
-    all_goals try {apply h_12; norm_num; done}
     all_goals try {apply h_13; norm_num; done}
     all_goals try {apply h_14; norm_num; done}
     all_goals try {apply h_15; norm_num; done}
@@ -1169,20 +1167,7 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     all_goals try {apply h_sq_5; norm_num; done}
     all_goals try {apply h_sq_7; norm_num; done}
     all_goals try {apply h_24; norm_num; done}
-    all_goals try {apply h_s9; norm_num; done}
-    all_goals try {apply h_s25; norm_num}
 
 
 }
-lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1 ∣ i-1)): ¬ isCarmichael i := by{
-  rw[Korselt];
-  push_neg;
-  intro h
-  use p
-  simp_all only [and_self, true_and]
-  obtain ⟨left, right⟩ := hdiv
-  · sorry
 
-  · exact hi2
-  · exact hi
-  }
