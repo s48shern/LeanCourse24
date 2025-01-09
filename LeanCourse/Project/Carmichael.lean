@@ -694,15 +694,25 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           refine (Nat.Prime.coprime_iff_not_dvd hpp).mpr ?_
           by_contra hnot
           rw [propext (Nat.dvd_div_iff_mul_dvd hdiv)] at hnot
-          have h: p ^ 2 ∣ n:= by exact?
+          rw [← Nat.pow_two] at hnot
+          exact h3 hnot
         }
         have h5: ∃b, b^(p-1)≡ 1 [ZMOD p] := by sorry
         obtain ⟨ b, hb ⟩ := h5
         have h6:∃a, a ≡ b [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by sorry
         obtain ⟨ a, ha ⟩ := h6
         have h7 : a.gcd (n/p) =1:= by {
-          sorry
-
+          have ha:= ha.2
+          have ha: (n/p:ℤ) ∣ a - 1 := Int.ModEq.dvd (_root_.id (Int.ModEq.symm ha))
+          rw [Int.dvd_def] at ha
+          obtain ⟨c, hc⟩:=ha
+          --rw [@gcd_eq_one_iff_coprime]
+          refine Tactic.NormNum.int_gcd_helper' 1 (-c) ?h₁ ?h₂ ?h₃
+          . simp
+          . simp
+          ring_nf
+          rw [← hc]
+          ring_nf
         }
         sorry
     . intro h
