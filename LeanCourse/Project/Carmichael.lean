@@ -1017,14 +1017,15 @@ theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
       . sorry
       . intro p hp
         sorry
-  }
+}
+
 #eval Squarefree 561
 lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
   rw[isCarmichael];
   push_neg;
   intro _ __1
   simp_all only
-  }
+}
 
 lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     have h1 : 561 = 3 * 11 * 17 := by norm_num
@@ -1051,13 +1052,11 @@ lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     constructor
     · norm_num
     · norm_num; exact h2
-
-
 }
+
 lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   constructor
-  ·
-    have h1 : 561 = 3 * 11 * 17 := by norm_num
+  · have h1 : 561 = 3 * 11 * 17 := by norm_num
     -- Step 2: Verify primes
     have p3 : Nat.Prime 3 := by exact Nat.prime_three
     have p11 : Nat.Prime 11 := by exact properDivisors_eq_singleton_one_iff_prime.mp rfl
@@ -1083,7 +1082,6 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
             · exact coprime_iff_isRelPrime.mp rfl
             · exact ⟨sq3, sq11⟩
           · exact sq17
-
       }
       contradiction
     · intro p hp
@@ -1136,7 +1134,6 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     have h_sq_5: (Nat.sqrt (i/5)) * (Nat.sqrt (i/5)) = (i/5)→ ¬ isCarmichael i := by sorry
     have h_sq_7: (Nat.sqrt (i/7)) * (Nat.sqrt (i/7)) = (i/7)→ ¬ isCarmichael i := by sorry
     interval_cases i
-
     all_goals try {apply h_4; norm_num; done}
     all_goals try {apply h_2; norm_num; done}
     all_goals try {apply h_3; norm_num; done}
@@ -1166,9 +1163,8 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     all_goals try {apply h_24; norm_num; done}
     all_goals try {apply h_s9; norm_num; done}
     all_goals try {apply h_s25; norm_num}
-
-
 }
+
 lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1 ∣ i-1)): ¬ isCarmichael i := by{
   rw[Korselt];
   push_neg;
@@ -1180,4 +1176,4 @@ lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.P
 
   · exact hi2
   · exact hi
-  }
+}
