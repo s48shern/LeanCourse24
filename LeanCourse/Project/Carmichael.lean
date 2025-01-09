@@ -495,7 +495,7 @@ lemma forall_prime_decomposition {n: ℕ} {s: Finset ℕ} (hn0: n>0): (∀ p, p�
         . refine maxPowDiv.le_of_dvd ?intro.intro.h₂.hp hn0 ?intro.intro.h₂.h
           exact Prime.one_lt hpp
           refine Nat.dvd_trans (maxPowDiv.pow_dvd p (n / x ^ x.maxPowDiv n)) ?intro.intro.h₂.h.h₂
-          refine div_dvd_of_dvd (maxPowDiv.pow_dvd x n)
+          exact div_dvd_of_dvd (maxPowDiv.pow_dvd x n)
       }
       have hfinal: ∀(x: ℕ), ∀(s: Finset ℕ), ((x ∣ n ∧ x.Prime ∧ x ∉ s ∧ (∀ p, p ∈ s → (Nat.Prime p ∧ p ∣ n))) → ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n):= by {
         intro x s h
