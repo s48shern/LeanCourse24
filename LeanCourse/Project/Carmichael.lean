@@ -495,7 +495,7 @@ lemma forall_prime_decomposition {n: ℕ} {s: Finset ℕ} (hn0: n>0): (∀ p, p�
         . refine maxPowDiv.le_of_dvd ?intro.intro.h₂.hp hn0 ?intro.intro.h₂.h
           exact Prime.one_lt hpp
           refine Nat.dvd_trans (maxPowDiv.pow_dvd p (n / x ^ x.maxPowDiv n)) ?intro.intro.h₂.h.h₂
-          refine div_dvd_of_dvd (maxPowDiv.pow_dvd x n)
+          exact div_dvd_of_dvd (maxPowDiv.pow_dvd x n)
       }
       have hfinal: ∀(x: ℕ), ∀(s: Finset ℕ), ((x ∣ n ∧ x.Prime ∧ x ∉ s ∧ (∀ p, p ∈ s → (Nat.Prime p ∧ p ∣ n))) → ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv (n / x ^ x.maxPowDiv n) = ∏ p ∈ s, (p:ℤ) ^ p.maxPowDiv n):= by {
         intro x s h
@@ -664,7 +664,6 @@ lemma exists_prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squar
   exact forall_prime_descomposition_squarefree hn0 hsqn h.1
 }
 
-
 theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
@@ -692,16 +691,28 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           contradiction
         }
         have h4: p.Coprime (n/p):= by{
-          refine coprime_iff_gcd_eq_one.mpr ?_
-          sorry
+          refine (Nat.Prime.coprime_iff_not_dvd hpp).mpr ?_
+          by_contra hnot
+          rw [propext (Nat.dvd_div_iff_mul_dvd hdiv)] at hnot
+          rw [← Nat.pow_two] at hnot
+          exact h3 hnot
         }
         have h5: ∃b, b^(p-1)≡ 1 [ZMOD p] := by sorry
         obtain ⟨ b, hb ⟩ := h5
         have h6:∃a, a ≡ b [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by sorry
         obtain ⟨ a, ha ⟩ := h6
         have h7 : a.gcd (n/p) =1:= by {
-          sorry
-
+          have ha:= ha.2
+          have ha: (n/p:ℤ) ∣ a - 1 := Int.ModEq.dvd (_root_.id (Int.ModEq.symm ha))
+          rw [Int.dvd_def] at ha
+          obtain ⟨c, hc⟩:=ha
+          --rw [@gcd_eq_one_iff_coprime]
+          refine Tactic.NormNum.int_gcd_helper' 1 (-c) ?h₁ ?h₂ ?h₃
+          . simp
+          . simp
+          ring_nf
+          rw [← hc]
+          ring_nf
         }
         sorry
     . intro h
@@ -769,43 +780,27 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
               intro p hp
               exact hintro p (mem_insert_of_mem hp)
               simp
-              have haux: (∀ p ∈ insert x s, Nat.Prime p ∧ p ∣ n) → (x:ℤ).natAbs.Coprime (∏ x ∈ s, (x:ℤ)).natAbs := by{
+              have haux: ∀s: Finset ℕ, (∏ x ∈ s, (x:ℤ)).natAbs = (∏ x ∈ s, x) := by {
+                intro s
                 induction s using Finset.induction with
-                  | empty => intro h2; exact coprime_of_dvd' fun k a a a ↦ a
-                  | @insert x2 s2 hxs2 ih2 => {
-                    intro hintro2
-                    rw [Finset.prod_insert hxs2]
-                    have hintro1: ¬ x∈ s2 := by {
-                      by_contra hnot
-                      exact hxs (Finset.mem_insert_of_mem hnot)
-                    }
-                    have hintro2: ((∀ p ∈ s2, Nat.Prime p ∧ p ∣ n) → a ^ (n - 1) ≡ 1 [ZMOD ∏ p ∈ s2, ↑p]) := sorry
-                    have hintro3: (∀ p ∈ insert x s2, Nat.Prime p ∧ p ∣ n) := by {
-                      intro p hp
-                      rw [@Finset.mem_insert] at hp
-                      obtain hp|hp:=hp
-                      . rw [hp]
-                        have hend: x∈ insert x (insert x2 s2) := by exact mem_insert_self x (insert x2 s2)
-                        exact hintro x hend
-                      . have hend: p ∈ insert x (insert x2 s2) := Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hp)
-                        exact hintro p hend
-                    }
-                    specialize ih2 hintro1 hintro2 hintro3
-                    rw [Int.natAbs_mul]
-                    refine Coprime.mul_right ?insert.insert.H1 (ih2 hintro3)
-                    have hx:= (hintro x (mem_insert_self x (insert x2 s2))).1
-                    have hx2:= (hintro x2 (Finset.mem_insert_of_mem (mem_insert_self x2 s2) )).1
-                    simp
-                    refine (coprime_primes hx hx2).mpr ?insert.insert.H1.a
-                    by_contra hnot
-                    have hlast: x ∈ insert x2 s2 := by {
-                      rw [hnot]
-                      exact mem_insert_self x2 s2
-                    }
-                    exact hxs hlast
-                  }
+                | empty => rfl
+                | @insert x2 s2 hxs2 ih2 => {
+                  rw [Finset.prod_insert hxs2]
+                  rw [Finset.prod_insert hxs2]
+                  rw [Int.natAbs_mul]
+                  rw [ih2]
+                  simp
+                }
               }
-              exact haux hintro
+              rw [haux s]
+              refine coprime_prod_right_iff.mpr ?insert.a
+              intro i hi
+              have hiprime:=(hintro i (Finset.mem_insert_of_mem hi)).1
+              have hxprime:=(hintro x (Finset.mem_insert_self x s)).1
+              refine (coprime_primes hxprime hiprime).mpr ?insert.a.a
+              by_contra hnot
+              rw [hnot] at hxs
+              exact hxs hi
             }
           }
           have hcond: ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by {
@@ -1022,13 +1017,15 @@ theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
       . sorry
       . intro p hp
         sorry
-  }
+}
+
 #eval Squarefree 561
 lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
   rw[isCarmichael];
   push_neg;
   intro _ __1
   simp_all only
+<<<<<<< HEAD
   }
 lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1:ℤ) ∣ (i-1:ℤ)): ¬ isCarmichael i := by{
   rw[Korselt];
@@ -1038,6 +1035,9 @@ lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.P
   simp_all only [and_self, true_and]
   obtain ⟨left, right⟩ := hdiv
   · exact fun a ↦ a
+=======
+}
+>>>>>>> 4de28a9eb8638473bd718ebd6b71efa391cac2fe
 
   · exact hi2
   · exact hi
@@ -1067,13 +1067,11 @@ lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     constructor
     · norm_num
     · norm_num; exact h2
-
-
 }
+
 lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   constructor
-  ·
-    have h1 : 561 = 3 * 11 * 17 := by norm_num
+  · have h1 : 561 = 3 * 11 * 17 := by norm_num
     -- Step 2: Verify primes
     have p3 : Nat.Prime 3 := by exact Nat.prime_three
     have p11 : Nat.Prime 11 := by exact properDivisors_eq_singleton_one_iff_prime.mp rfl
@@ -1099,7 +1097,6 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
             · exact coprime_iff_isRelPrime.mp rfl
             · exact ⟨sq3, sq11⟩
           · exact sq17
-
       }
       contradiction
     · intro p hp
@@ -1145,7 +1142,10 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     have h_sq_5: (Nat.sqrt (i/5)) * (Nat.sqrt (i/5)) = (i/5)→ ¬ isCarmichael i := by sorry
     have h_sq_7: (Nat.sqrt (i/7)) * (Nat.sqrt (i/7)) = (i/7)→ ¬ isCarmichael i := by sorry
     interval_cases i
+<<<<<<< HEAD
     all_goals try {apply h_sq; norm_num; done}
+=======
+>>>>>>> 4de28a9eb8638473bd718ebd6b71efa391cac2fe
     all_goals try {apply h_4; norm_num; done}
     all_goals try {apply h_2; norm_num; done}
     all_goals try {apply h_3; norm_num; done}
@@ -1159,6 +1159,7 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
     all_goals try {apply h_sq_3; norm_num; done}
     all_goals try {apply h_sq_5; norm_num; done}
     all_goals try {apply h_sq_7; norm_num; done}
+<<<<<<< HEAD
     all_goals try {apply h_2_1; norm_num; done}
     all_goals try {apply h_2_2; norm_num; done}
     all_goals try {apply h_10; norm_num; done}
@@ -1170,3 +1171,22 @@ lemma LowestCarmichael : isCarmichael 561 ∧ ∀ (i :ℕ ), i < 561 → ¬ isCa
 
     apply h_24; norm_num
 }
+=======
+    all_goals try {apply h_24; norm_num; done}
+    all_goals try {apply h_s9; norm_num; done}
+    all_goals try {apply h_s25; norm_num}
+}
+
+lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1 ∣ i-1)): ¬ isCarmichael i := by{
+  rw[Korselt];
+  push_neg;
+  intro h
+  use p
+  simp_all only [and_self, true_and]
+  obtain ⟨left, right⟩ := hdiv
+  · sorry
+
+  · exact hi2
+  · exact hi
+}
+>>>>>>> 4de28a9eb8638473bd718ebd6b71efa391cac2fe
