@@ -999,7 +999,7 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     exact h1n
 }
 
-theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
+@[simp] theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
   (∃ p1, ∃ p2, ∃ p3, Nat.Prime p1 ∧ p1 ∣ k ∧ Nat.Prime p2 ∧ p2 ∣ k ∧ Nat.Prime p3 ∧ p3 ∣ k ∧ ¬ p1=p2 ∧ ¬ p1=p3 ∧ ¬ p2=p3) ∧
   ∀ p, Nat.Prime p ∧ p ∣ k → p < Nat.sqrt k := by {
     intro h
@@ -1020,26 +1020,6 @@ theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
 }
 
 #eval Squarefree 561
-lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
-  rw[isCarmichael];
-  push_neg;
-  intro _ __1
-  simp_all only
-  }
-lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1:ℤ) ∣ (i-1:ℤ)): ¬ isCarmichael i := by{
-  rw[Korselt];
-  push_neg;
-  intro h
-  use p
-  simp_all only [and_self, true_and]
-  obtain ⟨left, right⟩ := hdiv
-  · exact fun a ↦ a
-
-  · exact hi2
-  · exact hi
-  }
-
-
 lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     have h1 : 561 = 3 * 11 * 17 := by norm_num
     have p3 : Nat.Prime 3 := by exact Nat.prime_three
@@ -1113,10 +1093,28 @@ lemma Carmichael561: isCarmichael 561 := by {
   · norm_num
   · norm_num
 }
+lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
+  rw[isCarmichael];
+  push_neg;
+  intro _ __1
+  simp_all only
+  }
+lemma NotCarmichaelPrimeDiv(p i:ℕ )(hi : i >1) (hi2: ¬ Nat.Prime i)(hp :Nat.Prime p) (hdiv: p ∣ i ∧ ¬ (p-1:ℤ) ∣ (i-1:ℤ)): ¬ isCarmichael i := by{
+  rw[Korselt];
+  push_neg;
+  intro h
+  use p
+  simp_all only [and_self, true_and]
+  obtain ⟨left, right⟩ := hdiv
+  · exact fun a ↦ a
+  · exact hi2
+  · exact hi
+  }
+
 lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   intro i hi
   have h_2: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
-  have h_3 : 2 ∣ i → ¬ isCarmichael i := by sorry
+  have h_3 : 2 ∣ i → ¬ isCarmichael i := by {sorry}
   have h_4 : 3∣ i ∧ ¬ 2 ∣ (i-1) →¬ isCarmichael i := by sorry
   have h_5 : 5∣ i ∧ ¬ 4 ∣ (i-1) →¬ isCarmichael i := by sorry
   have h_6 : 7∣ i ∧ ¬ 6 ∣ (i-1) →¬ isCarmichael i := by sorry
