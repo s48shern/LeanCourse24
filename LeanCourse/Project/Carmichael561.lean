@@ -153,12 +153,21 @@ lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.
   exact h2
   exact h3
  }
+lemma LowestCarmichael2 :∀ (i :ℕ ), i <10→ ¬ isCarmichael i:= by {
+  intro i hi
+  interval_cases i
+  have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
+  have h_3 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 3 ∧ 3∣ i ∧ ¬ (3-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 3 i a
 
+  all_goals try {apply h_3; norm_num; done}
+
+
+
+}
 
 lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   intro i hi
   have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
-  have h_2 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 2∧ 2∣ i ∧ ¬ (2-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 2 i a
   have h_3 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 3 ∧ 3∣ i ∧ ¬ (3-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 3 i a
   have h_5: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 5 ∧ 5∣ i ∧ ¬ (5-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 5 i a
   have h_7: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 7 ∧ 7∣ i ∧ ¬ (7-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 7 i a
@@ -172,9 +181,9 @@ lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   have h_37: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 37 ∧ 37∣ i ∧ ¬ (37-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 37 i a
   have h_41: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 41 ∧ 41∣ i ∧ ¬ (41-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 41 i a
   have h_sq :1>0 ∧ 1∣i ∧ ¬Nat.Prime i ∧ i/1>1 ∧  (Nat.sqrt (i/1)) * (Nat.sqrt (i/1)) = i/1→ ¬ isCarmichael i := by exact fun a ↦ sqdiv2 i 1 a
-  have h_s4: Nat.Prime 2∧ ¬ Nat.Prime i∧ i >1∧ 2^2 ∣ i∧  2^2 ∣ i →  ¬ isCarmichael i := by exac
-  have h_s9: Nat.Prime 3∧ ¬ Nat.Prime i∧ i >1∧ 3^2 ∣ i ∧ 3^2∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 3 a
-  have h_s25 : Nat.Prime 5∧ ¬ Nat.Prime i∧ i >1∧ 5^2 ∣ i ∧ 5^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 5 a
+  have h_s4: Nat.Prime 2∧ ¬ Nat.Prime i∧ i >1∧ 2^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 2 a
+  have h_s9: Nat.Prime 3∧ ¬ Nat.Prime i∧ i >1∧ 3^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 3 a
+  have h_s25 : Nat.Prime 5∧ ¬ Nat.Prime i∧ i >1∧ 5^2 ∣ i  →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 5 a
   have h_sq_3 : 3>0 ∧ 3∣i ∧ ¬Nat.Prime i ∧ i/3>1 ∧ (Nat.sqrt (i/3)) * (Nat.sqrt (i/3)) = (i/3)→ ¬ isCarmichael i := by  exact fun a ↦ sqdiv2 i 3 a
   have h_sq_5: 5>0 ∧ 5∣i ∧ ¬Nat.Prime i ∧ i/5>1∧ (Nat.sqrt (i/5)) * (Nat.sqrt (i/5)) = (i/5)→ ¬ isCarmichael i := by  exact fun a ↦ sqdiv2 i 5 a
   have h_sq_7: 7>0 ∧ 7∣i ∧ ¬Nat.Prime i ∧ i/7>1 ∧ (Nat.sqrt (i/7)) * (Nat.sqrt (i/7)) = (i/7)→ ¬ isCarmichael i := by exact fun a ↦ sqdiv2 i 7 a
