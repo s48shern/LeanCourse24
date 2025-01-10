@@ -102,7 +102,8 @@ lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   have h_3 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 2∧ 2∣ i ∧ ¬ (2-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 2 i a
   have h_4 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 3 ∧ 3∣ i ∧ ¬ (3-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 3 i a
   have h_5: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 5 ∧ 5∣ i ∧ ¬ (5-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 5 i a
-  have h_5: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 5 ∧ 5∣ i ∧ ¬ (5-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 5 i a
+  have h_7: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 7 ∧ 7∣ i ∧ ¬ (7-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 7 i a
+  have h_11: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 11 ∧ 11∣ i ∧ ¬ (11-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 11 i a
 
   have h_sq : (Nat.sqrt i) * (Nat.sqrt i) = i → ¬ isCarmichael i := by sorry
   have h_s9: 9 ∣ i →  ¬ isCarmichael i := by sorry
@@ -113,6 +114,6 @@ lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   interval_cases i
   all_goals try {apply h_sq; norm_num; done}
   all_goals try {apply h_4; norm_num; done}
-  sorry
+  all_goals sorry
 
 }
