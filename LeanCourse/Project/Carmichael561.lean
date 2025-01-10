@@ -368,9 +368,7 @@ lemma LowestCarmichael3 :∀ (i :ℕ ), i ≥ 200∧  i < 300→ ¬ isCarmichael
   all_goals try {apply h_139; norm_num; done}
   all_goals try {apply h_149; norm_num}
 }
-
-
-lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 400∧  i < 500→ ¬ isCarmichael i:= by {
+lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400→ ¬ isCarmichael i:= by {
   intro i hi
   have h_0: i < 2 → ¬ isCarmichael i := by intro haux; exact ncarm0and1 i haux
   have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
@@ -410,7 +408,123 @@ lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 400∧  i < 500→ ¬ isCarmichael
   have h_149: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 149 ∧ 149∣ i ∧ ¬ (149-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 149 i a
   have h_151: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 151 ∧ 151∣ i ∧ ¬ (151-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 151 i a
   have h_157: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 157 ∧ 157∣ i ∧ ¬ (157-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 157 i a
-  have h_163: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 163 ∧ 162∣ i ∧ ¬ (163-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 163 i a
+  have h_163: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 163 ∧ 163∣ i ∧ ¬ (163-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 163 i a
+  have h_167: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 167 ∧ 167∣ i ∧ ¬ (167-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 167 i a
+  have h_173: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 173 ∧ 173∣ i ∧ ¬ (173-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 173 i a
+  have h_179: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 179 ∧ 179∣ i ∧ ¬ (179-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 179 i a
+  have h_181: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 181 ∧ 181∣ i ∧ ¬ (181-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 181 i a
+  have h_191: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 191 ∧ 191∣ i ∧ ¬ (191-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 191 i a
+  have h_193: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 193 ∧ 193∣ i ∧ ¬ (193-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 193 i a
+  have h_197: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 197 ∧ 197∣ i ∧ ¬ (197-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 197 i a
+  have h_199: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 199 ∧ 199∣ i ∧ ¬ (199-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 199 i a
+  have h_sq :1>0 ∧ 1∣i ∧ ¬Nat.Prime i ∧ i/1>1 ∧  (Nat.sqrt (i/1)) * (Nat.sqrt (i/1)) = i/1→ ¬ isCarmichael i := by exact fun a ↦ sqdiv2 i 1 a
+  have h_s4: Nat.Prime 2∧ ¬ Nat.Prime i∧ i >1∧ 2^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 2 a
+  have h_s9: Nat.Prime 3∧ ¬ Nat.Prime i∧ i >1∧ 3^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 3 a
+  have h_s25 : Nat.Prime 5∧ ¬ Nat.Prime i∧ i >1∧ 5^2 ∣ i  →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 5 a
+  have h_sq_3 : 3>0 ∧ 3∣i ∧ ¬Nat.Prime i ∧ i/3>1 ∧ (Nat.sqrt (i/3)) * (Nat.sqrt (i/3)) = (i/3)→ ¬ isCarmichael i := by  exact fun a ↦ sqdiv2 i 3 a
+  have h_sq_5: 5>0 ∧ 5∣i ∧ ¬Nat.Prime i ∧ i/5>1∧ (Nat.sqrt (i/5)) * (Nat.sqrt (i/5)) = (i/5)→ ¬ isCarmichael i := by  exact fun a ↦ sqdiv2 i 5 a
+  have h_sq_7: 7>0 ∧ 7∣i ∧ ¬Nat.Prime i ∧ i/7>1 ∧ (Nat.sqrt (i/7)) * (Nat.sqrt (i/7)) = (i/7)→ ¬ isCarmichael i := by exact fun a ↦ sqdiv2 i 7 a
+  obtain ⟨left, right⟩ := hi
+  interval_cases i
+  all_goals try {apply h_sq; norm_num; done}
+  all_goals try {apply h_sq_3; norm_num; done}
+  all_goals try {apply h_sq_5; norm_num; done}
+  all_goals try {apply h_sq_7; norm_num; done}
+  all_goals try {apply h_s4; norm_num; done}
+  all_goals try {apply h_s9; norm_num; done}
+  all_goals try {apply h_s25; norm_num; done}
+  all_goals try {apply h_1; norm_num; done}
+  all_goals try {apply h_3; norm_num; done}
+  all_goals try {apply h_5; norm_num; done}
+  all_goals try {apply h_7; norm_num; done}
+  all_goals try {apply h_11; norm_num; done}
+  all_goals try {apply h_13; norm_num; done}
+  all_goals try {apply h_17; norm_num; done}
+  all_goals try {apply h_19; norm_num; done}
+  all_goals try {apply h_23; norm_num; done}
+  all_goals try {apply h_29; norm_num; done}
+  all_goals try {apply h_31; norm_num; done}
+  all_goals try {apply h_37; norm_num; done}
+  all_goals try {apply h_41; norm_num; done}
+  all_goals try {apply h_43; norm_num; done}
+  all_goals try {apply h_47; norm_num; done}
+  all_goals try {apply h_53; norm_num; done}
+  all_goals try {apply h_59; norm_num; done}
+  all_goals try {apply h_61; norm_num; done}
+  all_goals try {apply h_67; norm_num; done}
+  all_goals try {apply h_71; norm_num; done}
+  all_goals try {apply h_73; norm_num; done}
+  all_goals try {apply h_79; norm_num; done}
+  all_goals try {apply h_83; norm_num; done}
+  all_goals try {apply h_89; norm_num; done}
+  all_goals try {apply h_97; norm_num; done}
+  all_goals try {apply h_101; norm_num; done}
+  all_goals try {apply h_103; norm_num; done}
+  all_goals try {apply h_107; norm_num; done}
+  all_goals try {apply h_109; norm_num; done}
+  all_goals try {apply h_113; norm_num; done}
+  all_goals try {apply h_127; norm_num; done}
+  all_goals try {apply h_131; norm_num; done}
+  all_goals try {apply h_137; norm_num; done}
+  all_goals try {apply h_139; norm_num; done}
+  all_goals try {apply h_149; norm_num; done}
+  all_goals try {apply h_151; norm_num; done}
+  all_goals try {apply h_157; norm_num; done}
+  all_goals try {apply h_163; norm_num; done}
+  all_goals try {apply h_167; norm_num; done}
+  all_goals try {apply h_173; norm_num; done}
+  all_goals try {apply h_179; norm_num; done}
+  all_goals try {apply h_181; norm_num; done}
+  all_goals try {apply h_191; norm_num; done}
+  all_goals try {apply h_193; norm_num; done}
+  all_goals try {apply h_197; norm_num; done}
+  all_goals try {apply h_199; norm_num; done}
+
+
+}
+
+
+lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400∧  i < 561→ ¬ isCarmichael i:= by {
+  intro i hi
+  have h_0: i < 2 → ¬ isCarmichael i := by intro haux; exact ncarm0and1 i haux
+  have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
+  have h_3 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 3 ∧ 3∣ i ∧ ¬ (3-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 3 i a
+  have h_5: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 5 ∧ 5∣ i ∧ ¬ (5-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 5 i a
+  have h_7: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 7 ∧ 7∣ i ∧ ¬ (7-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 7 i a
+  have h_11: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 11 ∧ 11∣ i ∧ ¬ (11-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 11 i a
+  have h_13: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 13 ∧ 13∣ i ∧ ¬ (13-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 13 i a
+  have h_17: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 17 ∧ 17∣ i ∧ ¬ (17-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 17 i a
+  have h_19: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 19 ∧ 19∣ i ∧ ¬ (19-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 19 i a
+  have h_23: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 23 ∧ 23∣ i ∧ ¬ (23-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 23 i a
+  have h_29: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 29 ∧ 29∣ i ∧ ¬ (29-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 29 i a
+  have h_31: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 31 ∧ 31∣ i ∧ ¬ (31-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 31 i a
+  have h_37: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 37 ∧ 37∣ i ∧ ¬ (37-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 37 i a
+  have h_41: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 41 ∧ 41∣ i ∧ ¬ (41-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 41 i a
+  have h_43: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 43 ∧ 43∣ i ∧ ¬ (43-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 43 i a
+  have h_47: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 47 ∧ 47∣ i ∧ ¬ (47-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 47 i a
+  have h_53: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 53 ∧ 53∣ i ∧ ¬ (53-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 53 i a
+  have h_59: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 59 ∧ 59∣ i ∧ ¬ (59-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 59 i a
+  have h_61: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 61 ∧ 61∣ i ∧ ¬ (61-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 61 i a
+  have h_67: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 67 ∧ 67∣ i ∧ ¬ (67-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 67 i a
+  have h_71: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 71 ∧ 71∣ i ∧ ¬ (71-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 71 i a
+  have h_73: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 73 ∧ 73∣ i ∧ ¬ (73-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 73 i a
+  have h_79: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 79 ∧ 79∣ i ∧ ¬ (79-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 79 i a
+  have h_83: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 83 ∧ 83∣ i ∧ ¬ (83-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 83 i a
+  have h_89: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 89 ∧ 89∣ i ∧ ¬ (89-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 89 i a
+  have h_97: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 97 ∧ 97∣ i ∧ ¬ (97-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 97 i a
+  have h_101: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 101 ∧ 101∣ i ∧ ¬ (101-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 101 i a
+  have h_103: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 103 ∧ 103∣ i ∧ ¬ (103-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 103 i a
+  have h_107: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 107 ∧ 107∣ i ∧ ¬ (107-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 107 i a
+  have h_109: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 109 ∧ 109∣ i ∧ ¬ (109-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 109 i a
+  have h_113: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 113 ∧ 113∣ i ∧ ¬ (113-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 113 i a
+  have h_127: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 127 ∧ 127∣ i ∧ ¬ (127-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 127 i a
+  have h_131: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 131 ∧ 131∣ i ∧ ¬ (131-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 131 i a
+  have h_137: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 137 ∧ 137∣ i ∧ ¬ (137-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 137 i a
+  have h_139: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 139 ∧ 139∣ i ∧ ¬ (139-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 139 i a
+  have h_149: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 149 ∧ 149∣ i ∧ ¬ (149-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 149 i a
+  have h_151: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 151 ∧ 151∣ i ∧ ¬ (151-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 151 i a
+  have h_157: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 157 ∧ 157∣ i ∧ ¬ (157-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 157 i a
+  have h_163: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 163 ∧ 163∣ i ∧ ¬ (163-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 163 i a
   have h_167: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 167 ∧ 167∣ i ∧ ¬ (167-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 167 i a
   have h_173: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 173 ∧ 173∣ i ∧ ¬ (173-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 173 i a
   have h_179: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 179 ∧ 179∣ i ∧ ¬ (179-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 179 i a
@@ -538,4 +652,28 @@ lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 400∧  i < 500→ ¬ isCarmichael
   all_goals try {apply h_269; norm_num; done}
   all_goals try {apply h_271; norm_num; done}
   all_goals try {apply h_277; norm_num; done}
+
+}
+lemma smallest :∀ (i :ℕ ), i<561 → ¬ isCarmichael i:= by{
+  intro i hj
+  if h0 : i < 100 then
+    exact LowestCarmichael i h0
+  else if h1 : i < 200 then
+    have hi :i ≥ 100 := by linarith
+    have hi :i ≥ 100∧ i <200 := by exact And.symm ⟨h1, hi⟩
+    exact LowestCarmichael2 i hi
+
+  else if h2 : i < 300 then
+    have hi :i ≥ 200 := by linarith
+    have hi :i ≥ 200∧ i <300 := by exact And.symm ⟨h2, hi⟩
+    exact LowestCarmichael3 i hi
+  else if h3 : i < 400 then
+    -- Case: 300 ≤ n < 400
+    have hi :i ≥ 300 := by linarith
+    have hi :i ≥ 300∧ i <400 := by exact And.symm ⟨h3, hi⟩
+    exact LowestCarmichael4 i hi
+  else
+    have hi :i ≥ 400 := by linarith
+    have hi :i ≥ 400∧ i <561 := by exact And.symm ⟨hj, hi⟩
+    exact LowestCarmichael5 i hi
 }
