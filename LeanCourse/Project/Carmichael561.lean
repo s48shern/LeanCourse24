@@ -153,17 +153,7 @@ lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.
   exact h2
   exact h3
  }
-lemma LowestCarmichael2 :∀ (i :ℕ ), i <10→ ¬ isCarmichael i:= by {
-  intro i hi
-  interval_cases i
-  have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
-  have h_3 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 3 ∧ 3∣ i ∧ ¬ (3-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 3 i a
 
-  all_goals try {apply h_3; norm_num; done}
-
-
-
-}
 
 lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   intro i hi
@@ -209,6 +199,7 @@ lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   all_goals try {apply h_31; norm_num; done}
   all_goals try {apply h_37; norm_num; done}
   all_goals try {apply h_41; norm_num; done}
+
 
 
 }
