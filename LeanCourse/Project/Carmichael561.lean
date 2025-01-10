@@ -440,7 +440,6 @@ lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400→ ¬ isCarmichael
   all_goals try {apply h_11; norm_num; done}
   all_goals try {apply h_13; norm_num; done}
   all_goals try {apply h_17; norm_num; done}
-  all_goals try {apply h_19; norm_num; done}
   all_goals try {apply h_23; norm_num; done}
   all_goals try {apply h_29; norm_num; done}
   all_goals try {apply h_31; norm_num; done}
