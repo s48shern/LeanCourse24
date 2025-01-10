@@ -441,22 +441,10 @@ lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400→ ¬ isCarmichael
   all_goals try {apply h_13; norm_num; done}
   all_goals try {apply h_17; norm_num; done}
   all_goals try {apply h_23; norm_num; done}
-  all_goals try {apply h_29; norm_num; done}
   all_goals try {apply h_31; norm_num; done}
-  all_goals try {apply h_37; norm_num; done}
-  all_goals try {apply h_41; norm_num; done}
   all_goals try {apply h_43; norm_num; done}
-  all_goals try {apply h_47; norm_num; done}
-  all_goals try {apply h_53; norm_num; done}
-  all_goals try {apply h_59; norm_num; done}
   all_goals try {apply h_61; norm_num; done}
-  all_goals try {apply h_67; norm_num; done}
-  all_goals try {apply h_71; norm_num; done}
   all_goals try {apply h_73; norm_num; done}
-  all_goals try {apply h_79; norm_num; done}
-  all_goals try {apply h_83; norm_num; done}
-  all_goals try {apply h_89; norm_num; done}
-  all_goals try {apply h_97; norm_num; done}
   all_goals try {apply h_101; norm_num; done}
   all_goals try {apply h_103; norm_num; done}
   all_goals try {apply h_107; norm_num; done}
@@ -464,9 +452,6 @@ lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400→ ¬ isCarmichael
   all_goals try {apply h_113; norm_num; done}
   all_goals try {apply h_127; norm_num; done}
   all_goals try {apply h_131; norm_num; done}
-  all_goals try {apply h_137; norm_num; done}
-  all_goals try {apply h_139; norm_num; done}
-  all_goals try {apply h_149; norm_num; done}
   all_goals try {apply h_151; norm_num; done}
   all_goals try {apply h_157; norm_num; done}
   all_goals try {apply h_163; norm_num; done}
@@ -599,30 +584,17 @@ lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400∧  i < 561→ ¬ isCarmichael
   all_goals try {apply h_13; norm_num; done}
   all_goals try {apply h_17; norm_num; done}
   all_goals try {apply h_19; norm_num; done}
-  all_goals try {apply h_23; norm_num; done}
-  all_goals try {apply h_29; norm_num; done}
   all_goals try {apply h_31; norm_num; done}
   all_goals try {apply h_37; norm_num; done}
   all_goals try {apply h_41; norm_num; done}
-  all_goals try {apply h_43; norm_num; done}
-  all_goals try {apply h_47; norm_num; done}
-  all_goals try {apply h_53; norm_num; done}
-  all_goals try {apply h_59; norm_num; done}
   all_goals try {apply h_61; norm_num; done}
   all_goals try {apply h_67; norm_num; done}
-  all_goals try {apply h_71; norm_num; done}
   all_goals try {apply h_73; norm_num; done}
   all_goals try {apply h_79; norm_num; done}
-  all_goals try {apply h_83; norm_num; done}
   all_goals try {apply h_89; norm_num; done}
   all_goals try {apply h_97; norm_num; done}
   all_goals try {apply h_101; norm_num; done}
-  all_goals try {apply h_103; norm_num; done}
-  all_goals try {apply h_107; norm_num; done}
   all_goals try {apply h_109; norm_num; done}
-  all_goals try {apply h_113; norm_num; done}
-  all_goals try {apply h_127; norm_num; done}
-  all_goals try {apply h_131; norm_num; done}
   all_goals try {apply h_137; norm_num; done}
   all_goals try {apply h_139; norm_num; done}
   all_goals try {apply h_149; norm_num; done}
@@ -633,11 +605,6 @@ lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400∧  i < 561→ ¬ isCarmichael
   all_goals try {apply h_173; norm_num; done}
   all_goals try {apply h_179; norm_num; done}
   all_goals try {apply h_181; norm_num; done}
-  all_goals try {apply h_191; norm_num; done}
-  all_goals try {apply h_193; norm_num; done}
-  all_goals try {apply h_197; norm_num; done}
-  all_goals try {apply h_199; norm_num; done}
-  all_goals try {apply h_199; norm_num; done}
   all_goals try {apply h_211; norm_num; done}
   all_goals try {apply h_223; norm_num; done}
   all_goals try {apply h_227; norm_num; done}
@@ -650,7 +617,7 @@ lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400∧  i < 561→ ¬ isCarmichael
   all_goals try {apply h_263; norm_num; done}
   all_goals try {apply h_269; norm_num; done}
   all_goals try {apply h_271; norm_num; done}
-  all_goals try {apply h_277; norm_num; done}
+  all_goals try {apply h_277; norm_num; }
 
 }
 lemma smallest :∀ (i :ℕ ), i<561 → ¬ isCarmichael i:= by{
