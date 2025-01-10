@@ -104,6 +104,14 @@ lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
   have h_5: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 5 ∧ 5∣ i ∧ ¬ (5-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 5 i a
   have h_7: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 7 ∧ 7∣ i ∧ ¬ (7-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 7 i a
   have h_11: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 11 ∧ 11∣ i ∧ ¬ (11-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 11 i a
+  have h_13: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 13 ∧ 13∣ i ∧ ¬ (13-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 13 i a
+  have h_17: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 17 ∧ 17∣ i ∧ ¬ (17-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 17 i a
+  have h_19: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 19 ∧ 19∣ i ∧ ¬ (19-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 19 i a
+  have h_23: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 23 ∧ 23∣ i ∧ ¬ (23-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 23 i a
+  have h_29: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 29 ∧ 29∣ i ∧ ¬ (29-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 29 i a
+  have h_31: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 31 ∧ 31∣ i ∧ ¬ (31-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 31 i a
+  have h_37: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 37 ∧ 37∣ i ∧ ¬ (37-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 37 i a
+  have h_41: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 41 ∧ 41∣ i ∧ ¬ (41-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 41 i a
 
   have h_sq : (Nat.sqrt i) * (Nat.sqrt i) = i → ¬ isCarmichael i := by sorry
   have h_s9: 9 ∣ i →  ¬ isCarmichael i := by sorry
