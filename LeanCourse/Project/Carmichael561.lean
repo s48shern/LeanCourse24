@@ -154,8 +154,10 @@ lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.
   exact h3
  }
 
-
-lemma LowestCarmichael :∀ (i :ℕ ), i < 561 → ¬ isCarmichael i:= by {
+lemma ncarm0and1 (i :ℕ ) (h: i < 2): ¬ isCarmichael i = by{
+  exact?
+}
+lemma LowestCarmichael :∀ (i :ℕ ), i < 70→ ¬ isCarmichael i:= by {
   intro i hi
   have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
   have h_3 : i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 3 ∧ 3∣ i ∧ ¬ (3-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 3 i a
