@@ -188,15 +188,6 @@ lemma LowestCarmichael :∀ (i :ℕ ), i < 561→ ¬ isCarmichael i:= by {
   have h_83: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 83 ∧ 83∣ i ∧ ¬ (83-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 83 i a
   have h_89: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 89 ∧ 89∣ i ∧ ¬ (89-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 89 i a
   have h_97: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 97 ∧ 97∣ i ∧ ¬ (97-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 97 i a
-  have h_101: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 101 ∧ 101∣ i ∧ ¬ (101-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 101 i a
-  have h_103: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 103 ∧ 103∣ i ∧ ¬ (103-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 103 i a
-  have h_107: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 107 ∧ 107∣ i ∧ ¬ (107-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 107 i a
-  have h_109: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 109 ∧ 109∣ i ∧ ¬ (109-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 109 i a
-  have h_113: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 113 ∧ 113∣ i ∧ ¬ (113-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 113 i a
-  have h_127: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 127 ∧ 127∣ i ∧ ¬ (127-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 127 i a
-  have h_131: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 131 ∧ 131∣ i ∧ ¬ (131-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 131 i a
-  have h_137: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 137 ∧ 137∣ i ∧ ¬ (137-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 137 i a
-  have h_139: i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 139 ∧ 139∣ i ∧ ¬ (139-1) ∣ (i-1:ℤ)→¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrimeDiv 139 i a
 
   have h_sq :1>0 ∧ 1∣i ∧ ¬Nat.Prime i ∧ i/1>1 ∧  (Nat.sqrt (i/1)) * (Nat.sqrt (i/1)) = i/1→ ¬ isCarmichael i := by exact fun a ↦ sqdiv2 i 1 a
   have h_s4: Nat.Prime 2∧ ¬ Nat.Prime i∧ i >1∧ 2^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 2 a
