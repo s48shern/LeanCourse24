@@ -692,16 +692,42 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           contradiction
         }
         have h4: p.Coprime (n/p):= by{
-          refine coprime_iff_gcd_eq_one.mpr ?_
-          sorry
+          refine (Nat.Prime.coprime_iff_not_dvd hpp).mpr ?_
+          by_contra hnot
+          rw [propext (Nat.dvd_div_iff_mul_dvd hdiv)] at hnot
+          rw [← Nat.pow_two] at hnot
+          exact h3 hnot
         }
-        have h5: ∃b, b^(p-1)≡ 1 [ZMOD p] := by sorry
+        have h5: ∃b, b^(p-1)≡ 1 [ZMOD p] := by {
+          use 1
+          refine ModEq.pow_card_sub_one_eq_one hpp ?h.hpn
+          exact isCoprime_one_left
+        }
+        --have h5: ∀b, b≡0 [ZMOD p] ∨ b^(p-1)≡ 1 [ZMOD p] := by {
+        --  intro b
+        --  by_cases hcase: b ≡ 0 [ZMOD ↑p]
+        --  left;exact hcase
+        --  right
+        --  refine ModEq.pow_card_sub_one_eq_one hpp ?_
+        --  rw [@Int.modEq_zero_iff_dvd] at hcase
+        --  rw[isCoprime_comm, Prime.coprime_iff_not_dvd]
+        --  exact hcase
+        --  exact prime_iff_prime_int.mp hpp
+        --}
         obtain ⟨ b, hb ⟩ := h5
         have h6:∃a, a ≡ b [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by sorry
         obtain ⟨ a, ha ⟩ := h6
         have h7 : a.gcd (n/p) =1:= by {
-          sorry
-
+          have ha:= ha.2
+          have ha: (n/p:ℤ) ∣ a - 1 := Int.ModEq.dvd (_root_.id (Int.ModEq.symm ha))
+          rw [Int.dvd_def] at ha
+          obtain ⟨c, hc⟩:=ha
+          refine Tactic.NormNum.int_gcd_helper' 1 (-c) ?h₁ ?h₂ ?h₃
+          . simp
+          . simp
+          ring_nf
+          rw [← hc]
+          ring_nf
         }
         sorry
     . intro h
@@ -769,43 +795,27 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
               intro p hp
               exact hintro p (mem_insert_of_mem hp)
               simp
-              have haux: (∀ p ∈ insert x s, Nat.Prime p ∧ p ∣ n) → (x:ℤ).natAbs.Coprime (∏ x ∈ s, (x:ℤ)).natAbs := by{
+              have haux: ∀s: Finset ℕ, (∏ x ∈ s, (x:ℤ)).natAbs = (∏ x ∈ s, x) := by {
+                intro s
                 induction s using Finset.induction with
-                  | empty => intro h2; exact coprime_of_dvd' fun k a a a ↦ a
-                  | @insert x2 s2 hxs2 ih2 => {
-                    intro hintro2
-                    rw [Finset.prod_insert hxs2]
-                    have hintro1: ¬ x∈ s2 := by {
-                      by_contra hnot
-                      exact hxs (Finset.mem_insert_of_mem hnot)
-                    }
-                    have hintro2: ((∀ p ∈ s2, Nat.Prime p ∧ p ∣ n) → a ^ (n - 1) ≡ 1 [ZMOD ∏ p ∈ s2, ↑p]) := sorry
-                    have hintro3: (∀ p ∈ insert x s2, Nat.Prime p ∧ p ∣ n) := by {
-                      intro p hp
-                      rw [@Finset.mem_insert] at hp
-                      obtain hp|hp:=hp
-                      . rw [hp]
-                        have hend: x∈ insert x (insert x2 s2) := by exact mem_insert_self x (insert x2 s2)
-                        exact hintro x hend
-                      . have hend: p ∈ insert x (insert x2 s2) := Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hp)
-                        exact hintro p hend
-                    }
-                    specialize ih2 hintro1 hintro2 hintro3
-                    rw [Int.natAbs_mul]
-                    refine Coprime.mul_right ?insert.insert.H1 (ih2 hintro3)
-                    have hx:= (hintro x (mem_insert_self x (insert x2 s2))).1
-                    have hx2:= (hintro x2 (Finset.mem_insert_of_mem (mem_insert_self x2 s2) )).1
-                    simp
-                    refine (coprime_primes hx hx2).mpr ?insert.insert.H1.a
-                    by_contra hnot
-                    have hlast: x ∈ insert x2 s2 := by {
-                      rw [hnot]
-                      exact mem_insert_self x2 s2
-                    }
-                    exact hxs hlast
-                  }
+                | empty => rfl
+                | @insert x2 s2 hxs2 ih2 => {
+                  rw [Finset.prod_insert hxs2]
+                  rw [Finset.prod_insert hxs2]
+                  rw [Int.natAbs_mul]
+                  rw [ih2]
+                  simp
+                }
               }
-              exact haux hintro
+              rw [haux s]
+              refine coprime_prod_right_iff.mpr ?insert.a
+              intro i hi
+              have hiprime:=(hintro i (Finset.mem_insert_of_mem hi)).1
+              have hxprime:=(hintro x (Finset.mem_insert_self x s)).1
+              refine (coprime_primes hxprime hiprime).mpr ?insert.a.a
+              by_contra hnot
+              rw [hnot] at hxs
+              exact hxs hi
             }
           }
           have hcond: ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by {
