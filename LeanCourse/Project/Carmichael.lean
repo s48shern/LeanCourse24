@@ -722,7 +722,6 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           have hp : p = 1 :=by apply Nat.eq_one_of_dvd_one; norm_cast at haux
           have hp' : ¬ Nat.Prime p:=by rw [hp];exact Nat.not_prime_one
           contradiction
-
         }
         simp [hb] at h5
         have h6:∃a, a ≡ ↑(p-1) [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by {
@@ -747,7 +746,16 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           ring_nf
         }
         have h8 : a^(n-1) ≡ 1 [ZMOD n] := by{
-          exact?
+          obtain ⟨l, r⟩:=ha
+          sorry
+        }
+        have h9 : a^(n-1) ≡ 1 [ZMOD p] := by{
+          refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
+          calc (p:ℤ) ∣ n := by norm_cast;
+          _ ∣ a ^ (n - 1) - 1 := by exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h8))
+        }
+        have h9 : (p-1)^(n-1) ≡ 1 [ZMOD p]:= by {
+          calc (p-1)^(n-1) ≡ 1 [ZMOD p]
         }
     . intro h
       rw [isCarmichael]
