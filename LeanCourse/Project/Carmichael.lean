@@ -710,12 +710,12 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           exact prime_iff_prime_int.mp hpp
         }
 
-        specialize h5 ↑(p-1)
+        specialize h5 ↑(p - 1)
 
         have hb : ¬ ↑(p - 1) ≡ 0 [ZMOD ↑p]:= by{
           by_contra hc
           have haux: 1≡ 0 [ZMOD p]:= by {
-            have haux':p ≡ 1 [ZMOD p]:= by refine Int.modEq_iff_dvd.mpr ?_; rw [@Int.modEq_zero_iff_dvd] at hc; exact dvd_sub_comm.mp hc
+            have haux':p ≡ 1 [ZMOD p]:= by refine Int.modEq_iff_dvd.mpr ?_; rw [@Int.modEq_zero_iff_dvd] at hc; sorry
             calc 1 ≡ p [ZMOD p] := by exact _root_.id (Int.ModEq.symm haux')
             _ ≡ 0[ZMOD p] := by refine Dvd.dvd.modEq_zero_int ?h; rfl
           }
@@ -760,7 +760,7 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           _ ≡ 1 [ZMOD p] := by exact h9
         }
         have hord : orderOf (p-1) = (p-1) := by {
-          apply?
+          sorry
 
 
 
