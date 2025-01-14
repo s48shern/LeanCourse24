@@ -3,7 +3,7 @@ import LeanCourse.Project.Carmichael
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical
 
-#eval Squarefree 561
+
 lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     have h1 : 561 = 3 * 11 * 17 := by norm_num
     have p3 : Nat.Prime 3 := by exact Nat.prime_three
@@ -462,7 +462,7 @@ lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400→ ¬ isCarmichael
   all_goals try {apply h_191; norm_num; done}
   all_goals try {apply h_193; norm_num; done}
   all_goals try {apply h_197; norm_num; done}
-  all_goals try {apply h_199; norm_num; done}
+  all_goals try {apply h_199; norm_num}
 
 
 }
@@ -628,7 +628,6 @@ lemma smallest :∀ (i :ℕ ), i<561 → ¬ isCarmichael i:= by{
     have hi :i ≥ 100 := by linarith
     have hi :i ≥ 100∧ i <200 := by exact And.symm ⟨h1, hi⟩
     exact LowestCarmichael2 i hi
-
   else if h2 : i < 300 then
     have hi :i ≥ 200 := by linarith
     have hi :i ≥ 200∧ i <300 := by exact And.symm ⟨h2, hi⟩

@@ -698,24 +698,41 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           rw [← Nat.pow_two] at hnot
           exact h3 hnot
         }
-        have h5: ∃b, b^(p-1)≡ 1 [ZMOD p] := by {
-          use 1
-          refine ModEq.pow_card_sub_one_eq_one hpp ?h.hpn
-          exact isCoprime_one_left
+
+        have h5: ∀b, b≡0 [ZMOD p] ∨ b^(p-1)≡ 1 [ZMOD p] := by {
+          intro b
+          by_cases hcase: b ≡ 0 [ZMOD ↑p]
+          left;exact hcase
+          right
+          refine ModEq.pow_card_sub_one_eq_one hpp ?_
+          rw [@Int.modEq_zero_iff_dvd] at hcase
+          rw[isCoprime_comm, Prime.coprime_iff_not_dvd]
+          exact hcase
+          exact prime_iff_prime_int.mp hpp
         }
-        --have h5: ∀b, b≡0 [ZMOD p] ∨ b^(p-1)≡ 1 [ZMOD p] := by {
-        --  intro b
-        --  by_cases hcase: b ≡ 0 [ZMOD ↑p]
-        --  left;exact hcase
-        --  right
-        --  refine ModEq.pow_card_sub_one_eq_one hpp ?_
-        --  rw [@Int.modEq_zero_iff_dvd] at hcase
-        --  rw[isCoprime_comm, Prime.coprime_iff_not_dvd]
-        --  exact hcase
-        --  exact prime_iff_prime_int.mp hpp
-        --}
-        obtain ⟨ b, hb ⟩ := h5
-        have h6:∃a, a ≡ b [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by sorry
+        specialize h5 (p-1)
+        have hb : ¬ ↑p - 1 ≡ 0 [ZMOD ↑p]:= by{
+          by_contra hc
+          have haux: 1≡ 0 [ZMOD p]:= by {
+            have haux':p ≡ 1 [ZMOD p]:= by refine Int.modEq_iff_dvd.mpr ?_; rw [@Int.modEq_zero_iff_dvd] at hc; exact dvd_sub_comm.mp hc
+            calc 1 ≡ p [ZMOD p] := by exact _root_.id (Int.ModEq.symm haux')
+            _ ≡ 0[ZMOD p] := by refine Dvd.dvd.modEq_zero_int ?h; rfl
+          }
+          rw [@Int.modEq_zero_iff_dvd] at haux
+          have hp : p = 1 :=by apply Nat.eq_one_of_dvd_one; norm_cast at haux
+          have hp' : ¬ Nat.Prime p:=by rw [hp];exact Nat.not_prime_one
+          contradiction
+
+        }
+        simp [hb] at h5
+        have h6:∃a, a ≡ ↑(p-1) [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by {
+           obtain ⟨a, ha⟩ := Nat.chineseRemainder h4 (p-1) 1
+           obtain ⟨l, r⟩:=ha
+           use a
+           constructor
+           · exact (ZmodtoMod (p) (a) (p-1)).mpr l
+           · exact (ZmodtoMod (n/p) (a) (1)).mpr r
+        }
         obtain ⟨ a, ha ⟩ := h6
         have h7 : a.gcd (n/p) =1:= by {
           have ha:= ha.2
@@ -729,7 +746,9 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           rw [← hc]
           ring_nf
         }
-        sorry
+        have h8 : a^(n-1) ≡ 1 [ZMOD n] := by{
+          exact?
+        }
     . intro h
       rw [isCarmichael]
       constructor
