@@ -664,7 +664,6 @@ lemma exists_prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squar
   exact forall_prime_descomposition_squarefree hn0 hsqn h.1
 }
 
-
 theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
     constructor
@@ -710,8 +709,10 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           exact hcase
           exact prime_iff_prime_int.mp hpp
         }
-        specialize h5 (p-1)
-        have hb : ¬ ↑p - 1 ≡ 0 [ZMOD ↑p]:= by{
+
+        specialize h5 ↑(p-1)
+
+        have hb : ¬ ↑(p - 1) ≡ 0 [ZMOD ↑p]:= by{
           by_contra hc
           have haux: 1≡ 0 [ZMOD p]:= by {
             have haux':p ≡ 1 [ZMOD p]:= by refine Int.modEq_iff_dvd.mpr ?_; rw [@Int.modEq_zero_iff_dvd] at hc; exact dvd_sub_comm.mp hc
@@ -754,9 +755,18 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           calc (p:ℤ) ∣ n := by norm_cast;
           _ ∣ a ^ (n - 1) - 1 := by exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h8))
         }
-        have h9 : (p-1)^(n-1) ≡ 1 [ZMOD p]:= by {
-          calc (p-1)^(n-1) ≡ 1 [ZMOD p]
+        have h10 : (↑(p-1))^(n-1) ≡ 1 [ZMOD p]:= by {
+          calc (↑(p-1))^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
+          _ ≡ 1 [ZMOD p] := by exact h9
         }
+        have hord : orderOf (p-1) = (p-1) := by {
+          apply?
+
+
+
+
+        }
+        sorry
     . intro h
       rw [isCarmichael]
       constructor
