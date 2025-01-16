@@ -817,11 +817,13 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           exact hcase
           exact prime_iff_prime_int.mp hpp
         }
-        specialize h5 (p-1)
-        have hb : ¬ ↑p - 1 ≡ 0 [ZMOD ↑p]:= by{
+
+        specialize h5 ↑(p - 1)
+
+        have hb : ¬ ↑(p - 1) ≡ 0 [ZMOD ↑p]:= by{
           by_contra hc
           have haux: 1≡ 0 [ZMOD p]:= by {
-            have haux':p ≡ 1 [ZMOD p]:= by refine Int.modEq_iff_dvd.mpr ?_; rw [@Int.modEq_zero_iff_dvd] at hc; exact dvd_sub_comm.mp hc
+            have haux':p ≡ 1 [ZMOD p]:= by refine Int.modEq_iff_dvd.mpr ?_; rw [@Int.modEq_zero_iff_dvd] at hc; sorry
             calc 1 ≡ p [ZMOD p] := by exact _root_.id (Int.ModEq.symm haux')
             _ ≡ 0[ZMOD p] := by refine Dvd.dvd.modEq_zero_int ?h; rfl
           }
@@ -829,7 +831,6 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           have hp : p = 1 :=by apply Nat.eq_one_of_dvd_one; norm_cast at haux
           have hp' : ¬ Nat.Prime p:=by rw [hp];exact Nat.not_prime_one
           contradiction
-
         }
         simp [hb] at h5
         have h6:∃a, a ≡ ↑(p-1) [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by {
@@ -854,8 +855,26 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           ring_nf
         }
         have h8 : a^(n-1) ≡ 1 [ZMOD n] := by{
+          obtain ⟨l, r⟩:=ha
           sorry
         }
+        have h9 : a^(n-1) ≡ 1 [ZMOD p] := by{
+          refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
+          calc (p:ℤ) ∣ n := by norm_cast;
+          _ ∣ a ^ (n - 1) - 1 := by exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h8))
+        }
+        have h10 : (↑(p-1))^(n-1) ≡ 1 [ZMOD p]:= by {
+          calc (↑(p-1))^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
+          _ ≡ 1 [ZMOD p] := by exact h9
+        }
+        have hord : orderOf (p-1) = (p-1) := by {
+          sorry
+
+
+
+
+        }
+        sorry
     . intro h
       rw [isCarmichael]
       constructor
