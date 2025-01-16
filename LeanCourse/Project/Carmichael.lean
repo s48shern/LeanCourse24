@@ -664,6 +664,113 @@ lemma exists_prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squar
   exact forall_prime_descomposition_squarefree hn0 hsqn h.1
 }
 
+lemma congruence_by_prime_decomposition {n: ℕ} {a c: ℤ} {s: Finset ℕ} (hn0: n > 0) (hsqn: Squarefree n) (hsp: ∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n): (∀p ∈ s, a ≡ c [ZMOD (p:ℤ)]) ↔ (a ≡ c [ZMOD (n:ℤ)]) := by {
+  have hprime:= forall_prime_descomposition_squarefree hn0 hsqn hsp
+  constructor
+  intro hp
+  have h': ∀s: Finset ℕ, (∀ p: ℕ, p ∈ s → (Nat.Prime p ∧ p ∣ n)) → a ≡ c [ZMOD (∏ p in s, p)] := by{
+    intro s2
+    induction s2 using Finset.induction with
+    | empty => {
+      intro hintro
+      simp
+      exact Int.modEq_one
+    }
+    | @insert x s2 hxs ih => {
+      intro hintro
+      rw [Finset.prod_insert hxs]
+      rw [← Int.modEq_and_modEq_iff_modEq_mul]
+      constructor
+      . exact hp x ((hsp x).2 (hintro x (mem_insert_self x s2)))
+      apply ih ?_
+      intro p hp
+      exact hintro p (mem_insert_of_mem hp)
+      simp
+      have haux: ∀s: Finset ℕ, (∏ x ∈ s, (x:ℤ)).natAbs = (∏ x ∈ s, x) := by {
+        intro s
+        induction s using Finset.induction with
+        | empty => rfl
+        | @insert x2 s2 hxs2 ih2 => {
+          rw [Finset.prod_insert hxs2]
+          rw [Finset.prod_insert hxs2]
+          rw [Int.natAbs_mul]
+          rw [ih2]
+          simp
+        }
+      }
+      rw [haux s2]
+      refine coprime_prod_right_iff.mpr ?insert.a
+      intro i hi
+      have hiprime:=(hintro i (Finset.mem_insert_of_mem hi)).1
+      have hxprime:=(hintro x (Finset.mem_insert_self x s2)).1
+      refine (coprime_primes hxprime hiprime).mpr ?insert.a.a
+      by_contra hnot
+      rw [hnot] at hxs
+      exact hxs hi
+    }
+  }
+  have hcond: (∀ p ∈ s, Nat.Prime p ∧ p ∣ n) := by {
+    intro p a_1
+    subst hprime
+    simp_all only [and_imp, gt_iff_lt, CanonicallyOrderedCommSemiring.prod_pos, and_self]
+  }
+  have h':= h' s hcond
+  have hprime: ∏ p ∈ s, (p:ℤ) = (n:ℤ) := by {
+    rw [← hprime]
+    simp
+  }
+  rw [hprime] at h'
+  exact h'
+  intro hintro
+  intro p hp
+  have hp:=(hsp p).1 hp
+  obtain ⟨hp1, hp2⟩:= hp
+  rw[Int.modEq_iff_dvd] at hintro
+  rw[Int.modEq_iff_dvd]
+  have hp2: (p:ℤ) ∣ (n:ℤ) := by {
+    norm_cast
+  }
+  exact Int.dvd_trans hp2 hintro
+}
+
+lemma coprime_if_dvd_coprime {a:ℤ} {n p:ℕ} (hpp3: IsCoprime a n) (hpp2: p ∣ n): IsCoprime a p := by {
+  rw [@dvd_def] at hpp2
+  obtain ⟨c, hc⟩:= hpp2
+  rw[hc] at hpp3
+  rw [@isCoprime_iff_gcd_eq_one] at hpp3
+  push_cast at hpp3
+  rw [@isCoprime_iff_gcd_eq_one]
+  exact gcd_eq_one_of_gcd_mul_right_eq_one_left hpp3
+}
+
+lemma n_pow_card_sub_one_eq_one {a: ℤ} {n p: ℕ} (hpp1: Nat.Prime p) (hpp2: p ∣ n) (h: (p:ℤ)-1 ∣ (n:ℤ)-1) (hp2: n>1) (hpp3: IsCoprime a p): a ^ (n - 1) ≡ 1 [ZMOD (p:ℤ)] := by{
+  have hpa:=hpp3
+  have hpa: a ^ (p - 1) ≡ 1 [ZMOD (p:ℤ)] := by{
+    specialize hpa
+    exact Int.ModEq.pow_card_sub_one_eq_one hpp1 hpa
+  }
+  have hf: (p-1:ℤ) = (p-1:ℕ) := by {
+    exact Eq.symm (Int.natCast_pred_of_pos (Prime.pos hpp1))
+  }
+  rw [hf] at h
+  have hf: (n-1:ℤ) = (n-1:ℕ) := by {
+    exact Eq.symm (Int.natCast_pred_of_pos (zero_lt_of_lt hp2))
+  }
+  rw [hf] at h
+  norm_cast at h
+  rw [@dvd_def] at h
+  have h2: ∀ c, a ^ ((p - 1)*c) ≡ 1 [ZMOD (p:ℤ)]:= by{
+    intro c
+    calc a ^ ((p - 1)*c) ≡ (a ^ (p - 1))^c [ZMOD (p:ℤ)] := by ring_nf; trivial
+    _ ≡ 1^c [ZMOD (p:ℤ)] := Int.ModEq.pow c hpa
+    _ ≡ 1 [ZMOD (p:ℤ)] := by ring_nf; trivial
+  }
+  obtain ⟨c, hc⟩:= h
+  specialize h2 c
+  ring_nf at h2
+  rw [← hc] at h2
+  exact h2
+}
 
 theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
   by {
@@ -747,7 +854,7 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
           ring_nf
         }
         have h8 : a^(n-1) ≡ 1 [ZMOD n] := by{
-          exact?
+          sorry
         }
     . intro h
       rw [isCarmichael]
@@ -755,101 +862,21 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
       . exact hp1
       . constructor
         . intro a han
-          have hpa: ∀p, Nat.Prime p ∧ p∣n → IsCoprime a p:= by{
-            intro p hpp
-            rw [@dvd_def] at hpp
-            have hpp:=hpp.2
-            obtain ⟨c, hc⟩:= hpp
-            rw[hc] at han
-            rw [@isCoprime_iff_gcd_eq_one]
-            exact gcd_eq_one_of_gcd_mul_right_eq_one_left han
-          }
-          have hpa: ∀p, Nat.Prime p ∧ p∣n → a ^ (p - 1) ≡ 1 [ZMOD (p:ℤ)] := by{
-            intro p hp1
-            specialize hpa p hp1
-            exact Int.ModEq.pow_card_sub_one_eq_one hp1.1 hpa
-          }
-          have hpa: ∀p, Nat.Prime p ∧ p∣n → a ^ (n - 1) ≡ 1 [ZMOD (p:ℤ)] := by{
-            intro p hp1
-            specialize hpa p hp1
-            have h:= h.2 p hp1
-            have hf: (p-1:ℤ) = (p-1:ℕ) := by {
-              exact Eq.symm (Int.natCast_pred_of_pos (Prime.pos hp1.1))
-            }
-            rw [hf] at h
-            have hf: (n-1:ℤ) = (n-1:ℕ) := by {
-              exact Eq.symm (Int.natCast_pred_of_pos (zero_lt_of_lt hp2))
-            }
-            rw [hf] at h
-            norm_cast at h
-            rw [@dvd_def] at h
-            have h2: ∀ c, a ^ ((p - 1)*c) ≡ 1 [ZMOD (p:ℤ)]:= by{
-              intro c
-              calc a ^ ((p - 1)*c) ≡ (a ^ (p - 1))^c [ZMOD (p:ℤ)] := by ring_nf; trivial
-              _ ≡ 1^c [ZMOD (p:ℤ)] := Int.ModEq.pow c hpa
-              _ ≡ 1 [ZMOD (p:ℤ)] := by ring_nf; trivial
-            }
-            obtain ⟨c, hc⟩:= h
-            specialize h2 c
-            rw [← hc] at h2
-            exact h2
+          have han: ∀p, Nat.Prime p ∧ p∣ n → a ^ (n - 1) ≡ 1 [ZMOD (p:ℤ)] := by {
+            intro p hp
+            refine n_pow_card_sub_one_eq_one hp.1 hp.2 (h.2 p hp) hp2 ?_
+            refine coprime_if_dvd_coprime ?_ hp.2
+            exact isCoprime_iff_gcd_eq_one.mpr han
           }
           have hsetP:=exists_prime_descomposition_squarefree (zero_lt_of_lt hp2) h.1
           obtain ⟨setP, hsetP⟩:=hsetP
-          have h': ∀s: Finset ℕ, (∀ p: ℕ, p ∈ s → (Nat.Prime p ∧ p ∣ n)) → a^(n-1) ≡ 1 [ZMOD (∏ p in s, p)] := by{
-            intro s
-            induction s using Finset.induction with
-            | empty => {
-              intro hintro
-              simp
-              exact Int.modEq_one
-            }
-            | @insert x s hxs ih => {
-              intro hintro
-              rw [Finset.prod_insert hxs]
-              rw [← Int.modEq_and_modEq_iff_modEq_mul]
-              constructor
-              . exact (hpa x (hintro x (mem_insert_self x s)))--exact ((hintro.2.2.2 x) (mem_insert_self x s))
-              apply ih ?_
-              intro p hp
-              exact hintro p (mem_insert_of_mem hp)
-              simp
-              have haux: ∀s: Finset ℕ, (∏ x ∈ s, (x:ℤ)).natAbs = (∏ x ∈ s, x) := by {
-                intro s
-                induction s using Finset.induction with
-                | empty => rfl
-                | @insert x2 s2 hxs2 ih2 => {
-                  rw [Finset.prod_insert hxs2]
-                  rw [Finset.prod_insert hxs2]
-                  rw [Int.natAbs_mul]
-                  rw [ih2]
-                  simp
-                }
-              }
-              rw [haux s]
-              refine coprime_prod_right_iff.mpr ?insert.a
-              intro i hi
-              have hiprime:=(hintro i (Finset.mem_insert_of_mem hi)).1
-              have hxprime:=(hintro x (Finset.mem_insert_self x s)).1
-              refine (coprime_primes hxprime hiprime).mpr ?insert.a.a
-              by_contra hnot
-              rw [hnot] at hxs
-              exact hxs hi
-            }
+          have hcond: (∀ p ∈ setP, a ^ (n - 1) ≡ 1 [ZMOD ↑p]) := by {
+            intro p a_1
+            simp_all only [gt_iff_lt, and_imp]
           }
-          have hcond: ∀ p ∈ setP, Nat.Prime p ∧ p ∣ n := by {
-            intro p hp
-            apply (hsetP.1 p).1 hp
-          }
-          have h':=h' setP hcond
-          have hcond: ∏ p ∈ setP, (p:ℤ)=(n:ℤ):= by {
-            have hsetP:=hsetP.2
-            rw [Mathlib.Tactic.Zify.natCast_eq] at hsetP
-            rw [@Nat.cast_prod] at hsetP
-            exact hsetP
-          }
-          rw [hcond] at h'
-          exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h'))
+          refine Int.ModEq.dvd ?mpr.right.left.intro.a
+          refine Int.ModEq.symm ?mpr.right.left.intro.a.a
+          exact (congruence_by_prime_decomposition (zero_lt_of_lt hp2) h.1 hsetP.1).1 hcond
         . exact hp2
   }
 
@@ -1011,15 +1038,65 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
   exact Right.one_lt_mul' hp01g hp2g
 }
 
-@[simp] lemma isCarmichael' (n: ℕ): isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^(n-1)-1) := by{
+@[simp] lemma isCarmichael' (n: ℕ): isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^n-a) := by{
   constructor
   . intro h
+    have h':= (Korselt h.1 h.2.2).1 h
     unfold isCarmichael at h
     constructor
     . exact h.2.2
     constructor
     . exact h.1
-    sorry
+    intro a
+    obtain ⟨ setP, hsetP, hprime⟩ := exists_prime_decomposition (zero_lt_of_lt h.2.2)
+    refine Int.modEq_iff_dvd.mp ?mp.right.right.intro.intro.a
+    refine Int.ModEq.symm ?_
+    refine (congruence_by_prime_decomposition (zero_lt_of_lt h.2.2) h'.1 hsetP).1 ?_
+    intro p hsetp
+    by_cases hcase: (a.gcd p = 1)
+    obtain ⟨hsetp1,hsetp2⟩:= (hsetP p).1 hsetp
+    have hsetP:= h'.2 p ((hsetP p).1 hsetp)
+    have hp: Nat.Prime p ∧ p ∣ n := by{
+      constructor
+      exact hsetp1
+      exact hsetp2
+    }
+    have hend:=n_pow_card_sub_one_eq_one hsetp1 hsetp2 (h'.2 p hp) h.2.2 (isCoprime_iff_gcd_eq_one.mpr hcase)
+    calc a ^ n ≡ a*a^(n-1) [ZMOD ↑p] := by{
+      rw [← Int.pow_succ']
+      have h': n - 1 + 1 = n:= by{
+        refine Nat.sub_add_cancel ?h
+        exact one_le_of_lt h.2.2
+      }
+      rw [h']
+    }
+      _ ≡ a*1 [ZMOD ↑p] := by {
+        exact Int.ModEq.mul_left a hend
+      }
+    ring_nf
+    trivial
+    have h2: (p:ℤ) ∣ a := by {
+      rw [@eq_one_iff_not_exists_prime_dvd] at hcase
+      simp at hcase
+      obtain ⟨p', hpp', hp'⟩:= hcase
+      have hp' : (p':ℤ) ∣ (a.gcd ↑p:ℤ ) := by norm_cast
+      have hp'p: (p':ℤ) ∣ (p:ℤ) := by {
+        have haux: (a.gcd ↑p:ℤ) ∣ (p:ℤ) := by exact Int.gcd_dvd_right
+        exact Int.dvd_trans hp' haux
+      }
+      have hp'p: (p':ℤ)=(p:ℤ) := by{
+        norm_cast at hp'p
+        norm_cast
+        have hp:= ((hsetP p).1 hsetp).1
+        exact (Nat.prime_dvd_prime_iff_eq hpp' hp).mp hp'p
+      }
+      rw [← hp'p]
+      have haux: (a.gcd ↑p:ℤ) ∣ a := by exact Int.gcd_dvd_left
+      exact Int.dvd_trans hp' haux
+    }
+    refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
+    refine Int.dvd_sub ?_ h2
+    exact (Dvd.dvd.pow h2 (not_eq_zero_of_lt h.2.2))
   . intro hpn
     have han:=hpn.2.2
     have h1n:=hpn.1
@@ -1029,7 +1106,26 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     exact hpn
     constructor
     . intro a ha
-      exact han a
+      refine Int.ModEq.dvd ?mpr.right.left.a
+      have han:= han a
+      have han: (n:ℤ) ∣ a* (a ^ (n-1) - 1):= by {
+        have haux: a* (a ^ (n-1) - 1) = a ^ n - a := by {
+          ring_nf
+          rw [← Int.pow_succ']
+          have h: n-1+1=n := by {
+            refine Nat.sub_add_cancel (one_le_of_lt h1n)
+          }
+          rw [h]
+        }
+        rw [haux]
+        exact han
+      }
+      have han: (n:ℤ) ∣ (a ^ (n-1) - 1) := by {
+        refine dvd_of_dvd_mul_right_of_gcd_one han ?hab
+        rw [← ha]
+        exact Int.gcd_comm (↑n) a
+      }
+      exact Int.modEq_iff_dvd.mpr han
     exact h1n
 }
 
