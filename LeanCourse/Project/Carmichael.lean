@@ -133,7 +133,6 @@ lemma prime_dvd_def {n m p : ℕ} (hd : p^m ∣ n) (hp: Nat.Prime p) (hn: n>0) :
         linarith
 }
 
-
 lemma ModtoZmod (n a b: ℕ) : ( a ≡ b [MOD n]) ↔((a : ℤ) ≡ (b : ℤ) [ZMOD (n: ℤ )]) := by {
   exact Iff.symm natCast_modEq_iff
 }
@@ -154,6 +153,7 @@ lemma briefsimp (p m2 : ℕ) : p * (m2 + 1) + 1 ≡ 1 + (m2 + 1) * p [MOD p ^ 2]
   }
   exact (ModtoZmod (p ^ 2) (p * (m2 + 1) + 1) (1 + (m2 + 1) * p)).mpr hzed
 }
+
 lemma quicklemma (p n: ℕ ) (hn: n ≥2): 1 + ↑p + ↑p * ↑(n-2) ≡ 1 + ↑p * subNatNat (2 + (n-2)) 1 [ZMOD ↑p ^ 2] := by{
 
     norm_cast
@@ -176,6 +176,7 @@ lemma endingLemma (a b c p :ℤ ) (h1 : a ≡ b [ZMOD p^2]) (h2:  c ≡ 0 [ZMOD 
   _ ≡ a [ZMOD p^2] := by norm_num
   _ ≡ b [ZMOD p^2] := by exact h1
 }
+
 --zify
 --Fin_cases and discard nontrivial
 --interval_cases n <;> try decide
@@ -188,6 +189,7 @@ lemma calcs (m2 i : ℕ) (h:m2-i ≥ 1): 1+ m2 -i ≥ 1 +1:= by {
     }
   _ ≥ 1+1 := by exact Nat.add_le_add_left h 1
 }
+
 lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) (hred :(1+ p)^(n-1) ≡ 1 [ZMOD p^2] ): (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
@@ -254,11 +256,13 @@ lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) 
   }
   apply endingLemma (1 + ↑p + ↑p * ↑m2) (1 + ↑p * subNatNat (2 + m2) 1) (∑ x ∈ Finset.range m2, ↑p ^ (1 + m2 - x) * ↑((1 + m2).choose x)) (↑p) final hsum
 }
+
 lemma powerPrimePositive (p k : ℕ) (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
   refine (pow_pos_iff ?H.hn).mpr ?H.a
   · exact not_eq_zero_of_lt hk
   · exact Prime.pos hp
 }
+
 lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hpk : p ^ k * n' = n) (hn : n >1) (hred : (1+ p)^(n-1) ≡ 1 [MOD p^2]) (hk: k ≥ 2): False := by{
   have hred:(1+ p)^(n-1) ≡ 1 [ZMOD p^2] := by norm_cast; exact (ZmodtoMod (p ^ 2) ((1+ p)^(n-1)) (1)).mpr hred
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
@@ -327,7 +331,6 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
   exact ofNat_dvd.mp hdiv
 
 }
-
 
 lemma carmichael_is_squarefree  {n : ℕ} (h: isCarmichael n) : Squarefree n := by{
   rw [isCarmichael] at h
@@ -1167,8 +1170,8 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     exact h1n
 }
 
-theorem carmichael_primes_lt_sqrt {k: ℕ} : isCarmichael k → ∀ p, Nat.Prime p ∧ p ∣ k → p < Real.sqrt k := by {
-  intro hintro p hp
+theorem carmichael_primes_lt_sqrt {k: ℕ} (hintro: isCarmichael k) : ∀ p, Nat.Prime p ∧ p ∣ k → p < Real.sqrt k := by {
+  intro p hp
   obtain ⟨hsqr, hm1, hpk, hnk⟩:= (Korselt.1 hintro)
   have hea:= (isCarmichael'.1 hintro).2.2
   have hnum: ((p:ℤ)-1)*((k:ℤ)/(p:ℤ))+((k:ℤ)/(p:ℤ)-1)=(k:ℤ)-1 := by {
@@ -1217,9 +1220,7 @@ theorem carmichael_primes_lt_sqrt {k: ℕ} : isCarmichael k → ∀ p, Nat.Prime
       refine sqrt_pos_of_pos ?refine_2.a
       norm_cast;exact zero_lt_of_lt hnk
     }
-    _ = Real.sqrt k := by {
-      exact div_sqrt
-    }
+    _ = Real.sqrt k := div_sqrt
   }
   have hnum: p*p=k:= by{
     rw [@Nat.le_antisymm_iff]
@@ -1260,9 +1261,9 @@ theorem carmichael_primes_lt_sqrt {k: ℕ} : isCarmichael k → ∀ p, Nat.Prime
   exact hnum' hnum
 }
 
-theorem carmichael_has_3_factors {k: ℕ} : isCarmichael k → ∃ p1, ∃ p2, ∃ p3, Nat.Prime p1 ∧ p1 ∣ k ∧ Nat.Prime p2 ∧ p2 ∣ k ∧ Nat.Prime p3 ∧ p3 ∣ k ∧ ¬ p1=p2 ∧ ¬ p1=p3 ∧ ¬ p2=p3 := by {
-  intro h
+theorem carmichael_has_3_factors {k: ℕ} {s: Finset ℕ} (hs: ∀p, p ∈ s ↔ Nat.Prime p ∧ p ∣ k) (h: isCarmichael k) : s.card > 2 := by {
   have h':= carmichael_primes_lt_sqrt h
+  obtain ⟨hsqrf, hm1, hpk, hk1⟩ := Korselt.1 h
   by_contra hnot
   simp at hnot
   have hep: ∃ p, Nat.Prime p ∧ p ∣ k := by {
@@ -1270,11 +1271,68 @@ theorem carmichael_has_3_factors {k: ℕ} : isCarmichael k → ∃ p1, ∃ p2, �
     have h:=h.2.2
     exact Ne.symm (Nat.ne_of_lt h)
   }
-  have hep2:=hep
-  have hep3:=hep
-  obtain ⟨p1, hp1⟩:= hep
-  obtain ⟨p2, hp2⟩:= hep2
-  obtain ⟨p3, hp3⟩:= hep3
-  have hnot:= hnot p1 hp1.1 hp1.2 p2 hp2.1 hp2.2 p3 hp3.1 hp3.2
-  sorry
+  have hnot: s.card=1 ∨ s.card=2 := by{
+    refine le_and_le_add_one_iff.mp ?_
+    constructor
+    simp
+    obtain ⟨ p, hp⟩:= hep
+    have hep:= (hs p).2 hp
+    rw [@Finset.nonempty_iff_ne_empty]
+    exact ne_empty_of_mem hep
+    simp
+    exact hnot
+  }
+  have pdes:= forall_prime_descomposition_squarefree (zero_lt_of_lt hk1) hsqrf hs
+  obtain hnot|hnot:=hnot
+  . obtain ⟨ p, hnot⟩ := card_eq_one.mp hnot
+    have hp: p ∈ s:= by {
+      refine Finset.singleton_subset_iff.mp ?_
+      exact Finset.subset_of_eq (_root_.id (Eq.symm hnot))
+    }
+    rw[hnot] at pdes
+    simp at pdes
+    obtain ⟨hp1, hp2⟩:= (hs p).1 hp
+    have hnot: p<k:= by {
+      refine Nat.lt_of_le_of_ne ?h₁ ?h₂
+      exact Nat.le_of_eq pdes
+      by_contra hnot'
+      rw [hnot'] at hp1
+      exact hpk hp1
+    }
+    have hnot: ¬ p=k:= by exact Nat.ne_of_lt hnot
+    exact hnot pdes
+  . obtain ⟨ p , q, hpq, hnot⟩ := card_eq_two.mp hnot
+    have hp: p ∈ s:= by {
+      rw [hnot]
+      exact mem_insert_self p {q}
+    }
+    have hq: q ∈ s:= by {
+      rw [hnot]
+      refine Finset.mem_insert.mpr ?_
+      right
+      exact Finset.mem_singleton.mpr rfl
+    }
+    rw[hnot] at pdes
+    rw [prod_pair hpq] at pdes
+    have hq1:= ((hs q).1 hq).1
+    have hp1:= ((hs p).1 hp).1
+    have hq:= h' q ((hs q).1 hq)
+    have hp:= h' p ((hs p).1 hp)
+    have hnot: (p:ℝ) * (q:ℝ) < (k:ℝ) := by {
+      calc (p:ℝ) * (q:ℝ) < √↑k * (q:ℝ) := by {
+        refine mul_lt_mul_of_pos_right hp ?a0
+        norm_cast
+        exact Prime.pos hq1
+      }
+      _ < √↑k * √↑k := by {
+        refine mul_lt_mul_of_pos_left hq ?_
+        refine sqrt_pos_of_pos ?_
+        norm_cast
+        exact zero_lt_of_lt hk1
+      }
+      _ = k := by simp
+    }
+    norm_cast at hnot
+    have hnot: ¬ p * q = k := by exact Nat.ne_of_lt hnot
+    exact hnot pdes
 }
