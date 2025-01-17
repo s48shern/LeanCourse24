@@ -57,24 +57,25 @@ lemma Carmichael561: isCarmichael 561 := by {
         · exact sq17
     }
     contradiction
-  · intro p hp
-    norm_num
-    simp_all only [Nat.reduceMul]
-    obtain ⟨left, right⟩ := hp
-    have h1 : 561 = 3 * 11 * 17 := by norm_num
-    have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by simp_rw[h1]; exact listPrime561
-    have hlist : p ∈ [3, 11, 17] := by{
-      rw[←h2]
-      refine (mem_primeFactorsList ?hn).mpr ?_
-      exact Ne.symm (zero_ne_add_one 560)
-      exact And.symm ⟨right, left⟩
-    }
-    fin_cases hlist
+  · constructor
+    · intro p hp
+      norm_num
+      simp_all only [Nat.reduceMul]
+      obtain ⟨left, right⟩ := hp
+      have h1 : 561 = 3 * 11 * 17 := by norm_num
+      have h2 : Nat.primeFactorsList 561 = [3, 11, 17] := by simp_rw[h1]; exact listPrime561
+      have hlist : p ∈ [3, 11, 17] := by{
+        rw[←h2]
+        refine (mem_primeFactorsList ?hn).mpr ?_
+        exact Ne.symm (zero_ne_add_one 560)
+        exact And.symm ⟨right, left⟩
+      }
+      fin_cases hlist
+      · norm_num
+      · norm_num
+      · norm_num
     · norm_num
-    · norm_num
-    · norm_num
-  · norm_num
-  · norm_num
+
 }
 lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
   rw[isCarmichael];
@@ -88,12 +89,11 @@ lemma NotCarmichaelPrimeDiv(p i:ℕ ): i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime p �
   rw[Korselt];
   push_neg;
   intro h
-  use p
-  simp_all only [and_self, true_and]
-  obtain ⟨left, right⟩ := hdiv
-  · exact fun a ↦ a
-  · exact hnp
-  · exact hi
+  intro hp
+  specialize hp p
+  intro hj
+  obtain ⟨l, r⟩ := hdiv
+  simp_all only [gt_iff_lt, not_false_eq_true, and_self, imp_false, not_true_eq_false]
   }
 
 
@@ -131,9 +131,6 @@ lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.
         _ ∣ i := by exact hdiv
   }
   exact Decidable.not_or_of_imp fun a a_1 ↦ h a
-  exact h1
-  calc i ≥ i/j := by exact Nat.div_le_self i j
-  _ > 1 := by exact h2
 
 }
  lemma divsmall (i j:ℕ):Nat.Prime j∧ ¬ Nat.Prime i∧ i >1∧ j^2 ∣ i →  ¬ isCarmichael i := by {
@@ -150,8 +147,6 @@ lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.
      · ring_nf;exact hi
   }
   exact Decidable.not_or_of_imp fun a a_1 ↦ h a
-  exact h2
-  exact h3
  }
 
 lemma ncarm0and1 (i :ℕ ) (h: i < 2): ¬ isCarmichael i := by{

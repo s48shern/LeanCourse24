@@ -869,13 +869,7 @@ theorem Korselt {n : ℕ} : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Pri
           calc (↑(p-1))^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
           _ ≡ 1 [ZMOD p] := by exact h9
         }
-        have hord : orderOf (p-1) = (p-1) := by {
-          sorry
 
-
-
-
-        }
         sorry
     . intro h
       have hp1:= h.2.2.1
