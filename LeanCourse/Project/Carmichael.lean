@@ -771,7 +771,10 @@ lemma n_pow_card_sub_one_eq_one {a: ℤ} {n p: ℕ} (hpp1: Nat.Prime p) (hpp2: p
   rw [← hc] at h2
   exact h2
 }
+lemma existenceCyclic (p a: ℕ) (hp: Nat.Prime p): ∃ (b: ℕ ), IsUnit ↑b := by{
+  apply?
 
+}
 theorem Korselt {n : ℕ} : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ)) ∧ ¬ Nat.Prime n ∧ n > 1) :=
   by {
     constructor
@@ -785,92 +788,98 @@ theorem Korselt {n : ℕ} : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Pri
       have h:= h.2.1
       constructor
       . exact hsq
-      . intro p hpp
-        have hpn:=hpp.1.2
-        have hdiv:= hpp.2
-        have hpp:= hpp.1
+      . constructor
+        · intro p hpp
+          have hpn:=hpp.1.2
+          have hdiv:= hpp.2
+          have hpp:= hpp.1
 
-        have h2 : Nat.gcd p n = p := by apply Nat.gcd_eq_left ; exact hdiv
+          have h2 : Nat.gcd p n = p := by apply Nat.gcd_eq_left ; exact hdiv
 
-        have h3 : ¬p ^ 2 ∣ n := by{
-          intro hcontra
-          rw [@squarefree_iff_prime_squarefree] at hsq
-          specialize hsq p
-          have hsq := hsq hpp
-          ring_nf at hsq
-          contradiction
-        }
-        have h4: p.Coprime (n/p):= by{
-          refine (Nat.Prime.coprime_iff_not_dvd hpp).mpr ?_
-          by_contra hnot
-          rw [propext (Nat.dvd_div_iff_mul_dvd hdiv)] at hnot
-          rw [← Nat.pow_two] at hnot
-          exact h3 hnot
-        }
-
-        have h5: ∀b, b≡0 [ZMOD p] ∨ b^(p-1)≡ 1 [ZMOD p] := by {
-          intro b
-          by_cases hcase: b ≡ 0 [ZMOD ↑p]
-          left;exact hcase
-          right
-          refine ModEq.pow_card_sub_one_eq_one hpp ?_
-          rw [@Int.modEq_zero_iff_dvd] at hcase
-          rw[isCoprime_comm, Prime.coprime_iff_not_dvd]
-          exact hcase
-          exact prime_iff_prime_int.mp hpp
-        }
-
-        specialize h5 ↑(p - 1)
-
-        have hb : ¬ ↑(p - 1) ≡ 0 [ZMOD ↑p]:= by{
-          by_contra hc
-          have haux: 1≡ 0 [ZMOD p]:= by {
-            have haux':p ≡ 1 [ZMOD p]:= by refine Int.modEq_iff_dvd.mpr ?_; rw [@Int.modEq_zero_iff_dvd] at hc; sorry
-            calc 1 ≡ p [ZMOD p] := by exact _root_.id (Int.ModEq.symm haux')
-            _ ≡ 0[ZMOD p] := by refine Dvd.dvd.modEq_zero_int ?h; rfl
+          have h3 : ¬p ^ 2 ∣ n := by{
+            intro hcontra
+            rw [@squarefree_iff_prime_squarefree] at hsq
+            specialize hsq p
+            have hsq := hsq hpp
+            ring_nf at hsq
+            contradiction
           }
-          rw [@Int.modEq_zero_iff_dvd] at haux
-          have hp : p = 1 :=by apply Nat.eq_one_of_dvd_one; norm_cast at haux
-          have hp' : ¬ Nat.Prime p:=by rw [hp];exact Nat.not_prime_one
-          contradiction
-        }
-        simp [hb] at h5
-        have h6:∃a, a ≡ ↑(p-1) [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by {
-           obtain ⟨a, ha⟩ := Nat.chineseRemainder h4 (p-1) 1
-           obtain ⟨l, r⟩:=ha
-           use a
-           constructor
-           · exact (ZmodtoMod (p) (a) (p-1)).mpr l
-           · exact (ZmodtoMod (n/p) (a) (1)).mpr r
-        }
-        obtain ⟨ a, ha ⟩ := h6
-        have h7 : a.gcd (n/p) =1:= by {
-          have ha:= ha.2
-          have ha: (n/p:ℤ) ∣ a - 1 := Int.ModEq.dvd (_root_.id (Int.ModEq.symm ha))
-          rw [Int.dvd_def] at ha
-          obtain ⟨c, hc⟩:=ha
-          refine Tactic.NormNum.int_gcd_helper' 1 (-c) ?h₁ ?h₂ ?h₃
-          . simp
-          . simp
-          ring_nf
-          rw [← hc]
-          ring_nf
-        }
-        have h8 : a^(n-1) ≡ 1 [ZMOD n] := by{
-          obtain ⟨l, r⟩:=ha
-          sorry
-        }
-        have h9 : a^(n-1) ≡ 1 [ZMOD p] := by{
-          refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
-          calc (p:ℤ) ∣ n := by norm_cast;
-          _ ∣ a ^ (n - 1) - 1 := by exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h8))
-        }
-        have h10 : (↑(p-1))^(n-1) ≡ 1 [ZMOD p]:= by {
-          calc (↑(p-1))^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
-          _ ≡ 1 [ZMOD p] := by exact h9
-        }
+          have h4: p.Coprime (n/p):= by{
+            refine (Nat.Prime.coprime_iff_not_dvd hpp).mpr ?_
+            by_contra hnot
+            rw [propext (Nat.dvd_div_iff_mul_dvd hdiv)] at hnot
+            rw [← Nat.pow_two] at hnot
+            exact h3 hnot
+          }
 
-        sorry
+          have h5: ∀b, b≡0 [ZMOD p] ∨ b^(p-1)≡ 1 [ZMOD p] := by {
+            intro b
+            by_cases hcase: b ≡ 0 [ZMOD ↑p]
+            left;exact hcase
+            right
+            refine ModEq.pow_card_sub_one_eq_one hpp ?_
+            rw [@Int.modEq_zero_iff_dvd] at hcase
+            rw[isCoprime_comm, Prime.coprime_iff_not_dvd]
+            exact hcase
+            exact prime_iff_prime_int.mp hpp
+          }
+          have h5_1 : ∃ (b : (ZMod p)ˣ), IsUnit b :=by {sorry}
+          obtain ⟨b, hb'⟩ := h5_1
+          let b2 : ℕ := (b : (ZMod p)).val
+          have hb2: b2 =(b : (ZMod p)).val := by rfl
+          specialize h5 (b2)
+
+          have hb : ¬ ↑(b2) ≡ 0 [ZMOD ↑p]:= by{
+            by_contra hc
+            rw [← ZMod.intCast_eq_intCast_iff] at hc
+            have h : IsUnit 0:= by{
+              norm_cast at hc
+              rw[hc]at hb2
+
+            }
+            contradiction
+
+          }
+          simp [hb] at h5
+          have h6:∃a, a ≡ b2 [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]:= by {
+            obtain ⟨a, ha⟩ := Nat.chineseRemainder h4 (b2) 1
+            obtain ⟨l, r⟩:=ha
+            use a
+            constructor
+            · exact (ZmodtoMod (p) (a) (b2)).mpr l
+            · exact (ZmodtoMod (n/p) (a) (1)).mpr r
+          }
+          obtain ⟨ a, ha ⟩ := h6
+          have h7 : a.gcd (n/p) =1:= by {
+            have ha:= ha.2
+            have ha: (n/p:ℤ) ∣ a - 1 := Int.ModEq.dvd (_root_.id (Int.ModEq.symm ha))
+            rw [Int.dvd_def] at ha
+            obtain ⟨c, hc⟩:=ha
+            refine Tactic.NormNum.int_gcd_helper' 1 (-c) ?h₁ ?h₂ ?h₃
+            . simp
+            . simp
+            ring_nf
+            rw [← hc]
+            ring_nf
+          }
+          have h8 : a^(n-1) ≡ 1 [ZMOD n] := by{
+            obtain ⟨l, r⟩:=ha
+            sorry
+          }
+          have h9 : a^(n-1) ≡ 1 [ZMOD p] := by{
+            refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
+            calc (p:ℤ) ∣ n := by norm_cast;
+            _ ∣ a ^ (n - 1) - 1 := by exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h8))
+          }
+          have h10 : (↑(b2))^(n-1) ≡ 1 [ZMOD p]:= by {
+            calc (↑(b2))^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
+            _ ≡ 1 [ZMOD p] := by exact h9
+          }
+
+          sorry
+        · constructor
+          · exact hp1
+          · exact hp2
     . intro h
       have hp1:= h.2.2.1
       have hp2:= h.2.2.2
