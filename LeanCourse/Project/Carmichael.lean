@@ -772,10 +772,12 @@ lemma n_pow_card_sub_one_eq_one {a: ℤ} {n p: ℕ} (hpp1: Nat.Prime p) (hpp2: p
   exact h2
 }
 
-theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ))) :=
+theorem Korselt {n : ℕ} : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ)) ∧ ¬ Nat.Prime n ∧ n > 1) :=
   by {
     constructor
     . intro h
+      have hp1:= h.1
+      have hp2:= h.2.2
       rw [isCarmichael] at h
       have hsq: Squarefree n := by{
         exact carmichael_is_squarefree h
@@ -876,6 +878,13 @@ theorem Korselt {n : ℕ} (hp1: ¬ Nat.Prime n) (hp2: n > 1) : isCarmichael n �
         }
         sorry
     . intro h
+      have hp1:= h.2.2.1
+      have hp2:= h.2.2.2
+      have h: Squarefree n ∧ (∀ (p : ℕ), Nat.Prime p ∧ p ∣ n → (p:ℤ) - 1 ∣ (n:ℤ) - 1) := by{
+        constructor
+        exact h.1
+        exact h.2.1
+      }
       rw [isCarmichael]
       constructor
       . exact hp1
@@ -938,6 +947,7 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     exact Irreducible.squarefree hp0
     exact Irreducible.squarefree hp1
     exact Irreducible.squarefree hp2
+  constructor
   intro p hp
   have hpp := hp.2
   have hp := hp.1
@@ -1051,16 +1061,22 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
         _ ≡ 0*(4*k) [ZMOD k*18] := Int.ModEq.mul_right (4*k) hi
         _ ≡ 0 [ZMOD k*18] := by ring_nf; trivial
     }
+  constructor
   refine not_prime_mul ?intro.intro.intro.intro.intro.intro.intro.hp.left.a1 ?intro.intro.intro.intro.intro.intro.intro.hp.left.b1
   exact Ne.symm (Nat.ne_of_lt hp01g)
   exact Ne.symm (Nat.ne_of_lt hp2g)
   exact Right.one_lt_mul' hp01g hp2g
 }
 
-@[simp] lemma isCarmichael' (n: ℕ): isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^n-a) := by{
+@[simp] lemma isCarmichael' {n: ℕ}: isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^n-a) := by{
   constructor
   . intro h
-    have h':= (Korselt h.1 h.2.2).1 h
+    have h':= (Korselt).1 h
+    have h': Squarefree n ∧ (∀ (p : ℕ), Nat.Prime p ∧ p ∣ n → (p:ℤ) - 1 ∣ (n:ℤ) - 1) := by{
+      constructor
+      exact h'.1
+      exact h'.2.1
+    }
     unfold isCarmichael at h
     constructor
     . exact h.2.2
@@ -1148,22 +1164,114 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     exact h1n
 }
 
-theorem carmichael_properties {k: ℕ} : isCarmichael k → ¬ 2 ∣ k ∧
-  (∃ p1, ∃ p2, ∃ p3, Nat.Prime p1 ∧ p1 ∣ k ∧ Nat.Prime p2 ∧ p2 ∣ k ∧ Nat.Prime p3 ∧ p3 ∣ k ∧ ¬ p1=p2 ∧ ¬ p1=p3 ∧ ¬ p2=p3) ∧
-  ∀ p, Nat.Prime p ∧ p ∣ k → p < Nat.sqrt k := by {
-    intro h
-    constructor
-    . apply weak_carmichael_is_odd
-      . by_cases h': k=2
-        . absurd h.1
-          rw [h']
-          trivial
-        . have h'':=h.2.2
-          constructor
-          . exact Nat.lt_of_le_of_ne h'' fun a ↦ h' (_root_.id (Eq.symm a))
-          . exact h.2.1
-    . constructor
-      . sorry
-      . intro p hp
-        sorry
+theorem carmichael_primes_lt_sqrt {k: ℕ} : isCarmichael k → ∀ p, Nat.Prime p ∧ p ∣ k → p < Real.sqrt k := by {
+  intro hintro p hp
+  obtain ⟨hsqr, hm1, hpk, hnk⟩:= (Korselt.1 hintro)
+  have hea:= (isCarmichael'.1 hintro).2.2
+  have hnum: ((p:ℤ)-1)*((k:ℤ)/(p:ℤ))+((k:ℤ)/(p:ℤ)-1)=(k:ℤ)-1 := by {
+    ring_nf
+    simp
+    refine Int.mul_ediv_cancel' ?H
+    norm_cast
+    exact hp.2
   }
+  have hnum: (p:ℤ)-1 ∣ (k:ℤ)/(p:ℤ)-1 := by {
+    have h:=hm1 p hp
+    rw [← hnum] at h
+    refine (Int.dvd_iff_dvd_of_dvd_add h).mp ?_
+    exact Int.dvd_mul_right (↑p - 1) (↑k / ↑p)
+  }
+  have hnum: (p:ℤ)-1 ≤ (k:ℤ)/(p:ℤ)-1:= by{
+    refine Int.le_of_dvd ?h ?_
+    refine Int.sub_pos_of_lt ?h.h
+    norm_cast
+    refine (Nat.lt_div_iff_mul_lt ?h.h.hdn 1).mpr ?h.h.a
+    exact hp.2
+    simp
+    have hp2:=hp.2
+    have hp:=hp.1
+    refine Nat.lt_of_le_of_ne ?h.h.a.h₁ ?h.h.a.h₂
+    refine Nat.le_of_dvd (zero_lt_of_lt hnk) hp2
+    by_contra hnot
+    rw [hnot] at hp
+    exact hpk hp
+    exact hnum
+  }
+  simp at hnum
+  by_contra hnot
+  simp at hnot
+  norm_cast at hnum
+  have hnum: p ≤ Real.sqrt k := by {
+    calc (p:ℝ) ≤ ↑k/↑p := by {
+      refine (le_div_iff₀' ?hc).mpr ?_
+      have hp:=hp.1
+      norm_cast;exact Prime.pos hp
+      norm_cast;exact Nat.mul_le_of_le_div p p k hnum
+    }
+    _ ≤ k/Real.sqrt k := by {
+      refine div_le_div_of_nonneg_left ?_ ?_ hnot
+      norm_cast;exact Nat.zero_le k
+      refine sqrt_pos_of_pos ?refine_2.a
+      norm_cast;exact zero_lt_of_lt hnk
+    }
+    _ = Real.sqrt k := by {
+      exact div_sqrt
+    }
+  }
+  have hnum: p*p=k:= by{
+    rw [@Nat.le_antisymm_iff]
+    constructor
+    have haux: (p:ℝ)*(p:ℝ)≤ k := by{
+      calc p*p≤ √↑k*√↑k := by {
+        refine _root_.mul_self_le_mul_self ?ha hnum
+        norm_cast
+        exact Nat.zero_le p
+      }
+      _ = (√↑k)^2 := by exact Eq.symm (pow_two √↑k)
+      _ = k := by {
+        refine sq_sqrt ?_
+        norm_cast;exact Nat.zero_le k
+      }
+    }
+    norm_cast at haux
+    have haux: (p:ℝ)*(p:ℝ)≥ k := by{
+      calc p*p≥ √↑k*√↑k := by {
+        refine _root_.mul_self_le_mul_self ?_ hnot
+        exact Real.sqrt_nonneg ↑k
+      }
+      _ = (√↑k)^2 := by exact Eq.symm (pow_two √↑k)
+      _ = k := by {
+        refine sq_sqrt ?_
+        norm_cast;exact Nat.zero_le k
+      }
+    }
+    norm_cast at haux
+  }
+  have hnum: p*p ∣ k := by exact dvd_of_eq hnum
+  have hnum := hsqr p hnum
+  have hnum' : ¬ (IsUnit p) := by {
+    have hp:=hp.1
+    refine Prime.not_unit ?_
+    exact prime_iff.mp hp
+  }
+  exact hnum' hnum
+}
+
+theorem carmichael_has_3_factors {k: ℕ} : isCarmichael k → ∃ p1, ∃ p2, ∃ p3, Nat.Prime p1 ∧ p1 ∣ k ∧ Nat.Prime p2 ∧ p2 ∣ k ∧ Nat.Prime p3 ∧ p3 ∣ k ∧ ¬ p1=p2 ∧ ¬ p1=p3 ∧ ¬ p2=p3 := by {
+  intro h
+  have h':= carmichael_primes_lt_sqrt h
+  by_contra hnot
+  simp at hnot
+  have hep: ∃ p, Nat.Prime p ∧ p ∣ k := by {
+    refine Nat.exists_prime_and_dvd ?hn
+    have h:=h.2.2
+    exact Ne.symm (Nat.ne_of_lt h)
+  }
+  have hep2:=hep
+  have hep3:=hep
+  obtain ⟨p1, hp1⟩:= hep
+  obtain ⟨p2, hp2⟩:= hep2
+  obtain ⟨p3, hp3⟩:= hep3
+  have hnot:= hnot p1 hp1.1 hp1.2 p2 hp2.1 hp2.2 p3 hp3.1 hp3.2
+  sorry
+}
