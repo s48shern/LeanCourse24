@@ -1,4 +1,4 @@
-import LeanCourse.Project.Carmichael
+import LeanCourse.Project.Korselt
 
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical
@@ -30,6 +30,7 @@ lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     · norm_num
     · norm_num; exact h2
 }
+
 lemma Carmichael561: isCarmichael 561 := by {
   have h1 : 561 = 3 * 11 * 17 := by norm_num
   have p3 : Nat.Prime 3 := by exact Nat.prime_three
@@ -77,12 +78,14 @@ lemma Carmichael561: isCarmichael 561 := by {
     · norm_num
 
 }
+
 lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
   rw[isCarmichael];
   push_neg;
   intro _ __1
   simp_all only
-  }
+}
+
 lemma NotCarmichaelPrimeDiv(p i:ℕ ): i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime p ∧  p ∣ i ∧ ¬ (p-1:ℤ) ∣ (i-1:ℤ)→ ¬ isCarmichael i := by{
   intro hi
   obtain ⟨hi, hnp, hp, hdiv⟩ := hi
@@ -94,10 +97,9 @@ lemma NotCarmichaelPrimeDiv(p i:ℕ ): i >1 ∧ ¬ Nat.Prime i ∧ Nat.Prime p �
   intro hj
   obtain ⟨l, r⟩ := hdiv
   simp_all only [gt_iff_lt, not_false_eq_true, and_self, imp_false, not_true_eq_false]
-  }
+}
 
-
-lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.sqrt (i/j)) * (Nat.sqrt (i/j))= (i/j)→¬ isCarmichael i := by {
+lemma sqdiv2 (i j:ℕ ): j > 0 ∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.sqrt (i/j)) * (Nat.sqrt (i/j))= (i/j)→¬ isCarmichael i := by {
   intro hi
   obtain ⟨hj, hj2, h1, h2,h⟩ := hi
   rw[Korselt]
@@ -131,9 +133,9 @@ lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.
         _ ∣ i := by exact hdiv
   }
   exact Decidable.not_or_of_imp fun a a_1 ↦ h a
-
 }
- lemma divsmall (i j:ℕ):Nat.Prime j∧ ¬ Nat.Prime i∧ i >1∧ j^2 ∣ i →  ¬ isCarmichael i := by {
+
+lemma divsmall (i j:ℕ):Nat.Prime j∧ ¬ Nat.Prime i∧ i >1∧ j^2 ∣ i →  ¬ isCarmichael i := by {
   intro hi
   obtain ⟨h, h2, h3, hi⟩ := hi
   rw[Korselt]
@@ -147,7 +149,7 @@ lemma sqdiv2 (i j:ℕ ): j > 0∧ j ∣ i ∧ ¬ Nat.Prime i ∧  i/j >1∧(Nat.
      · ring_nf;exact hi
   }
   exact Decidable.not_or_of_imp fun a a_1 ↦ h a
- }
+}
 
 lemma ncarm0and1 (i :ℕ ) (h: i < 2): ¬ isCarmichael i := by{
   rw[isCarmichael]
@@ -210,7 +212,6 @@ lemma LowestCarmichael :∀ (i :ℕ ), i < 100→ ¬ isCarmichael i:= by {
   all_goals try {apply h_47; norm_num; }
 
 }
-
 
 lemma LowestCarmichael2 :∀ (i :ℕ ), i ≥ 100 ∧ i<200 →¬ isCarmichael i:= by {
   intro i hi
@@ -278,6 +279,7 @@ lemma LowestCarmichael2 :∀ (i :ℕ ), i ≥ 100 ∧ i<200 →¬ isCarmichael i
   all_goals try {apply h_89; norm_num; done}
   all_goals try {apply h_97; norm_num; }
 }
+
 lemma LowestCarmichael3 :∀ (i :ℕ ), i ≥ 200∧  i < 300→ ¬ isCarmichael i:= by {
   intro i hi
   have h_0: i < 2 → ¬ isCarmichael i := by intro haux; exact ncarm0and1 i haux
@@ -363,7 +365,8 @@ lemma LowestCarmichael3 :∀ (i :ℕ ), i ≥ 200∧  i < 300→ ¬ isCarmichael
   all_goals try {apply h_139; norm_num; done}
   all_goals try {apply h_149; norm_num}
 }
-lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400→ ¬ isCarmichael i:= by {
+
+lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400 → ¬ isCarmichael i:= by {
   intro i hi
   have h_0: i < 2 → ¬ isCarmichael i := by intro haux; exact ncarm0and1 i haux
   have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
@@ -458,12 +461,9 @@ lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400→ ¬ isCarmichael
   all_goals try {apply h_193; norm_num; done}
   all_goals try {apply h_197; norm_num; done}
   all_goals try {apply h_199; norm_num}
-
-
 }
 
-
-lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400∧  i < 561→ ¬ isCarmichael i:= by {
+lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400 ∧ i < 561 → ¬ isCarmichael i:= by {
   intro i hi
   have h_0: i < 2 → ¬ isCarmichael i := by intro haux; exact ncarm0and1 i haux
   have h_1: Nat.Prime i → ¬ isCarmichael i := by exact fun a ↦ NotCarmichaelPrime i a
@@ -615,6 +615,7 @@ lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400∧  i < 561→ ¬ isCarmichael
   all_goals try {apply h_277; norm_num; }
 
 }
+
 lemma smallest :∀ (i :ℕ ), i<561 → ¬ isCarmichael i:= by{
   intro i hj
   if h0 : i < 100 then
@@ -636,4 +637,12 @@ lemma smallest :∀ (i :ℕ ), i<561 → ¬ isCarmichael i:= by{
     have hi :i ≥ 400 := by linarith
     have hi :i ≥ 400∧ i <561 := by exact And.symm ⟨hj, hi⟩
     exact LowestCarmichael5 i hi
+}
+
+lemma carmichael_ge_561 {n: ℕ}: isCarmichael n → n ≥ 561 := by{
+  intro h
+  by_contra hnot
+  simp at hnot
+  have hnot:=smallest n hnot
+  exact hnot h
 }
