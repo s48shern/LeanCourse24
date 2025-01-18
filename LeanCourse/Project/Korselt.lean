@@ -291,43 +291,14 @@ lemma Unit_divides(p a: ℕ) (b : ZMod p) (hu: IsUnit b)(hp: Nat.Prime p)  :¬ p
   rw [@ZMod.val_eq_zero] at h_zero
   have h_nzero : (b : ZMod p) ≠ 0:= by {
     intro h_zero
-    rw [h_zero] at hu
-    have hnot: ¬ IsUnit (0: (ZMod p)) := by {
+    have hnot: ¬ (@IsUnit (ZMod p) (@MonoidWithZero.toMonoid (ZMod p) Semiring.toMonoidWithZero) b) := by {
+      rw [h_zero]
       rw [@isUnit_iff_exists]
       simp
-      intro x hx
-      by_contra hnot
-      have h': 0 * x=0 := zero_mul x
-      have h': ¬ 0 * x = 1 := by{
-        rw [h']
-        exact zero_ne_one' (ZMod p)
-      }
-      have h'': 0 * x = 1 := by {
-        --unfold HMul.hMul at hx
-        --unfold HMul.hMul
-        --unfold OfNat.ofNat at *
-        --unfold instHMul at *
-        --unfold Zero.toOfNat0 at *
-        --unfold One.toOfNat1 at *
-        --unfold Mul.mul at *
-
-        --unfold MulOneClass.toMul at *
-        --unfold Zero.zero at *
-        --unfold CommMonoidWithZero.toZero at *
-        --unfold Monoid.toMulOneClass at *
-
-        --unfold One.one at *
-        --unfold Semiring.toOne at *
-        --unfold CommSemiring.toSemiring at *
-        --unfold CommRing.toCommSemiring at *
-        exact hx
-      }
-      exact h' h''
     }
-    sorry
+    exact hnot hu
   }
-  contradiction
-
+  exact h_nzero h_zero
 }
 
 lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n ):(∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ)) ∧ ¬ Nat.Prime n ∧ n > 1 := by{
