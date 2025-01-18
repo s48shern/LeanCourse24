@@ -49,13 +49,24 @@ lemma weak_carmichael_is_odd {n : ℕ}: n > 2 ∧ (∀ (a : ℤ), (Int.gcd a n =
   exact hend h2
 }
 
-structure Carmichael where
-  n: ℕ
-  notPrime : ¬ Nat.Prime n
-  g1: n>1
-  fermat: ∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1
-
 def isCarmichael (n : ℕ) := ¬ Nat.Prime n ∧ (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) ∧ n>1
+lemma carmichael_not_prime {n:ℕ} (h: isCarmichael n) : ¬ Nat.Prime n := by exact h.1
+lemma carmichael_def_property {n: ℕ} (h: isCarmichael n): (∀ (a : ℤ), Int.gcd a n = 1 → (n:ℤ) ∣ a^(n-1)-1) := h.2.1
+lemma carmichael_ge_4 {n:ℕ} (h: isCarmichael n) : n > 3 := by {
+  have h':= h.2.2
+  have h'': n ≠ 2 := by {
+    by_contra hnot
+    rw [hnot] at h
+    exact h.1 Nat.prime_two
+  }
+  have h': n > 2 := Nat.lt_of_le_of_ne h' (_root_.id (Ne.symm h''))
+  have h'': n ≠ 3 := by {
+    by_contra hnot
+    rw [hnot] at h
+    exact h.1 Nat.prime_three
+  }
+  exact Nat.lt_of_le_of_ne h' (_root_.id (Ne.symm h''))
+}
 
 lemma prime_dvd_def {n m p : ℕ} (hd : p^m ∣ n) (hp: Nat.Prime p) (hn: n>0) : ∃ k,∃ c, k≥ m ∧ p^k*c=n ∧ Nat.gcd p c = 1 := by{
   simp_all only [not_false_eq_true, gt_iff_lt, and_self, implies_true, true_and, ge_iff_le, exists_and_left]
@@ -914,6 +925,7 @@ theorem Korselt {n : ℕ} : isCarmichael n ↔ (Squarefree n ∧ (∀ p, Nat.Pri
         . exact hp2
   }
 
+
 lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Nat.Prime p2 ∧
   (∃(k :ℕ), k>0 ∧ p0 = 6 * k + 1 ∧ p1 = 12 * k + 1 ∧ p2 = 18 * k + 1)
   → isCarmichael (p0 * p1 * p2) := by {
@@ -1074,7 +1086,65 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
   exact Right.one_lt_mul' hp01g hp2g
 }
 
-@[simp] lemma isCarmichael' {n: ℕ}: isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^n-a) := by{
+lemma carmichael_def_property' {n: ℕ} (h: isCarmichael n): ∀ (a : ℤ), (n:ℤ) ∣ a^n-a := by {
+  have h':= (Korselt).1 h
+  have h': Squarefree n ∧ (∀ (p : ℕ), Nat.Prime p ∧ p ∣ n → (p:ℤ) - 1 ∣ (n:ℤ) - 1) := by{
+    constructor
+    exact h'.1
+    exact h'.2.1
+  }
+  intro a
+  obtain ⟨ setP, hsetP, hprime⟩ := exists_prime_decomposition (zero_lt_of_lt h.2.2)
+  refine Int.modEq_iff_dvd.mp ?mp.right.right.intro.intro.a
+  refine Int.ModEq.symm ?_
+  refine (congruence_by_prime_decomposition (zero_lt_of_lt h.2.2) h'.1 hsetP).1 ?_
+  intro p hsetp
+  by_cases hcase: (a.gcd p = 1)
+  obtain ⟨hsetp1,hsetp2⟩:= (hsetP p).1 hsetp
+  have hsetP:= h'.2 p ((hsetP p).1 hsetp)
+  have hp: Nat.Prime p ∧ p ∣ n := by{
+    constructor
+    exact hsetp1
+    exact hsetp2
+  }
+  have hend:=n_pow_card_sub_one_eq_one hsetp1 hsetp2 (h'.2 p hp) h.2.2 (isCoprime_iff_gcd_eq_one.mpr hcase)
+  calc a ^ n ≡ a*a^(n-1) [ZMOD ↑p] := by{
+    rw [← Int.pow_succ']
+    have h': n - 1 + 1 = n:= by{
+      refine Nat.sub_add_cancel ?h
+      exact one_le_of_lt h.2.2
+    }
+    rw [h']
+  }
+    _ ≡ a*1 [ZMOD ↑p] := by {
+      exact Int.ModEq.mul_left a hend
+    }
+  ring_nf
+  trivial
+  have h2: (p:ℤ) ∣ a := by {
+    rw [@eq_one_iff_not_exists_prime_dvd] at hcase
+    simp at hcase
+    obtain ⟨p', hpp', hp'⟩:= hcase
+    have hp' : (p':ℤ) ∣ (a.gcd ↑p:ℤ ) := by norm_cast
+    have hp'p: (p':ℤ) ∣ (p:ℤ) := by {
+      have haux: (a.gcd ↑p:ℤ) ∣ (p:ℤ) := by exact Int.gcd_dvd_right
+      exact Int.dvd_trans hp' haux
+    }
+    have hp'p: (p':ℤ)=(p:ℤ) := by{
+      norm_cast at hp'p
+      norm_cast
+      have hp:= ((hsetP p).1 hsetp).1
+      exact (Nat.prime_dvd_prime_iff_eq hpp' hp).mp hp'p
+    }
+    rw [← hp'p]
+    have haux: (a.gcd ↑p:ℤ) ∣ a := by exact Int.gcd_dvd_left
+    exact Int.dvd_trans hp' haux
+  }
+  refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
+  refine Int.dvd_sub ?_ h2
+  exact (Dvd.dvd.pow h2 (not_eq_zero_of_lt h.2.2))
+}
+lemma isCarmichael' {n: ℕ}: isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^n-a) := by{
   constructor
   . intro h
     have h':= (Korselt).1 h
@@ -1088,56 +1158,7 @@ lemma Korselts_criterion' {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ Na
     . exact h.2.2
     constructor
     . exact h.1
-    intro a
-    obtain ⟨ setP, hsetP, hprime⟩ := exists_prime_decomposition (zero_lt_of_lt h.2.2)
-    refine Int.modEq_iff_dvd.mp ?mp.right.right.intro.intro.a
-    refine Int.ModEq.symm ?_
-    refine (congruence_by_prime_decomposition (zero_lt_of_lt h.2.2) h'.1 hsetP).1 ?_
-    intro p hsetp
-    by_cases hcase: (a.gcd p = 1)
-    obtain ⟨hsetp1,hsetp2⟩:= (hsetP p).1 hsetp
-    have hsetP:= h'.2 p ((hsetP p).1 hsetp)
-    have hp: Nat.Prime p ∧ p ∣ n := by{
-      constructor
-      exact hsetp1
-      exact hsetp2
-    }
-    have hend:=n_pow_card_sub_one_eq_one hsetp1 hsetp2 (h'.2 p hp) h.2.2 (isCoprime_iff_gcd_eq_one.mpr hcase)
-    calc a ^ n ≡ a*a^(n-1) [ZMOD ↑p] := by{
-      rw [← Int.pow_succ']
-      have h': n - 1 + 1 = n:= by{
-        refine Nat.sub_add_cancel ?h
-        exact one_le_of_lt h.2.2
-      }
-      rw [h']
-    }
-      _ ≡ a*1 [ZMOD ↑p] := by {
-        exact Int.ModEq.mul_left a hend
-      }
-    ring_nf
-    trivial
-    have h2: (p:ℤ) ∣ a := by {
-      rw [@eq_one_iff_not_exists_prime_dvd] at hcase
-      simp at hcase
-      obtain ⟨p', hpp', hp'⟩:= hcase
-      have hp' : (p':ℤ) ∣ (a.gcd ↑p:ℤ ) := by norm_cast
-      have hp'p: (p':ℤ) ∣ (p:ℤ) := by {
-        have haux: (a.gcd ↑p:ℤ) ∣ (p:ℤ) := by exact Int.gcd_dvd_right
-        exact Int.dvd_trans hp' haux
-      }
-      have hp'p: (p':ℤ)=(p:ℤ) := by{
-        norm_cast at hp'p
-        norm_cast
-        have hp:= ((hsetP p).1 hsetp).1
-        exact (Nat.prime_dvd_prime_iff_eq hpp' hp).mp hp'p
-      }
-      rw [← hp'p]
-      have haux: (a.gcd ↑p:ℤ) ∣ a := by exact Int.gcd_dvd_left
-      exact Int.dvd_trans hp' haux
-    }
-    refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
-    refine Int.dvd_sub ?_ h2
-    exact (Dvd.dvd.pow h2 (not_eq_zero_of_lt h.2.2))
+    exact carmichael_def_property' h
   . intro hpn
     have han:=hpn.2.2
     have h1n:=hpn.1
