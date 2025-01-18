@@ -439,11 +439,13 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
 
     have h8 : a^(n-1) ≡ 1 [ZMOD n] := by{
       have ha' : a = a.toNat := by exact Eq.symm (toNat_of_nonneg hg0)
-      rw [ha'] at *
+      rw [ha']
       norm_cast at h7_1
       obtain ⟨l, r⟩:=ha
-      sorry
-      -- use Nat.ModEq.pow_totient
+      --sorry
+      have heuler:= Nat.ModEq.pow_totient h7_1
+      simp at heuler
+      rw [← ha']
     }
     have h9 : a^(n-1) ≡ 1 [ZMOD p] := by{
       refine Int.ModEq.symm ((fun {n a b} ↦ Int.modEq_iff_dvd.mpr) ?_)
