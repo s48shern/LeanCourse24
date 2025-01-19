@@ -552,10 +552,6 @@ lemma LowestCarmichael5 :∀ (i :ℕ ), i ≥ 400 ∧ i < 561 → ¬ isCarmichae
 
   have h_277: i > 1 ∧ ¬ Nat.Prime i ∧ Nat.Prime 277 ∧ 277 ∣ i ∧ ¬ (277 - 1) ∣ (i - 1:ℤ) → ¬ isCarmichael i :=
     by exact fun a ↦ NotCarmichaelPrimeDiv 277 i a
-
-
-
-
   have h_sq :1>0 ∧ 1∣i ∧ ¬Nat.Prime i ∧ i/1>1 ∧  (Nat.sqrt (i/1)) * (Nat.sqrt (i/1)) = i/1→ ¬ isCarmichael i := by exact fun a ↦ sqdiv2 i 1 a
   have h_s4: Nat.Prime 2∧ ¬ Nat.Prime i∧ i >1∧ 2^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 2 a
   have h_s9: Nat.Prime 3∧ ¬ Nat.Prime i∧ i >1∧ 3^2 ∣ i →  ¬ isCarmichael i := by exact fun a ↦ divsmall i 3 a

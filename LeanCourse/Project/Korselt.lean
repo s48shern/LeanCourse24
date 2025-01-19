@@ -49,9 +49,7 @@ lemma endingLemma (a b c p :ℤ ) (h1 : a ≡ b [ZMOD p^2]) (h2:  c ≡ 0 [ZMOD 
   _ ≡ b [ZMOD p^2] := by exact h1
 }
 
---zify
---Fin_cases and discard nontrivial
---interval_cases n <;> try decide
+
 lemma calcs (m2 i : ℕ) (h:m2-i ≥ 1): 1+ m2 -i ≥ 1 +1:= by {
   calc 1+ m2 -i = 1 + (m2-i):= by {
     refine AddLECancellable.add_tsub_assoc_of_le ?hc ?h 1
@@ -304,7 +302,10 @@ lemma Unit_divides(p a: ℕ) (b : ZMod p) (hu: IsUnit b)(hp: Nat.Prime p)  :¬ p
 lemma equality_greater_1 (n:ℕ) (h: n ≥ 1):(Nat.cast (n-1):ℤ) = subNatNat n 1:= by {
   exact Eq.symm (subNatNat_of_le h)
 }
-
+lemma Product_cast {p a: ℕ} (b: (ZMod p)ˣ) (hp: Nat.Prime p) (hb :(b: ZMod p)^(a)=(b: ZMod p)^(orderOf b) ): b^(a)=b^(orderOf b) := by {
+  ext : 1
+  simp_all only [Units.val_pow_eq_pow_val]
+}
 lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n ):(∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ)) ∧ ¬ Nat.Prime n ∧ n > 1 := by{
   have hp1:= h.1
   have hp2:= h.2.2
@@ -345,20 +346,26 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
       exact hcase
       exact prime_iff_prime_int.mp hpp
     }
-    have h5_1 : ∃ (b : (ZMod p)), IsUnit b ∧ orderOf b = p - 1 :=by {
+    have h5_1 : ∃ (b : (ZMod p)ˣ), IsUnit (b: ZMod p) ∧ orderOf b  = p - 1 :=by {
       by_cases hp: p >2
-      · use 2
-        have hcop: Nat.Coprime 2 p:= by {
-          refine coprime_two_left.mpr ?_
-          have hp2: p ≠ 2 := by linarith
-          exact Prime.odd_of_ne_two hpp hp2
+      · have hCyclic : IsAddCyclic ((ZMod p)):= by exact ZMod.instIsAddCyclic p
+        have hCyclic2 : IsCyclic ((ZMod p)ˣ):= by {
+          haveI : Fact (Nat.Prime p) := ⟨hpp⟩
+          exact instIsCyclicUnitsOfFinite
         }
-        rw [←ZMod.isUnit_iff_coprime 2 p] at hcop
-        have haux : 2 = ↑2 := by norm_num
-        norm_num at hcop
+        rw [@isCyclic_iff_exists_ofOrder_eq_natCard] at hCyclic2
+        have hcard: Nat.card (ZMod p)ˣ = p-1 := by {
+          haveI : Fact (Nat.Prime p) := ⟨hpp⟩
+          simp [ZMod.card_units_eq_totient p]
+          exact totient_prime hpp
+        }
+        rw [hcard] at hCyclic2
+        obtain ⟨b, hb⟩ := hCyclic2
+        use b
         constructor
-        exact hcop
-        sorry
+        · exact Units.isUnit b
+        · haveI : NeZero p := ⟨Nat.Prime.ne_zero hpp⟩
+          exact hb
       · have hp2: p =2 := by {
           have hp2 : p ≤ 2:= by exact Nat.le_of_not_lt hp
           refine Eq.symm (Nat.le_antisymm ?h₁ hp2)
@@ -371,23 +378,23 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
         simp
     }
     obtain ⟨b, hb', hb''⟩ := h5_1
-    specialize h5 (b).val
+    specialize h5 ((b: ZMod p)).val
 
-    have hb : ¬ (b).val ≡ 0 [ZMOD ↑p]:= by{
+    have hb : ¬ ((b: ZMod p)).val ≡ 0 [ZMOD ↑p]:= by{
       by_contra hc
       rw [← ZMod.intCast_eq_intCast_iff] at hc
       norm_cast at hc
       rw [ZMod.natCast_zmod_eq_zero_iff_dvd] at hc
-      have hndiv : ¬ p ∣ b.val := by exact Unit_divides p n b hb' hpp
+      have hndiv : ¬ p ∣ (b: ZMod p).val := by exact Unit_divides p n b hb' hpp
       contradiction
     }
     simp [hb] at h5
-    have h6:∃a, a ≡ b.val [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)] ∧ a ≥ 0:= by {
-      obtain ⟨a, ha⟩ := Nat.chineseRemainder h4 (b).val 1
+    have h6:∃a, a ≡ (b: ZMod p).val [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)] ∧ a ≥ 0:= by {
+      obtain ⟨a, ha⟩ := Nat.chineseRemainder h4 ((b: ZMod p)).val 1
       obtain ⟨l, r⟩:=ha
       use a
       constructor
-      · exact (ZmodtoMod (p) (a) (b).val).mpr l
+      · exact (ZmodtoMod (p) (a) ((b: ZMod p)).val).mpr l
       · constructor
         · exact (ZmodtoMod (n/p) (a) (1)).mpr r
         · exact ofNat_zero_le a
@@ -395,7 +402,7 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
     }
     obtain ⟨ a, ha ⟩ := h6
     have hg0 := ha.2.2
-    have ha: a ≡ ↑b.val [ZMOD ↑p] ∧ a ≡ 1 [ZMOD ↑n / ↑p] := by {
+    have ha: a ≡ ↑(b: ZMod p).val [ZMOD ↑p] ∧ a ≡ 1 [ZMOD ↑n / ↑p] := by {
       constructor
       · exact ha.1
       · exact ha.2.1
@@ -416,10 +423,10 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
     have h7_1 : a.gcd n =1:= by {
       have ha' : a = a.toNat := by exact Eq.symm (toNat_of_nonneg hg0)
       have ha:= ha.1
-      have ha: ↑p ∣  b.val -a :=by exact Int.ModEq.dvd ha
+      have ha: ↑p ∣  (b: ZMod p).val -a :=by exact Int.ModEq.dvd ha
       have ha: ¬ ↑p ∣ a := by {
         by_contra hnot
-        have hb2:(p:ℤ) ∣ (b.val:ℤ) := by exact (Int.dvd_iff_dvd_of_dvd_sub ha).mpr hnot
+        have hb2:(p:ℤ) ∣ ((b: ZMod p).val:ℤ) := by exact (Int.dvd_iff_dvd_of_dvd_sub ha).mpr hnot
         rw [@Int.modEq_zero_iff_dvd] at hb
         contradiction
       }
@@ -449,22 +456,32 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
       calc (p:ℤ) ∣ n := by norm_cast;
       _ ∣ a ^ (n - 1) - 1 := by exact Int.ModEq.dvd (_root_.id (Int.ModEq.symm h8))
     }
-    have h10 : (b).val^(n-1) ≡ 1 [ZMOD p]:= by {
-      calc (b.val)^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
+    have h10 : ((b: ZMod p)).val^(n-1) ≡ 1 [ZMOD p]:= by {
+      calc ((b: ZMod p).val)^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
       _ ≡ 1 [ZMOD p] := by exact h9
     }
     have hend: p - 1 ∣ n - 1 := by {
-      have hend': orderOf (b.val: ZMod p) ∣ n-1 := by {
-        exact order_dvd_mod h10
+      haveI : NeZero p := ⟨Nat.Prime.ne_zero hpp⟩
+
+      have hend': orderOf b ∣ n-1 := by {
+        have haux: ↑(b: ZMod p).val ^ (n - 1) ≡ ↑(b: ZMod p).val ^ (p- 1) [ZMOD ↑p] := by exact  Int.ModEq.trans h10 (_root_.id (Int.ModEq.symm h5))
+        rw[← hb''] at haux
+        simp at haux
+        have haux' : (b: ZMod p)^(n-1)=(b: ZMod p)^(orderOf b) := by {
+          sorry
+        }
+        have haux' : b^(n-1)=b^(orderOf b) := by {
+              exact Product_cast b hpp haux'
+        }
+        apply orderOf_dvd_of_pow_eq_one
+        have hb : b^orderOf b = 1 := by exact pow_orderOf_eq_one b
+        rw [← hb]
+        exact haux'
+
+
       }
-      have h': NeZero p := by {
-        rw [@neZero_iff]
-        rw [@Nat.ne_zero_iff_zero_lt]
-        exact Prime.pos hpp
-      }
-      have h: (b.val: ZMod p) = b := ZMod.natCast_zmod_val b
-      rw [h] at hend'
-      rw [hb''] at hend'
+
+      simp_rw[hb''] at hend'
       exact hend'
     }
     zify at hend

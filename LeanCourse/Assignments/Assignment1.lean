@@ -97,7 +97,7 @@ what is new and in red what is about to change.
 Now try it yourself. Note that `ring` can still do calculations,
 but it doesn't use the assumptions `h` and `h'`
 -/
-
+#check isCyclic_iff_exists_ofOrder_eq_natCard
 example (a b c d : ℝ) (h : b = d + d) (h' : a = b + c) : a + b = c + 4 * d := by {
 
   calc a + b = (b + c ) + b := by rw [h']
