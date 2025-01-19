@@ -1,4 +1,5 @@
 import Mathlib
+import Mathlib.GroupTheory.OrderOfElement
 
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical
@@ -492,4 +493,11 @@ lemma n_pow_card_sub_one_eq_one {a: ℤ} {n p: ℕ} (hpp1: Nat.Prime p) (hpp2: p
   ring_nf at h2
   rw [← hc] at h2
   exact h2
+}
+
+lemma order_dvd_mod {n p q: ℕ} (hn: p^n≡ 1 [ZMOD q]): orderOf (p: ZMod q) ∣ n := by {
+  refine orderOf_dvd_of_pow_eq_one ?h
+  rw [← ZMod.intCast_eq_intCast_iff] at hn
+  simp at hn
+  exact hn
 }

@@ -1,5 +1,6 @@
 import LeanCourse.Project.Carmichael
 import Mathlib
+import Mathlib.GroupTheory.OrderOfElement
 
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical
@@ -341,7 +342,7 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
       exact hcase
       exact prime_iff_prime_int.mp hpp
     }
-    have h5_1 : ∃ (b : (ZMod p)), IsUnit b :=by {
+    have h5_1 : ∃ (b : (ZMod p)), IsUnit b ∧ orderOf b = p - 1 :=by {
       by_cases hp: p >2
       · use 2
         have hcop: Nat.Coprime 2 p:= by {
@@ -352,17 +353,21 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
         rw [←ZMod.isUnit_iff_coprime 2 p] at hcop
         have haux : 2 = ↑2 := by norm_num
         norm_num at hcop
+        constructor
         exact hcop
-
+        sorry
       · have hp2: p =2 := by {
           have hp2 : p ≤ 2:= by exact Nat.le_of_not_lt hp
           refine Eq.symm (Nat.le_antisymm ?h₁ hp2)
           exact Prime.two_le hpp
         }
         use 1
+        constructor
         exact isUnit_one
+        rw [hp2]
+        simp
     }
-    obtain ⟨b, hb'⟩ := h5_1
+    obtain ⟨b, hb', hb''⟩ := h5_1
     specialize h5 (b).val
 
     have hb : ¬ (b).val ≡ 0 [ZMOD ↑p]:= by{
@@ -372,11 +377,9 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
       rw [ZMod.natCast_zmod_eq_zero_iff_dvd] at hc
       have hndiv : ¬ p ∣ b.val := by exact Unit_divides p n b hb' hpp
       contradiction
-
-
     }
     simp [hb] at h5
-    have h6:∃a, a ≡ b.val [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)]∧ a ≥ 0:= by {
+    have h6:∃a, a ≡ b.val [ZMOD p] ∧ a ≡ 1[ZMOD (n/p)] ∧ a ≥ 0:= by {
       obtain ⟨a, ha⟩ := Nat.chineseRemainder h4 (b).val 1
       obtain ⟨l, r⟩:=ha
       use a
@@ -447,8 +450,20 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
       calc (b.val)^(n-1) ≡ (a)^(n-1) [ZMOD p] := by refine Int.ModEq.symm (Int.ModEq.pow (n - 1) ?h1); exact ha.1
       _ ≡ 1 [ZMOD p] := by exact h9
     }
-
-
+    have hend: p - 1 ∣ n - 1 := by {
+      have hend': orderOf (b.val: ZMod p) ∣ n-1 := by {
+        exact order_dvd_mod h10
+      }
+      have h': NeZero p := by {
+        rw [@neZero_iff]
+        rw [@Nat.ne_zero_iff_zero_lt]
+        exact Prime.pos hpp
+      }
+      have h: (b.val: ZMod p) = b := ZMod.natCast_zmod_val b
+      rw [h] at hend'
+      rw [hb''] at hend'
+      exact hend'
+    }
     sorry
   · constructor
     · exact hp1
