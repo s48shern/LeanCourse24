@@ -366,6 +366,7 @@ lemma LowestCarmichael3 :∀ (i :ℕ ), i ≥ 200∧  i < 300→ ¬ isCarmichael
   all_goals try {apply h_139; norm_num; done}
   all_goals try {apply h_149; norm_num}
 }
+
 lemma LowestCarmichael4 :∀ (i :ℕ ), i ≥ 300∧  i < 400 → ¬ isCarmichael i:= by {
   intro i hi
   have h_0: i < 2 → ¬ isCarmichael i := by intro haux; exact ncarm0and1 i haux
