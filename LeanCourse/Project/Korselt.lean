@@ -301,6 +301,9 @@ lemma Unit_divides(p a: ℕ) (b : ZMod p) (hu: IsUnit b)(hp: Nat.Prime p)  :¬ p
   }
   exact h_nzero h_zero
 }
+lemma equality_greater_1 (n:ℕ) (h: n ≥ 1):(Nat.cast (n-1):ℤ) = subNatNat n 1:= by {
+  exact Eq.symm (subNatNat_of_le h)
+}
 
 lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n ):(∀ p, Nat.Prime p ∧ p ∣ n → (p-1:ℤ) ∣ (n-1:ℤ)) ∧ ¬ Nat.Prime n ∧ n > 1 := by{
   have hp1:= h.1
@@ -464,7 +467,14 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
       rw [hb''] at hend'
       exact hend'
     }
-    sorry
+    zify at hend
+    norm_cast
+    have hn : (Nat.cast (p-1):ℤ) = subNatNat p 1 := by apply equality_greater_1 p; exact Prime.one_le hpp
+    have hn2 : (Nat.cast (n-1):ℤ) = subNatNat n 1 := by apply equality_greater_1 n; exact one_le_of_lt hp2
+    rw [← hn]
+    rw[← hn2]
+    exact hend
+
   · constructor
     · exact hp1
     · exact hp2
