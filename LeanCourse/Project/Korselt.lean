@@ -466,9 +466,12 @@ lemma korselt_prime_division {n : ℕ} (h: isCarmichael n) ( hsq: Squarefree n )
       have hend': orderOf b ∣ n-1 := by {
         have haux: ↑(b: ZMod p).val ^ (n - 1) ≡ ↑(b: ZMod p).val ^ (p- 1) [ZMOD ↑p] := by exact  Int.ModEq.trans h10 (_root_.id (Int.ModEq.symm h5))
         rw[← hb''] at haux
-        simp at haux
+        norm_cast at haux
         have haux' : (b: ZMod p)^(n-1)=(b: ZMod p)^(orderOf b) := by {
-          sorry
+          have haux' :(b: ZMod p).val ^ (n - 1) ≡ (b: ZMod p).val ^ (orderOf b) [MOD p] := by exact (ModtoZmod (p) ((b: ZMod p).val ^ (n - 1)) ((b: ZMod p).val ^ (orderOf b))).mpr haux
+          rw [← ZMod.eq_iff_modEq_nat] at haux'
+          simp at haux'
+          exact haux'
         }
         have haux' : b^(n-1)=b^(orderOf b) := by {
               exact Product_cast b hpp haux'
