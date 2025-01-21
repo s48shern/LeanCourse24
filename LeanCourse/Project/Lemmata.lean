@@ -376,8 +376,6 @@ lemma forall_prime_descomposition_squarefree {n : ℕ} {s: Finset ℕ} (hn0: n >
   exact hind s n hcond
 }
 
-#check ZMod.isUnit_iff_coprime
-
 lemma exists_prime_descomposition_squarefree {n : ℕ} (hn0: n > 0) (hsqn: Squarefree n): ∃(s: Finset ℕ), (∀ p, p∈ s ↔ Nat.Prime p ∧ p ∣ n) ∧ (∏ p ∈ s, p = n) := by {
   have h:= exists_prime_decomposition hn0
   obtain ⟨s, h⟩:= h
@@ -500,4 +498,39 @@ lemma order_dvd_mod {n p q: ℕ} (hn: p^n≡ 1 [ZMOD q]): orderOf (p: ZMod q) �
   rw [← ZMod.intCast_eq_intCast_iff] at hn
   simp at hn
   exact hn
+}
+
+lemma powerPrimePositive {p k : ℕ} (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
+  refine (pow_pos_iff ?H.hn).mpr ?H.a
+  · exact not_eq_zero_of_lt hk
+  · exact Prime.pos hp
+}
+
+lemma Unit_divides {p: ℕ} {b : ZMod p} (hu: IsUnit b) (hp: Nat.Prime p)  :¬ p ∣ b.val:= by{
+  have hp2 : NeZero p := by rw [@neZero_iff]; exact Nat.Prime.ne_zero hp
+  have hgroup : MonoidWithZero (ZMod p):= by exact CommMonoidWithZero.toMonoidWithZero
+  have hgroup2 : Nontrivial (ZMod p):= by refine ZMod.nontrivial_iff.mpr ?_;exact Nat.Prime.ne_one hp
+  have h_range : b.val < p := by exact ZMod.val_lt b
+  intro hc
+  have h_zero : b.val = 0 := by exact eq_zero_of_dvd_of_lt hc h_range
+
+  rw [@ZMod.val_eq_zero] at h_zero
+  have h_nzero : (b : ZMod p) ≠ 0:= by {
+    intro h_zero
+    have hnot: ¬ (@IsUnit (ZMod p) (@MonoidWithZero.toMonoid (ZMod p) Semiring.toMonoidWithZero) b) := by {
+      rw [h_zero]
+      rw [@isUnit_iff_exists]
+      simp
+    }
+    exact hnot hu
+  }
+  exact h_nzero h_zero
+}
+
+lemma ModtoZmod (n a b: ℕ) : ( a ≡ b [MOD n]) ↔((a : ℤ) ≡ (b : ℤ) [ZMOD (n: ℤ )]) := by {
+  exact Iff.symm natCast_modEq_iff
+}
+
+lemma ZmodtoMod (n a b: ℕ) : ((a : ℤ) ≡ (b : ℤ)  [ZMOD (n: ℤ )]) ↔( a ≡ b [MOD n]) := by {
+  exact natCast_modEq_iff
 }

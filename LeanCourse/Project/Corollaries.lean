@@ -49,17 +49,17 @@ lemma Chernick_construction {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ 
   have hp := hp.1
   have hp2: p=p0 ∨ p=p1 ∨ p=p2:= by{
     by_contra hcont
-    simp at hcont
+    simp only [not_or] at hcont
     rw [propext (Prime.dvd_iff_not_coprime hp)] at hpp
     rw [@coprime_mul_iff_right] at hpp
     rw [@coprime_mul_iff_right] at hpp
-    simp at hpp
+    simp only [not_and, ne_eq, and_imp] at hpp
     have hpp0: p.Coprime p0:= by {
       have hint: ¬ p ∣ p0 := by {
         rw [@prime_def_lt'] at hp0
         by_cases hc: p < p0
         exact hp0.2 p (Prime.two_le hp) hc
-        simp at hc
+        simp only [not_lt] at hc
         exact not_dvd_of_pos_of_lt (zero_lt_of_lt hp0g) (Nat.lt_of_le_of_ne hc (Ne.symm hcont.1))
       }
       exact (Nat.Prime.coprime_iff_not_dvd hp).mpr hint
@@ -69,7 +69,7 @@ lemma Chernick_construction {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ 
         rw [@prime_def_lt'] at hp1
         by_cases hc: p < p1
         exact hp1.2 p (Prime.two_le hp) hc
-        simp at hc
+        simp? at hc
         exact not_dvd_of_pos_of_lt (zero_lt_of_lt hp1g) (Nat.lt_of_le_of_ne hc (Ne.symm hcont.2.1))
       }
       exact (Nat.Prime.coprime_iff_not_dvd hp).mpr hint
@@ -79,7 +79,7 @@ lemma Chernick_construction {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ 
         rw [@prime_def_lt'] at hp2
         by_cases hc: p < p2
         exact hp2.2 p (Prime.two_le hp) hc
-        simp at hc
+        simp only [not_lt] at hc
         exact not_dvd_of_pos_of_lt (zero_lt_of_lt hp2g) (Nat.lt_of_le_of_ne hc (Ne.symm hcont.2.2))
       }
       exact (Nat.Prime.coprime_iff_not_dvd hp).mpr hint
@@ -102,11 +102,11 @@ lemma Chernick_construction {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ 
         trivial
       }
       refine Int.ModEq.add ?_ ?_
-      . simp
+      . simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, add_sub_cancel_right]
         calc k * 30 ≡ 6*k*5 [ZMOD 6*k] := by ring_nf; trivial
         _ ≡ 0*5 [ZMOD 6*k] := Int.ModEq.mul_right 5 hi
         _ ≡ 0 [ZMOD 6*k] := by rfl
-      . simp
+      . simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, add_sub_cancel_right]
         calc k^2 * 216 ≡ 6*k*(36*k) [ZMOD 6*k] := by ring_nf; trivial
         _ ≡ 0*(36*k) [ZMOD 6*k] := Int.ModEq.mul_right (36*k) hi
         _ ≡ 0 [ZMOD 6*k] := by ring_nf; trivial
@@ -126,11 +126,11 @@ lemma Chernick_construction {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ 
         trivial
       }
       refine Int.ModEq.add ?_ ?_
-      . simp
+      . simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, add_sub_cancel_right]
         calc k * 24 ≡ 12*k*2 [ZMOD 12*k] := by ring_nf; trivial
         _ ≡ 0*2 [ZMOD 12*k] := Int.ModEq.mul_right 2 hi
         _ ≡ 0 [ZMOD 12*k] := by rfl
-      . simp
+      . simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, add_sub_cancel_right]
         calc k^2 * 108 ≡ 12*k*(9*k) [ZMOD 12*k] := by ring_nf; trivial
         _ ≡ 0*(9*k) [ZMOD 12*k] := Int.ModEq.mul_right (9*k) hi
         _ ≡ 0 [ZMOD 12*k] := by ring_nf; trivial
@@ -149,10 +149,11 @@ lemma Chernick_construction {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ 
         trivial
       }
       refine Int.ModEq.add ?_ ?_
-      . simp
+      . simp only [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, add_sub_cancel_right]
         ring_nf; exact hi
       . ring_nf
-        simp
+        simp only [reduceNeg, Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat,
+          neg_add_cancel_left]
         calc k^2 * 72 ≡ k*18*(4*k) [ZMOD k*18] := by ring_nf; trivial
         _ ≡ 0*(4*k) [ZMOD k*18] := Int.ModEq.mul_right (4*k) hi
         _ ≡ 0 [ZMOD k*18] := by ring_nf; trivial
@@ -201,7 +202,7 @@ lemma carmichael_def_property' {n: ℕ} (h: isCarmichael n): ∀ (a : ℤ), (n:�
   trivial
   have h2: (p:ℤ) ∣ a := by {
     rw [@eq_one_iff_not_exists_prime_dvd] at hcase
-    simp at hcase
+    simp only [not_forall, Classical.not_imp, Decidable.not_not] at hcase
     obtain ⟨p', hpp', hp'⟩:= hcase
     have hp' : (p':ℤ) ∣ (a.gcd ↑p:ℤ ) := by norm_cast
     have hp'p: (p':ℤ) ∣ (p:ℤ) := by {
@@ -222,6 +223,7 @@ lemma carmichael_def_property' {n: ℕ} (h: isCarmichael n): ∀ (a : ℤ), (n:�
   refine Int.dvd_sub ?_ h2
   exact (Dvd.dvd.pow h2 (not_eq_zero_of_lt h.2.2))
 }
+
 lemma isCarmichael' {n: ℕ}: isCarmichael n ↔ (n > 1 ∧ ¬ Nat.Prime n ∧ ∀ (a : ℤ), (n:ℤ) ∣ a^n-a) := by{
   constructor
   . intro h
@@ -275,7 +277,7 @@ theorem carmichael_primes_lt_sqrt {k: ℕ} (hintro: isCarmichael k) : ∀ p, Nat
   have hea:= (isCarmichael'.1 hintro).2.2
   have hnum: ((p:ℤ)-1)*((k:ℤ)/(p:ℤ))+((k:ℤ)/(p:ℤ)-1)=(k:ℤ)-1 := by {
     ring_nf
-    simp
+    simp only [reduceNeg, add_right_inj]
     refine Int.mul_ediv_cancel' ?H
     norm_cast
     exact hp.2
@@ -292,7 +294,7 @@ theorem carmichael_primes_lt_sqrt {k: ℕ} (hintro: isCarmichael k) : ∀ p, Nat
     norm_cast
     refine (Nat.lt_div_iff_mul_lt ?h.h.hdn 1).mpr ?h.h.a
     exact hp.2
-    simp
+    simp only [mul_one]
     have hp2:=hp.2
     have hp:=hp.1
     refine Nat.lt_of_le_of_ne ?h.h.a.h₁ ?h.h.a.h₂
@@ -302,9 +304,9 @@ theorem carmichael_primes_lt_sqrt {k: ℕ} (hintro: isCarmichael k) : ∀ p, Nat
     exact hpk hp
     exact hnum
   }
-  simp at hnum
+  simp only [tsub_le_iff_right, sub_add_cancel] at hnum
   by_contra hnot
-  simp at hnot
+  simp only [gt_iff_lt, not_lt] at hnot
   norm_cast at hnum
   have hnum: p ≤ Real.sqrt k := by {
     calc (p:ℝ) ≤ ↑k/↑p := by {
@@ -364,7 +366,7 @@ theorem carmichael_has_3_factors {k: ℕ} {s: Finset ℕ} (hs: ∀p, p ∈ s ↔
   have h':= carmichael_primes_lt_sqrt h
   obtain ⟨hsqrf, hm1, hpk, hk1⟩ := Korselt.1 h
   by_contra hnot
-  simp at hnot
+  simp only [gt_iff_lt, not_lt] at hnot
   have hep: ∃ p, Nat.Prime p ∧ p ∣ k := by {
     refine Nat.exists_prime_and_dvd ?hn
     have h:=h.2.2
@@ -373,12 +375,12 @@ theorem carmichael_has_3_factors {k: ℕ} {s: Finset ℕ} (hs: ∀p, p ∈ s ↔
   have hnot: s.card=1 ∨ s.card=2 := by{
     refine le_and_le_add_one_iff.mp ?_
     constructor
-    simp
+    simp only [one_le_card]
     obtain ⟨ p, hp⟩:= hep
     have hep:= (hs p).2 hp
     rw [@Finset.nonempty_iff_ne_empty]
     exact ne_empty_of_mem hep
-    simp
+    simp only [Nat.reduceAdd]
     exact hnot
   }
   have pdes:= forall_prime_descomposition_squarefree (zero_lt_of_lt hk1) hsqrf hs
@@ -389,7 +391,7 @@ theorem carmichael_has_3_factors {k: ℕ} {s: Finset ℕ} (hs: ∀p, p ∈ s ↔
       exact Finset.subset_of_eq (_root_.id (Eq.symm hnot))
     }
     rw[hnot] at pdes
-    simp at pdes
+    simp only [Finset.prod_singleton] at pdes
     obtain ⟨hp1, hp2⟩:= (hs p).1 hp
     have hnot: p<k:= by {
       refine Nat.lt_of_le_of_ne ?h₁ ?h₂
@@ -429,7 +431,7 @@ theorem carmichael_has_3_factors {k: ℕ} {s: Finset ℕ} (hs: ∀p, p ∈ s ↔
         norm_cast
         exact zero_lt_of_lt hk1
       }
-      _ = k := by simp
+      _ = k := by simp only [Nat.cast_nonneg, mul_self_sqrt]
     }
     norm_cast at hnot
     have hnot: ¬ p * q = k := by exact Nat.ne_of_lt hnot
