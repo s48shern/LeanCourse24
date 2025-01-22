@@ -5,7 +5,7 @@ import Mathlib.GroupTheory.OrderOfElement
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical
 
-lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) (hred :(1+ p)^(n-1) ≡ 1 [ZMOD p^2] ): (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
+lemma BinomialCongruence (n p n' k : ℕ) (hpk : p ^ k * n' = n) (hn : n ≥ 2) : (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have haux :  (1+ p)^(n-1) = ∑ m ∈ Finset.range (n), 1 ^ m * p ^ (n -1 - m) * (n - 1).choose m := by {
       rw [add_pow];
@@ -103,7 +103,7 @@ lemma SquareFreePart2  {n p n' k : ℕ} (hp: Nat.Prime p) (hd : p * p ∣ n) (hp
   have hred:(1+ p)^(n-1) ≡ 1 [ZMOD p^2] := by norm_cast; exact (ZmodtoMod (p ^ 2) ((1+ p)^(n-1)) (1)).mpr hred
   have hobvious : (n - 1 + 1) = n := by ring_nf; apply add_sub_of_le; linarith
   have hbin : (1+ p)^(n-1) ≡ 1 + (n-1)*p [ZMOD p^2] := by {
-   exact BinomialCongruence n p n' k hpk hn hred
+   exact BinomialCongruence n p n' k hpk hn
   }
   have hdiv : 1 + (n-1)*p +p≡ 1 [ZMOD p^2] := by{
     calc 1 + (n-1)*p +p≡ 1 + n * p  - p + p [ZMOD p^2] := by {
