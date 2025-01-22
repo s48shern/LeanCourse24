@@ -3,7 +3,6 @@ import LeanCourse.Project.Korselt
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical
 
-
 lemma listPrime561 : Nat.primeFactorsList 561 = [3, 11, 17] := by {
     have h1 : 561 = 3 * 11 * 17 := by norm_num
     have p3 : Nat.Prime 3 := by exact Nat.prime_three

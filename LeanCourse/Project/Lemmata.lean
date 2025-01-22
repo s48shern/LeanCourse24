@@ -493,13 +493,6 @@ lemma n_pow_card_sub_one_eq_one {a: ℤ} {n p: ℕ} (hpp1: Nat.Prime p) (hpp2: p
   exact h2
 }
 
-lemma order_dvd_mod {n p q: ℕ} (hn: p^n≡ 1 [ZMOD q]): orderOf (p: ZMod q) ∣ n := by {
-  refine orderOf_dvd_of_pow_eq_one ?h
-  rw [← ZMod.intCast_eq_intCast_iff] at hn
-  simp at hn
-  exact hn
-}
-
 lemma powerPrimePositive {p k : ℕ} (hk : k ≥ 1) (hp: Nat.Prime p) : 0 < p^k := by {
   refine (pow_pos_iff ?H.hn).mpr ?H.a
   · exact not_eq_zero_of_lt hk
@@ -534,3 +527,8 @@ lemma ModtoZmod (n a b: ℕ) : ( a ≡ b [MOD n]) ↔((a : ℤ) ≡ (b : ℤ) [Z
 lemma ZmodtoMod (n a b: ℕ) : ((a : ℤ) ≡ (b : ℤ)  [ZMOD (n: ℤ )]) ↔( a ≡ b [MOD n]) := by {
   exact natCast_modEq_iff
 }
+
+#check Nat.chineseRemainder
+#check ZMod.chineseRemainder
+#check ZMod.eq_iff_modEq_nat
+#check isCyclic_iff_exists_ofOrder_eq_natCard
