@@ -69,7 +69,7 @@ lemma Chernick_construction {p0 p1 p2: ℕ} : Nat.Prime p0 ∧ Nat.Prime p1 ∧ 
         rw [@prime_def_lt'] at hp1
         by_cases hc: p < p1
         exact hp1.2 p (Prime.two_le hp) hc
-        simp? at hc
+        simp only [not_lt] at hc
         exact not_dvd_of_pos_of_lt (zero_lt_of_lt hp1g) (Nat.lt_of_le_of_ne hc (Ne.symm hcont.2.1))
       }
       exact (Nat.Prime.coprime_iff_not_dvd hp).mpr hint
