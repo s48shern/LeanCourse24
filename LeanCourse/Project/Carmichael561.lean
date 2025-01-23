@@ -75,7 +75,6 @@ lemma Carmichael561: isCarmichael 561 := by {
       · norm_num
       · norm_num
     · norm_num
-
 }
 
 lemma NotCarmichaelPrime(p :ℕ ) (hp :Nat.Prime p) : ¬ isCarmichael p := by{
