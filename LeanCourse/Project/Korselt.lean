@@ -279,35 +279,25 @@ lemma carmichael_prime_division {n : ℕ} (h: isCarmichael n): (∀ p, Nat.Prime
     exact prime_iff_prime_int.mp hpp
   }
   have h5_1 : ∃ (b : (ZMod p)ˣ), IsUnit (b: ZMod p) ∧ orderOf b  = p - 1 :=by {
-    by_cases hp: p >2
-    · have hCyclic : IsAddCyclic ((ZMod p)):= by exact ZMod.instIsAddCyclic p
-      have hCyclic2 : IsCyclic ((ZMod p)ˣ):= by {
-        haveI : Fact (Nat.Prime p) := ⟨hpp⟩
-        exact instIsCyclicUnitsOfFinite
-      }
-      rw [@isCyclic_iff_exists_ofOrder_eq_natCard] at hCyclic2
-      have hcard: Nat.card (ZMod p)ˣ = p-1 := by {
-        haveI : Fact (Nat.Prime p) := ⟨hpp⟩
-        simp only [card_eq_fintype_card, ZMod.card_units_eq_totient p]
-        exact totient_prime hpp
-      }
-      rw [hcard] at hCyclic2
-      obtain ⟨b, hb⟩ := hCyclic2
-      use b
-      constructor
-      · exact Units.isUnit b
-      · haveI : NeZero p := ⟨Nat.Prime.ne_zero hpp⟩
-        exact hb
-    · have hp2: p =2 := by {
-        have hp2 : p ≤ 2:= by exact Nat.le_of_not_lt hp
-        refine Eq.symm (Nat.le_antisymm ?h₁ hp2)
-        exact Prime.two_le hpp
-      }
-      use 1
-      constructor
-      exact isUnit_one
-      rw [hp2]
-      simp
+    have hCyclic : IsAddCyclic ((ZMod p)):= by exact ZMod.instIsAddCyclic p
+    have hCyclic2 : IsCyclic ((ZMod p)ˣ):= by {
+      haveI : Fact (Nat.Prime p) := ⟨hpp⟩
+      exact instIsCyclicUnitsOfFinite
+    }
+    rw [@isCyclic_iff_exists_ofOrder_eq_natCard] at hCyclic2
+    have hcard: Nat.card (ZMod p)ˣ = p-1 := by {
+      haveI : Fact (Nat.Prime p) := ⟨hpp⟩
+      simp only [card_eq_fintype_card, ZMod.card_units_eq_totient p]
+      exact totient_prime hpp
+    }
+    rw [hcard] at hCyclic2
+    obtain ⟨b, hb⟩ := hCyclic2
+    use b
+    constructor
+    · exact Units.isUnit b
+    · haveI : NeZero p := ⟨Nat.Prime.ne_zero hpp⟩
+      exact hb
+
   }
   obtain ⟨b, hb', hb''⟩ := h5_1
   specialize h5 ((b: ZMod p)).val
@@ -412,9 +402,8 @@ lemma carmichael_prime_division {n : ℕ} (h: isCarmichael n): (∀ p, Nat.Prime
     exact hend'
   }
   zify at hend
-  norm_cast
-  have hn : (Nat.cast (p-1):ℤ) = subNatNat p 1 := by apply Eq.symm (subNatNat_of_le ?_); exact Prime.one_le hpp
-  have hn2 : (Nat.cast (n-1):ℤ) = subNatNat n 1 := by apply Eq.symm (subNatNat_of_le ?_); exact one_le_of_lt hp2
+  have hn : (Nat.cast (p-1):ℤ) = (p:ℤ)-1:= by apply Eq.symm (subNatNat_of_le ?_); exact Prime.one_le hpp
+  have hn2 : (Nat.cast (n-1):ℤ) =(n:ℤ)-1:= by apply Eq.symm (subNatNat_of_le ?_); exact one_le_of_lt hp2
   rw [← hn]
   rw[← hn2]
   exact hend
