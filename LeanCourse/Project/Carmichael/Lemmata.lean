@@ -1,4 +1,8 @@
-import Mathlib
+import Mathlib.Analysis.Normed.Field.Lemmas
+import Mathlib.Data.Int.Star
+import Mathlib.Data.Nat.MaxPowDiv
+import Mathlib.Data.Nat.Squarefree
+import Mathlib.FieldTheory.Finite.Basic
 import Mathlib.GroupTheory.OrderOfElement
 
 open Real Function Nat BigOperators Set Finset Algebra Int
