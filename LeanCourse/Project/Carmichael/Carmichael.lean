@@ -1,4 +1,4 @@
-import LeanCourse.Project.Lemmata
+import LeanCourse.Project.Carmichael.Lemmata
 import Mathlib
 
 open Real Function Nat BigOperators Set Finset Algebra Int

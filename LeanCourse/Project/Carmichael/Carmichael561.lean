@@ -1,4 +1,4 @@
-import LeanCourse.Project.Korselt
+import LeanCourse.Project.Carmichael.Korselt
 
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical

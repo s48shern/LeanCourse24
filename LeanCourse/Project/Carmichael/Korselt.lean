@@ -1,4 +1,4 @@
-import LeanCourse.Project.Carmichael
+import LeanCourse.Project.Carmichael.Carmichael
 import Mathlib
 import Mathlib.GroupTheory.OrderOfElement
 
