@@ -1,0 +1,288 @@
+\documentclass{beamer}
+\usetheme{Berlin}
+
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{amssymb}
+
+\usepackage{color}
+\definecolor{keywordcolor}{rgb}{0.7, 0.1, 0.1}   % red
+\definecolor{commentcolor}{rgb}{0.4, 0.4, 0.4}   % grey
+\definecolor{symbolcolor}{rgb}{0.0, 0.1, 0.6}    % blue
+\definecolor{sortcolor}{rgb}{0.1, 0.5, 0.1}      % green
+
+\usepackage{listings}
+\def\lstlanguagefiles{lstlean.tex}
+\lstset{language=lean}
+
+\newenvironment{conjecture}[1][ ]{\setbeamercolor{block title}{use=structure,fg=white,bg=red!60}\begin{block}{Conjecture #1}}{\end{block}}
+
+%\newenvironment{conjecture}[0]{\setbeamercolor{block title}{use=structure,fg=white,bg=red!60}\begin{block}{Conjecture}}{\end{block}}
+
+\newcommand{\lrarr}{\leftrightarrow}
+\newcommand{\Lrarr}{\Leftrightarrow}
+\newcommand{\larr}{\leftarrow}
+\newcommand{\Larr}{\Leftarrow}
+\newcommand{\rarr}{\rightarrow}
+\newcommand{\Rarr}{\Rightarrow}
+
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\ntuple}{(x_1,...,x_n)}
+\newcommand{\ytuple}{(y_1,...,y_n)}
+\newcommand{\atuple}{(a_1,...,a_n)}
+\newcommand{\aktuple}{(a_1,...,a_k)}
+
+\title{Carmichael numbers}
+\author{Pablo Cageao \& Sergio Hernando}
+\date{January 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\begin{frame}{Objective \& index}
+    \tableofcontents
+\end{frame}
+
+\begin{frame}[fragile]{Definition}
+    \begin{definition}
+        An integer $n > 1$ is called a \textit{Carmichael number} if $n$ is composite and
+$(a, n)=1 \to a^{n-1} \equiv 1 \mod{n}$ for all $a\in \ZZ$.
+    \end{definition}
+\end{frame}
+
+
+
+
+
+\section{Korselt's criterion}
+\subsection{Definition}
+\begin{frame}{Korselt's theorem}
+    \begin{theorem}[Korselt's Criterion]
+        A composite integer $n > 1$ is a Carmichael number if and only if
+        \begin{enumerate}
+            \item n is squarefree.
+            \item for every prime p dividing n, $(p - 1) | (n - 1)$.
+        \end{enumerate}
+    \end{theorem}
+\end{frame}
+
+%\subsection{Necessary conditions}
+\subsection{Proof}
+\begin{frame}{Carmichael are squarefree}
+    \begin{proof}[Carmichael is Squarefree]
+    Proceed by contradiction
+        \begin{enumerate}
+            \item $\exists p$,\  $p^2 |n$
+            \pause
+            \item $\exists a$ :
+                $ a \equiv 1 +p\pmod{p^k}\text{ and } a \equiv 1 \pmod{n'}.$ 
+            \pause
+            \item $(a, n) = 1$, and $a^{n-1} \equiv 1 \pmod{n}.$
+            \pause
+            \item $(1+p)^{n-1} \equiv 1 \pmod{p^2}.$
+            \pause
+            \item $1 + (n-1)p  \equiv 1\pmod{p^2}.$
+            \pause
+            \item $p  \equiv 0\pmod{p^2}.$
+        \end{enumerate}
+    \end{proof}
+\end{frame}
+
+\begin{frame}{Divisibility rule}
+    \begin{proof}[Divisibility rule]
+        \begin{enumerate}
+            \item $\exists b$: $b$ mod $p$ has order $p-1$.
+            \pause
+            \item $\exists a$: $ a \equiv b \pmod{p} \ \text{and} \ a \equiv 1 \pmod{n/p}$. 
+            \pause
+            \item $a^{n-1}\equiv b^{n-1} \equiv 1 \pmod p.$
+
+        \end{enumerate}
+    \end{proof}
+\end{frame}
+
+%\subsection{Sufficient condition}
+\begin{frame}{Sufficient conditions}
+\begin{proof}[Sufficient conditions]
+    For each prime $p$, for which $p| n$, if $a \in \mathbb{Z}$ satisfies $gcd(a,n)=1$
+    \begin{enumerate}
+        \item $a^{p-1}\equiv 1 \pmod p.$
+        \pause
+        \item $a^{n-1}\equiv 1 \pmod p.$
+    \end{enumerate}
+    \pause
+    Then if $n$ is squarefree, $a^{n-1}\equiv 1 \pmod n.$
+    \end{proof}
+\end{frame}
+
+
+
+
+
+
+
+
+\section{Another characterization}
+\begin{frame}{Theorem statement}
+    \begin{theorem}
+        A composite integer $n$ is a Carmichael number if and only if $a^n \equiv a \mod{n}$ for all $a \in \ZZ$.
+    \end{theorem}
+\end{frame}
+
+\begin{frame}{Sufficient}
+    \begin{lemma}
+       for all $a\in Z$, $a^n \equiv a \mod{n} \Rightarrow (a, n)=1 \to a^{n-1} \equiv 1 \mod{n}$
+    \end{lemma}
+    \begin{proof}
+        \pause\begin{enumerate}
+            \item Let $a\in \ZZ$ s.t. $(a, n)=1$.
+            \pause\item $a^{-1}a^n \equiv a^{-1}a \mod{n}$.
+            \pause\item $a^{n-1} \equiv 1 \mod{n}$.
+        \end{enumerate}
+    \end{proof}
+\end{frame}
+
+\begin{frame}{Necessary}
+    \begin{lemma}
+        $n$ is a Carmichael number $\Rightarrow a^n \equiv a \mod{n}$ for all $a\in Z$
+    \end{lemma}
+    \begin{proof}
+        \pause\begin{enumerate}
+            \item Is enough to show $a^n \equiv a \mod{p}$ for all p prime factor of $n$.
+            \pause\item $a\equiv 0 \mod p$.
+            \pause\item $a\not\equiv 0 \mod p$.
+            \pause\item $a^{p-1}\equiv 1 \mod p$.
+            \pause\item $(p - 1) | (n - 1) \Rightarrow a^{n-1}\equiv 1 \mod p$.
+            \pause\item $a^{n}\equiv a \mod p$.
+        \end{enumerate}
+    \end{proof}
+\end{frame}
+
+
+
+
+
+\section{561}
+\begin{frame}{561 is a Carmichael number}
+$$561 = 3*11*17$$
+$$2 |560$$
+$$10 |560$$
+$$16 |560$$
+    
+\end{frame}
+
+\begin{frame}{561 is the lowest Carmichael number}
+\begin{lemma}[Decision criteria]
+For every number $n$, so that $n<561$, try:
+    \begin{enumerate}
+        \item If $p|n$ then $p-1|n-1$
+        \item n is squarefree
+    \end{enumerate}
+    
+\end{lemma}
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+\section{Other properties}
+\begin{frame}{Statements}
+    \begin{corollary}[Jack Chernick, 1939]
+        If $k$ is a positive integer such that $6k + 1$, $12k + 1$, and $18k + 1$ are all prime,
+then the product $n = (6k + 1)(12k + 1)(18k + 1)$ is a Carmichael number.
+    \end{corollary}
+    \pause\begin{lemma}
+        Every Carmichael number
+        \pause\begin{itemize}
+            \item Is odd.
+            \pause\item Has at least three different prime factors.
+            \pause\item Satisfies that every prime factor of n is less than $\sqrt{n}$.
+        \end{itemize}
+    \end{lemma}
+\end{frame}
+
+\begin{frame}{Chernick's construction}
+    \begin{corollary}[Jack Chernick, 1939]
+        If $k$ is a positive integer such that $6k + 1$, $12k + 1$, and $18k + 1$ are all prime,
+then the product $n = (6k + 1)(12k + 1)(18k + 1)$ is a Carmichael number.
+    \end{corollary}
+    \pause\begin{proof}
+        Korselt
+        \pause
+        \begin{itemize}
+            \item n composite greater than 1
+            \pause\item n is squarefree
+            \pause\item for every prime p dividing n, also $(p - 1) | (n - 1)$.
+            \pause\begin{itemize}
+                \item $n\equiv (0+1)(0+1)(0+1)\equiv 1 \mod 6k$.
+                \item $n\equiv (6k+1)(0+1)(6k+1)\equiv 1 \mod 12k$.
+                \item $n\equiv (6k+1)(12k+1)(0+1)\equiv 1 \mod 18k$.
+            \end{itemize}
+        \end{itemize}
+    \end{proof}
+\end{frame}
+
+\begin{frame}
+    \begin{lemma}
+        Every Carmichael number is odd.
+    \end{lemma}
+    \begin{proof}
+        Let $n$ be a Carmichael number
+        \pause\begin{enumerate}
+            \item $n-1$ relatively prime with $n$.
+            \pause\item $(n-1)^{(n-1)}\equiv (-1)^{(n-1)} \equiv 1 \mod n$.
+            \pause\item $n>2\Rightarrow -1 \not\equiv 1 \mod n$.
+            \pause\item $n-1$ even.
+        \end{enumerate}
+    \end{proof}
+\end{frame}
+
+\begin{frame}
+    \begin{lemma}
+        Let n be a Carmichael number. Every prime factor of n is less than $\sqrt{n}$.
+    \end{lemma}
+    \begin{proof}
+        Let $n$ be a Carmichael number and $p$ one of it's prime factors. 
+        \pause\begin{enumerate}
+            \item $\frac{n-1}{p-1}=\frac{p(n/p)-1}{p-1}=\frac{(p-1)(n/p)+n/p-1}{p-1}=\frac{n}{p}+\frac{n/p-1}{p-1}$.
+            \pause\item $p-1|n/p-1$.
+            \pause\item $p\leq n/p\Rightarrow p^2\leq n$.
+            \pause\item $n\neq p^2$ (squarefree).
+        \end{enumerate}
+    \end{proof}
+\end{frame}
+
+\begin{frame}
+    \begin{lemma}
+        Every Carmichael number has at least three different prime factors.
+    \end{lemma}
+    \begin{proof}
+        Contradiction
+        $$n=pq\Rightarrow p>\sqrt{n} \text{ or } q>\sqrt{n}$$
+    \end{proof}
+\end{frame}
+
+\section{Future}
+\begin{frame}{Future work}
+
+    \begin{conjecture}[(Dickson's conjecture)]
+        There are infinitely many numbers generated by Chernick's construction.
+    \end{conjecture}
+    \begin{theorem}[W. R. Alford, A. Granville, C. Pomerance, 1994]
+        There are infinitely many Carmichael numbers.
+    \end{theorem}
+\end{frame}
+
+\end{document}
