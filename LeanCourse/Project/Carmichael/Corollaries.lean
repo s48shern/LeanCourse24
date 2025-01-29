@@ -1,5 +1,4 @@
 import LeanCourse.Project.Carmichael.Korselt
-import Mathlib
 
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical

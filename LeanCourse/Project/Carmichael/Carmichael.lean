@@ -1,5 +1,7 @@
 import LeanCourse.Project.Carmichael.Lemmata
-import Mathlib
+import Mathlib.Algebra.Group.Int
+import Mathlib.Data.Nat.Prime.Defs
+
 
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical

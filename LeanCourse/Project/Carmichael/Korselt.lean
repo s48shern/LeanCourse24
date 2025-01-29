@@ -1,6 +1,4 @@
 import LeanCourse.Project.Carmichael.Carmichael
-import Mathlib
-import Mathlib.GroupTheory.OrderOfElement
 
 open Real Function Nat BigOperators Set Finset Algebra Int
 open Classical
