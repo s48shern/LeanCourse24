@@ -3,8 +3,8 @@
 Please fill out the following. Fill in the project topic once you have decided.
 ```
 First & last name: Sergio Javier Hernando Rivero
-Project topic:
-Partner (optional):
+Project topic: Carmichael numbers
+Partner (optional): Pablo Cageao Honduvilla
 ```
 
 ## Your own project
